@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n web,api -c blue,green \"cross-env PORT=5000 pnpm dev:web\" \"cross-env PORT=5001 pnpm dev:api\"",
     "dev:api": "pnpm --filter @workspace/api-server run dev",
     "dev:web": "pnpm --filter @workspace/kurdish-pos run dev",
-    "build": "pnpm --filter @workspace/kurdish-pos --filter @workspace/api-server run build",
+    "build": "pnpm --filter @workspace/kurdish-pos run build && pnpm --filter @workspace/api-server run build",
     "build:api": "pnpm --filter @workspace/api-server run build",
     "start": "pnpm --filter @workspace/api-server run start",
     "start:api": "pnpm --filter @workspace/api-server run start",

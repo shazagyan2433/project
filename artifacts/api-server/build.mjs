@@ -3,12 +3,35 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { cp, rm } from "node:fs/promises";
+import fs from "node:fs";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
+
+async function copyFrontendStatic(distDir) {
+  const frontendCandidates = [
+    path.resolve(artifactDir, "../kurdish-pos/dist/public"),
+    path.resolve(artifactDir, "../kurdish-pos/dist"),
+  ];
+
+  const source = frontendCandidates.find((dir) =>
+    fs.existsSync(path.join(dir, "index.html")),
+  );
+  if (!source) {
+    console.warn(
+      "[build] Frontend SPA not found — run kurdish-pos build first. Skipping static copy.",
+    );
+    return;
+  }
+
+  const target = path.join(distDir, "public");
+  await rm(target, { recursive: true, force: true });
+  await cp(source, target, { recursive: true });
+  console.log(`[build] Copied SPA ${source} → ${target}`);
+}
 
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
@@ -119,6 +142,8 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
   });
+
+  await copyFrontendStatic(distDir);
 }
 
 buildAll().catch((err) => {
