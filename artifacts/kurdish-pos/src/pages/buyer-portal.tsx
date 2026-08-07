@@ -269,7 +269,7 @@ function ProfilePanel() {
 
 /* ── Tab definitions ─────────────────────────────────────────────── */
 const TABS: RoleTab[] = [
-  { id:"marketplace", label:"Marketplace", labelKu:"بازار",    labelAr:"السوق",    Icon:Store        },
+  { id:"marketplace", label:"Marketplace", labelKu:"بازاڕ",    labelAr:"السوق",    Icon:Store        },
   { id:"orders",      label:"Orders",      labelKu:"داواکاری", labelAr:"الطلبات",  Icon:ClipboardList },
   { id:"payments",    label:"Payments",    labelKu:"پارەدان",  labelAr:"المدفوعات",Icon:CreditCard    },
   { id:"profile",     label:"Profile",     labelKu:"پڕۆفایل",  labelAr:"الملف",    Icon:User          },

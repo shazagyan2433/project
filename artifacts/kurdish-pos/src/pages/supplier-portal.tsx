@@ -267,7 +267,7 @@ function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
 
   return (
     <PanelShell>
-      <h1 className="text-sm font-extrabold text-white mb-4">شیکاری فرۆش</h1>
+      <h1 className="text-sm font-extrabold text-white mb-4">شیکاریی فرۆشەکان</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {isLoading ? [0,1,2,3].map(i => <MetricSkeleton key={i} />) : [
