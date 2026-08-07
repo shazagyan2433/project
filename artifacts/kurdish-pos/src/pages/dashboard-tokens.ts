@@ -1,14 +1,15 @@
 import type { CSSProperties } from "react";
 
-export const BG = "#0b0f17";
+/** Page / card surfaces — follow active color mode via CSS variables */
+export const BG = "var(--terminal-bg)";
 
 export const C = {
-  text: "#f1f5f9",
-  muted: "#64748b",
-  sub: "#94a3b8",
-  border: "rgba(255,255,255,0.06)",
-  glass: "rgba(255,255,255,0.03)",
-  glassHover: "rgba(255,255,255,0.06)",
+  text: "var(--terminal-text)",
+  muted: "var(--shell-text-muted)",
+  sub: "var(--shell-text-secondary)",
+  border: "var(--shell-border)",
+  glass: "var(--terminal-card)",
+  glassHover: "var(--shell-hover)",
   cyan: "#06b6d4",
   orange: "#f97316",
   purple: "#8b5cf6",
@@ -24,7 +25,7 @@ export function glassCard(accent?: string): CSSProperties {
     WebkitBackdropFilter: "blur(24px)",
     border: `1px solid ${C.border}`,
     borderRadius: "16px",
-    transition: "background 0.15s ease",
+    transition: "background 0.15s ease, border-color 0.15s ease",
   };
   if (accent) {
     return {

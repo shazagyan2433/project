@@ -11,7 +11,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme, PRESETS } from "@/contexts/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -19,7 +19,7 @@ import {
   Eye, EyeOff, Check, Loader2, Camera,
   AlertCircle,
 } from "lucide-react";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import {
   formatStoreAddress,
   isValidCoords,
@@ -497,11 +497,22 @@ function CompanyTab() {
    PREFERENCES TAB  (module-level)
 ═══════════════════════════════════════════════════════════════════ */
 function PreferencesTab() {
-  const { colors, applyPreset } = useTheme();
+  const { colors, applyPreset, presets } = useTheme();
 
   return (
     <div className="flex flex-col gap-8">
       <SectionHead title="پەسەندکراوەکان" sub="زمان و ڕووکاری ئەپ" />
+
+      {/* Light / Dark mode */}
+      <section className="flex flex-col gap-3">
+        <div>
+          <p className="text-[13px] font-bold text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>دۆخی ڕووکار</p>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Vazirmatn, sans-serif" }}>
+            لە دۆخی ڕووناک و تاریک هەڵبژێرە.
+          </p>
+        </div>
+        <ThemeModeToggle variant="sidebar" className="max-w-xs" />
+      </section>
 
       {/* Language */}
       <section className="flex flex-col gap-3">
@@ -525,7 +536,7 @@ function PreferencesTab() {
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {PRESETS.map(preset => {
+          {presets.map(preset => {
             const active = colors.accent === preset.colors.accent && colors.bg === preset.colors.bg;
             return (
               <button

@@ -89,6 +89,20 @@
   --sidebar-foreground: 210 40% 98%;
   --sidebar-active: 217 100% 55%;
   --sidebar-border: 220 40% 14%;
+
+  /* LinQi shell layout (sidebar, header, main) */
+  --shell-page-bg: #f1f5f9;
+  --shell-sidebar-bg: #ffffff;
+  --shell-header-bg: rgba(255, 255, 255, 0.92);
+  --shell-border: rgba(15, 23, 42, 0.10);
+  --shell-text-primary: #0f172a;
+  --shell-text-secondary: #475569;
+  --shell-text-muted: #64748b;
+  --shell-hover: rgba(15, 23, 42, 0.06);
+  --shell-input-bg: #f8fafc;
+  --shell-input-border: rgba(15, 23, 42, 0.12);
+  --shell-dropdown-bg: rgba(255, 255, 255, 0.98);
+  --shell-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
 }
 
 /* ═══════════════════════════════════════════
@@ -133,6 +147,19 @@
   --sidebar-foreground: 210 40% 98%;
   --sidebar-active: 217 100% 60%;
   --sidebar-border: 220 40% 14%;
+
+  --shell-page-bg: #0d1117;
+  --shell-sidebar-bg: rgba(13, 17, 23, 0.94);
+  --shell-header-bg: rgba(11, 15, 23, 0.80);
+  --shell-border: rgba(255, 255, 255, 0.07);
+  --shell-text-primary: #f1f5f9;
+  --shell-text-secondary: rgba(255, 255, 255, 0.78);
+  --shell-text-muted: rgba(255, 255, 255, 0.35);
+  --shell-hover: rgba(255, 255, 255, 0.08);
+  --shell-input-bg: rgba(255, 255, 255, 0.06);
+  --shell-input-border: rgba(255, 255, 255, 0.08);
+  --shell-dropdown-bg: rgba(9, 13, 22, 0.96);
+  --shell-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
 }
 
 /* ═══════════════════════════════════════════
@@ -141,11 +168,19 @@
    ThemeContext.applyColorsToDOM() via JS.
 ═══════════════════════════════════════════ */
 :root {
+  --terminal-bg:          #f1f5f9;
+  --terminal-text:        #0f172a;
+  --terminal-accent:      #1A6AFF;
+  --terminal-accent-glow: #1A6AFF38;
+  --terminal-card:        rgba(15, 23, 42, 0.04);
+}
+
+.dark {
   --terminal-bg:          #0b0f17;
   --terminal-text:        #f1f5f9;
   --terminal-accent:      #1A6AFF;
   --terminal-accent-glow: #1A6AFF38;
-  --terminal-card:        rgba(255,255,255,0.03);
+  --terminal-card:        rgba(255, 255, 255, 0.03);
 }
 
 /* Make Tailwind's primary classes respond to the custom accent in real-time */
@@ -239,10 +274,15 @@ input, textarea, select, button, a, table, thead, tbody, tr, td, th {
   }
 
   thead > tr > th {
-    background-color: hsl(220 40% 8%) !important;
-    color: hsl(210 40% 98%) !important;
+    background-color: hsl(220 20% 94%) !important;
+    color: hsl(215 25% 25%) !important;
     font-weight: 700 !important;
     letter-spacing: 0.01em;
+  }
+
+  .dark thead > tr > th {
+    background-color: hsl(220 40% 8%) !important;
+    color: hsl(210 40% 98%) !important;
   }
 
   tbody > tr {
@@ -428,4 +468,109 @@ a.bg-primary:active {
     hsl(220 40% 5%);
   background-size: 300% 300%;
   animation: sidebar-flow 20s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   LINQI SHELL — layout surfaces (light/dark)
+═══════════════════════════════════════════ */
+.linqi-app-root {
+  background: var(--shell-page-bg);
+  color: var(--shell-text-primary);
+}
+
+.linqi-sidebar {
+  background: var(--shell-sidebar-bg);
+  border-inline-end: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+}
+
+.linqi-mobile-header {
+  background: var(--shell-header-bg);
+  border-bottom: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+}
+
+.linqi-top-header {
+  background: var(--shell-header-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+  color: var(--shell-text-primary);
+}
+
+.linqi-main-scroll {
+  background: var(--shell-page-bg);
+}
+
+.linqi-dropdown {
+  background: var(--shell-dropdown-bg);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+}
+
+.linqi-header-icon-btn {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  color: var(--shell-text-secondary);
+}
+.linqi-header-icon-btn:hover {
+  background: var(--shell-hover);
+  color: var(--shell-text-primary);
+}
+
+.linqi-sidebar-theme-btn {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  color: var(--shell-text-secondary);
+}
+.linqi-sidebar-theme-btn:hover {
+  background: var(--shell-hover);
+  color: var(--shell-text-primary);
+}
+
+.linqi-sidebar-label {
+  color: var(--shell-text-secondary);
+}
+
+/* Sidebar nav — light mode readable text */
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) {
+  color: var(--shell-text-secondary) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) .linqi-nav-icon {
+  color: var(--terminal-accent) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active):hover {
+  background: var(--shell-hover) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-section-label {
+  color: var(--shell-text-muted) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-brand-title {
+  color: var(--shell-text-primary) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-brand-sub {
+  color: var(--shell-text-muted) !important;
+}
+
+.linqi-shell-input {
+  background: var(--shell-input-bg) !important;
+  border: 1px solid var(--shell-input-border) !important;
+  color: var(--shell-text-primary) !important;
+}
+.linqi-shell-input::placeholder {
+  color: var(--shell-text-muted) !important;
+}
+
+.linqi-breadcrumb-muted {
+  color: var(--shell-text-muted);
+}
+:root:not(.dark) .linqi-dropdown {
+  color: var(--shell-text-primary);
+}
+
+:root:not(.dark) .linqi-dropdown p,
+:root:not(.dark) .linqi-dropdown span,
+:root:not(.dark) .linqi-dropdown button {
+  color: inherit;
 }
