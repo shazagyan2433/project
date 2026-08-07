@@ -11,7 +11,12 @@ import {
   isOfflineApiResponse,
   LOGIN_FETCH_TIMEOUT_MS,
 } from "@/lib/local-auth";
-import { hardNavigate } from "@/lib/auth-session";
+import {
+  AUTH_TOKEN_KEY,
+  hardNavigate,
+  hasAuthenticatedAppAccess,
+  isBypassAuthToken,
+} from "@/lib/auth-session";
 
 export default function Login() {
   const { loginWithToken, user } = useAuth();
@@ -25,9 +30,10 @@ export default function Login() {
   const submitLockRef = useRef(false);
 
   useEffect(() => {
-    if (user) {
-      navigate(user.role === "admin" ? "/admin/dashboard" : "/dashboard");
-    }
+    if (!user) return;
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token || isBypassAuthToken(token) || !hasAuthenticatedAppAccess()) return;
+    navigate(user.role === "admin" ? "/admin/dashboard" : "/dashboard");
   }, [user, navigate]);
 
   const finishOfflineAdminLogin = () => {

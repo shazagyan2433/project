@@ -15,6 +15,8 @@ import {
   isBypassAuthToken,
   getCachedAdminUser,
   isCurrentlyOnAdminPath,
+  getCurrentAppPath,
+  isLoginEntryPath,
 } from "@/lib/auth-session";
 import { parseJsonResponse } from "@/lib/api-fallback";
 import { isOfflineApiResponse, LOGIN_FETCH_TIMEOUT_MS } from "@/lib/local-auth";
@@ -164,6 +166,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(CACHED_USER_KEY, JSON.stringify(u));
       })
       .catch(() => {
+        if (isLoginEntryPath(getCurrentAppPath())) {
+          setUser(null);
+          return;
+        }
         const admin = readCachedAdminUser();
         if (admin) {
           setUser(admin);
@@ -237,7 +243,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!token) {
-      if (!onAdminPath) {
+      const onLoginPath = isLoginEntryPath(getCurrentAppPath());
+      if (!onAdminPath && !onLoginPath) {
         const cached = readCachedOnboardingUser();
         setUser(cached);
       } else {

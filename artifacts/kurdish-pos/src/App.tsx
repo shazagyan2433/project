@@ -17,6 +17,9 @@ import {
   isLogoutEntry,
   hasAuthenticatedAppAccess,
   ONBOARDING_ENTRY_PATH,
+  LOGIN_ENTRY_PATH,
+  normalizeAppPath,
+  isLoginEntryPath,
 } from "@/lib/auth-session";
 import "@/i18n";
 import i18n from "@/i18n";
@@ -244,9 +247,14 @@ function MerchantRouter() {
 function Router() {
   const { isLoading } = useAuth();
   const [location] = useLocation();
-  const path = location.replace(/\/$/, "") || "/";
+  const path = normalizeAppPath(location);
 
-  if (location === "/merchant" || location === "/app") {
+  /* Public auth entry — never redirect away; must render login UI */
+  if (isLoginEntryPath(path)) {
+    return <Login />;
+  }
+
+  if (path === "/merchant" || path === "/app") {
     return <Redirect to={MERCHANT_APP_PATH} />;
   }
 
@@ -254,33 +262,29 @@ function Router() {
     return <Redirect to={ONBOARDING_ENTRY_PATH} />;
   }
 
-  if (location === "/login") {
-    return <Login />;
-  }
-
-  if (location === "/onboarding" || location === "/register") {
+  if (path === "/onboarding" || path === "/register") {
     if (hasAuthenticatedAppAccess() && !wantsPublicEntry()) {
       return <Redirect to={MERCHANT_APP_PATH} />;
     }
     return <Register />;
   }
 
-  const legacyTarget = LEGACY_ADMIN_ALIASES[location];
+  const legacyTarget = LEGACY_ADMIN_ALIASES[path];
   if (legacyTarget) {
     return <Redirect to={legacyTarget} />;
   }
 
-  if (location === "/admin") {
+  if (path === "/admin") {
     return <Redirect to="/admin/dashboard" />;
   }
 
-  if (isAdminPath(location)) {
+  if (isAdminPath(path)) {
     if (isLoading) return <LoadingScreen />;
     return <AdminRouter />;
   }
 
   if (!hasAuthenticatedAppAccess()) {
-    return <Redirect to={ONBOARDING_ENTRY_PATH} />;
+    return <Redirect to={LOGIN_ENTRY_PATH} />;
   }
 
   return <MerchantRouter />;

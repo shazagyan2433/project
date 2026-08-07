@@ -114,13 +114,32 @@ export function hardNavigate(path: string) {
   window.location.href = target;
 }
 
+/** Strip trailing slashes — `/login/` → `/login`, empty → `/`. */
+export function normalizeAppPath(path: string): string {
+  return path.replace(/\/$/, "") || "/";
+}
+
+/** Current in-app path (strips Vite `BASE_URL` prefix). */
+export function getCurrentAppPath(): string {
+  const base = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+  let path = window.location.pathname;
+  if (base && path.startsWith(base)) {
+    path = path.slice(base.length) || "/";
+  }
+  return normalizeAppPath(path);
+}
+
+export function isLoginEntryPath(path?: string): boolean {
+  const normalized = normalizeAppPath(path ?? getCurrentAppPath());
+  return normalized === LOGIN_ENTRY_PATH || normalized.endsWith(LOGIN_ENTRY_PATH);
+}
+
 export function isPublicEntryPath(path: string): boolean {
-  const normalized = path.replace(/\/$/, "") || "/";
+  const normalized = normalizeAppPath(path);
   return (
     normalized === "/" ||
-    normalized === "/login" ||
-    normalized.endsWith("/login") ||
-    normalized === "/onboarding" ||
+    isLoginEntryPath(normalized) ||
+    normalized === ONBOARDING_ENTRY_PATH ||
     normalized === "/register"
   );
 }
@@ -150,10 +169,7 @@ export function getCachedAdminUser(): { role: string } | null {
 }
 
 export function isCurrentlyOnAdminPath(): boolean {
-  const base = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-  let path = window.location.pathname;
-  if (base && path.startsWith(base)) path = path.slice(base.length) || "/";
-  const normalized = path.replace(/\/$/, "") || "/";
+  const normalized = getCurrentAppPath();
   return normalized === "/admin" || normalized.startsWith("/admin/");
 }
 
