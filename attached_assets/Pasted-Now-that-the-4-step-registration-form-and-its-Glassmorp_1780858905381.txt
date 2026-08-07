@@ -1,0 +1,28 @@
+Now that the 4-step registration form and its Glassmorphic styling are perfectly complete, let's move to Step 2: Create the main internal layout ("LinQi Terminal Dashboard") that loads immediately after a user successfully onboarders.
+
+Please implement the exact Sidebar layout, navigation structure, and high-end styling as seen in the LinQi Terminal walkthrough video:
+
+1. Sidebar & Layout Structure (دەقاوەدەق وەک ڤیدیۆکە):
+Build a high-end, fixed left-sidebar containing the following exact navigation links and icons:
+- Dashboard (سەرەکی - General overview with responsive cards for metrics)
+- Marketplace (بازاڕ - Product display and B2B vendor catalog browsing grid)
+- LinQi Assistant (یارمەتیدەری AI - Interactive AI business copilot messaging screen)
+- Inventory (کۆگا - Stock monitoring, batch logging, and expiry/low-stock alert cards)
+- Logistics (گەیاندن - LinQi Logistics Brain™ dashboard with interactive route tracking maps)
+- Negotiation (گفتوگۆ - B2B direct counter-offer and AI negotiation room interface)
+- Financial (دارایی - CFO invoice tracker, multi-currency revenue charts, and cashflow stats)
+- Market Intel (زانیاری بازاڕ - B2B product trends, pricing analytics, and high-margin region heatmaps)
+- Supplier Directory (تۆماری فرۆشیاران - Master supplier catalog filtered by verified trust badges and provinces)
+- Procurement (دابینکاری - Dynamic RFQ submission console and quotation status tracking)
+- Notification Center (ئاگادارییەکان - Categorized view for sales alerts, system messages, and RFQ updates)
+- Rewards Center (خەڵاتەکان - Gamified B2B milestone system, wheel spin animation, and tier challenges)
+
+2. Sidebar Premium Glassmorphism Theme:
+- Use a consistent Glassmorphic style for the sidebar and main container cards: background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.1);
+- Active links must glow with a sharp, premium Blue accent (#3B82F6) shadow and high contrast text.
+
+3. Top Navigation Header:
+- Implement a global top bar containing: A centered smart search input, a clean 3-language toggle (Kurdish, Arabic, English), a notification bell indicator, and a user profile avatar badge showing the logged-in company name.
+
+4. Multi-Language State Control:
+- Ensure the sidebar text, metrics, and labels translate flawlessly across all 3 languages without breaking layout text-alignments (use strict RTL for Kurdish and Arabic).

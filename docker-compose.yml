@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-linqi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linqi}
+      POSTGRES_DB: ${POSTGRES_DB:-linqi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-linqi} -d ${POSTGRES_DB:-linqi}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${APP_PORT:-80}:8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-linqi}
+      PGDATABASE: ${POSTGRES_DB:-linqi}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-linqi}:${POSTGRES_PASSWORD:-linqi}@postgres:5432/${POSTGRES_DB:-linqi}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-secret-before-going-live}
+      PUBLIC_STATIC_DIR: /app/artifacts/kurdish-pos/dist/public
+      # Optional: set to your droplet URL if you access from another origin
+      # ALLOWED_ORIGINS: http://YOUR_DROPLET_IP
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

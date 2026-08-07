@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.data
+dist
+**/dist/public
+**/.vite
+.env
+.env.*
+!.env.docker.example
+*.log
+.DS_Store

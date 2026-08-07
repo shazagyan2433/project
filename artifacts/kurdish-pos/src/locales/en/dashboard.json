@@ -1,0 +1,165 @@
+{
+  "status": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "pending": "Pending",
+    "active": "Active",
+    "maintenance": "Maintenance",
+    "standby": "Standby"
+  },
+  "timeRange": {
+    "week": "Week",
+    "month": "Month",
+    "year": "Year"
+  },
+  "header": {
+    "iraqIQD": "Iraq · IQD",
+    "systemActive": "System Active",
+    "linesActive": "Lines Active"
+  },
+  "table": {
+    "total": "Total",
+    "time": "Time",
+    "id": "#"
+  },
+  "payment": {
+    "cash": "Cash",
+    "debt": "Credit",
+    "insurance": "Insurance",
+    "pending": "Pending",
+    "card": "Card",
+    "online": "Online"
+  },
+  "admin": {
+    "overviewLabel": "Platform Overview",
+    "overviewSub": "Active users, requests & revenue",
+    "verificationLabel": "User Verification",
+    "verificationSub": "Review pending account requests",
+    "transactionsLabel": "Transactions",
+    "transactionsSub": "Payment history & revenue",
+    "skipLink": "Skip to Dashboard"
+  },
+  "sectors": {
+    "market": {
+      "statusText": "Store Open",
+      "title": "Dashboard",
+      "titleHighlight": "Market",
+      "m0": { "label": "Total Sales Today",       "sub": "Growth vs. yesterday" },
+      "m1": { "label": "Active Customers Today",  "sub": "New & returning customers" },
+      "m2": { "label": "Inventory Alerts",        "sub": "Items need restocking" },
+      "m3": { "label": "Incoming Orders",         "sub": "Purchase & return requests" },
+      "activity": { "title": "Store Activity",    "sub": "Latest transactions today" },
+      "chart":    { "title": "Daily Sales Analysis", "sub": "Routine sales vs. monthly target", "line1": "Routine Sales", "line2": "Monthly Target" },
+      "top":      { "title": "Top-Selling Items", "sub": "Best-selling products this year" },
+      "alerts":   { "title": "Low Stock Alerts" },
+      "table":    { "title": "Recent Purchases", "sub": "Latest store transactions", "colParty": "Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+    },
+    "pharma": {
+      "statusText": "Clinic & Pharmacy Open",
+      "title": "Management Terminal",
+      "titleHighlight": "Medical & Pharma",
+      "m0": { "label": "Total Pharma Sales",        "sub": "Growth vs. last week" },
+      "m1": { "label": "Patients & Customers Today","sub": "New & returning patients" },
+      "m2": { "label": "Low Medicine Alerts",       "sub": "Items need restocking" },
+      "m3": { "label": "New Prescriptions",         "sub": "Medical scripts & requests" },
+      "activity": { "title": "Pharmacy Activity",   "sub": "Latest transactions today" },
+      "chart":    { "title": "Pharmacy Sales Analysis", "sub": "Daily revenue vs. target", "line1": "Medicine Sales", "line2": "Monthly Target" },
+      "top":      { "title": "Medicine & Medical Supply List", "sub": "Best-selling medicines this year" },
+      "alerts":   { "title": "Low Medicine Stock" },
+      "table":    { "title": "Patient Purchases", "sub": "Latest pharmacy sales", "colParty": "Patient / Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+    },
+    "restaurant": {
+      "statusText": "Restaurant Open",
+      "title": "Dashboard",
+      "titleHighlight": "Restaurant",
+      "m0": { "label": "Today's Revenue",           "sub": "Growth vs. yesterday" },
+      "m1": { "label": "Incoming Orders",           "sub": "Table & takeaway requests" },
+      "m2": { "label": "Tables Occupied Now",       "sub": "Occupied & available tables" },
+      "m3": { "label": "Top-Ordered Items",         "sub": "Today's menu" },
+      "activity": { "title": "Restaurant Activity", "sub": "Latest orders today" },
+      "chart":    { "title": "Restaurant Revenue Analysis", "sub": "Daily revenue vs. target", "line1": "Routine Revenue", "line2": "Monthly Target" },
+      "top":      { "title": "Best-Selling Dishes", "sub": "Top menu items this year" },
+      "alerts":   { "title": "Low Ingredient Stock" },
+      "table":    { "title": "Today's Orders", "sub": "Latest restaurant orders", "colParty": "Table / Customer", "colCount": "Dishes", "colMethod": "Payment Method" }
+    },
+    "hotel": {
+      "statusText": "Hotel Open",
+      "title": "Dashboard",
+      "titleHighlight": "Hotel",
+      "m0": { "label": "Booking Revenue Today",   "sub": "Growth vs. yesterday" },
+      "m1": { "label": "Rooms Occupied",           "sub": "Occupied & available rooms" },
+      "m2": { "label": "Active Guests Today",      "sub": "Check-ins & arrivals" },
+      "m3": { "label": "Requested Services",       "sub": "Laundry & dining requests" },
+      "activity": { "title": "Hotel Activity",    "sub": "Latest events today" },
+      "chart":    { "title": "Hotel Revenue Analysis", "sub": "Booking revenue vs. monthly target", "line1": "Booking Revenue", "line2": "Monthly Target" },
+      "top":      { "title": "Top-Booked Room Types", "sub": "Most requested room categories" },
+      "alerts":   { "title": "Current Room Issues" },
+      "table":    { "title": "Today's Bookings", "sub": "Check-ins & arrivals", "colParty": "Guest", "colCount": "Nights", "colMethod": "Payment Method" }
+    },
+    "office": {
+      "statusText": "Office Open",
+      "title": "Dashboard",
+      "titleHighlight": "Office / B2B",
+      "m0": { "label": "B2B Sales Today",          "sub": "Growth vs. last week" },
+      "m1": { "label": "Corporate Customers",      "sub": "Active companies & factories" },
+      "m2": { "label": "Pending Approvals",        "sub": "Product & market requests" },
+      "m3": { "label": "Outstanding Credit",       "sub": "Overdue receivables" },
+      "activity": { "title": "Business Activity", "sub": "Latest B2B transactions" },
+      "chart":    { "title": "B2B Sales Analysis", "sub": "Bulk sales vs. target", "line1": "B2B Sales", "line2": "Monthly Target" },
+      "top":      { "title": "Top-Selling Products", "sub": "Best-selling B2B products this year" },
+      "alerts":   { "title": "Low B2B Stock" },
+      "table":    { "title": "Today's Orders", "sub": "B2B & bulk requests", "colParty": "Company / Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+    },
+    "delivery": {
+      "statusText": "Delivery System Active",
+      "title": "Dashboard",
+      "titleHighlight": "Delivery",
+      "m0": { "label": "Completed Deliveries Today", "sub": "Deliveries completed" },
+      "m1": { "label": "Active Drivers",             "sub": "On-duty & available drivers" },
+      "m2": { "label": "Active Shipments",           "sub": "Deliveries in transit" },
+      "m3": { "label": "Success Rate",               "sub": "Successful deliveries this year" },
+      "activity": { "title": "Delivery Activity",   "sub": "Latest shipments & transfers" },
+      "chart":    { "title": "Daily Delivery Analysis", "sub": "Delivery count vs. target", "line1": "Completed Deliveries", "line2": "Daily Target" },
+      "top":      { "title": "Top Drivers", "sub": "By completed deliveries" },
+      "alerts":   { "title": "Route Issues" },
+      "table":    { "title": "Today's Deliveries", "sub": "Completed & in progress", "colParty": "Customer", "colCount": "Packages", "colMethod": "Type" }
+    }
+  },
+  "distributor": {
+    "statusActive": "System Active",
+    "title": "Distributor",
+    "titleHighlight": "Dashboard",
+    "m0": { "label": "Distribution Volume YTD",    "sub": "Growth vs. prior period" },
+    "m1": { "label": "Active Agent Warehouses",    "sub": "Warehouses & distribution centers" },
+    "m2": { "label": "Pending Requests",           "sub": "Bulk & unit requests" },
+    "m3": { "label": "Shipments Today",            "sub": "Erbil · Sulaymaniyah · Duhok routes" },
+    "activity": { "title": "Distribution Activity", "sub": "Latest business transactions" },
+    "chart":    { "title": "Distribution Volume Analysis", "sub": "Distribution and shipment flow over time", "line1": "Distribution Volume", "line2": "Completed Deliveries" },
+    "agents":   { "title": "Top Agents", "sub": "By distribution volume", "warehousesLabel": "warehouses" },
+    "pipeline": { "title": "Fulfillment Pipeline", "sub": "Shipment route monitoring", "loadsLabel": "loads", "filledLabel": "filled" }
+  },
+  "factory": {
+    "statusActive": "Lines Active",
+    "title": "Factory",
+    "titleHighlight": "Dashboard",
+    "m0": { "label": "Today's Production",         "sub": "Production units — today" },
+    "m1": { "label": "Production Lines",           "sub": "3 active · 1 on maintenance" },
+    "m2": { "label": "Raw Materials",              "sub": "Packaging & oil running low" },
+    "m3": { "label": "Bulk Orders",                "sub": "Large-scale production requests" },
+    "activity": { "title": "Factory Activity",    "sub": "Latest production events" },
+    "chart":    { "title": "Production Analysis", "sub": "Routine factory output vs. target", "line1": "Routine Production", "line2": "Monthly Target" },
+    "lines":    { "title": "Production Line Status", "sub": "Utilization & output metrics", "utilizationLabel": "Utilization", "unitsLabel": "units" },
+    "orders":   { "title": "Bulk Orders", "sub": "Large-scale orders from companies", "colCustomer": "Customer", "colProduct": "Product", "colQty": "Qty", "colDeadline": "Deadline", "colStatus": "Status" }
+  },
+  "currency": {
+    "iqd":    "IQD",
+    "suffix": "",
+    "prefix": "IQD ",
+    "usd":    "$"
+  },
+  "chart": {
+    "millionSuffix":  "M",
+    "thousandSuffix": "K",
+    "deliveryUnit":   "Deliveries"
+  }
+}

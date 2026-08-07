@@ -1,0 +1,29 @@
+Please completely overhaul and replace the old, plain white UI shown in image "844a7d72-576a-40a9-b406-f15c835c0b83". Rebuild the entire Central Admin Dashboard from scratch to look like a premium, high-tech B2B infrastructure console that integrates all master requirements and matching the glassmorphic aesthetics of the LinQi Terminal.
+
+Please implement the following layout and feature modules:
+
+1. Premium Terminal Theme (گۆڕینی تەواوی دیزاینەکە):
+- Switch the entire layout to a dark background with the signature Glassmorphic frosted panels: background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);
+- Use high-contrast white text for titles and glowing Electric Blue (#3B82F6) for active counters and data highlights. Ensure smooth RTL text layout for Kurdish and Arabic.
+
+2. National Overview Hub (داشبۆردی نیشتمانی):
+At the top of the page, display 4 premium glowing metric cards with dynamic trend arrows:
+- Total National Sales Volume (کۆی قەبارەی فرۆشی نیشتمانی لە عێراق)
+- LinQi Accumulated Revenue / Auto-Commissions (کۆی داهات و عمولەی پلاتفۆرم)
+- Active Dynamic Sectors Counter (11 Sectors live overview)
+- Total Verified Businesses vs Pending Approvals (کۆمپانیا چالاکەکان بەرامبەر چاوەڕوانەکان)
+
+3. Advanced Multi-Sector Verification Queue (بەشی وەرگرتنی فۆڕمە نوێیەکان):
+- Replace the old table with a modern glassmorphic ledger showing incoming requests from the 11 sectors (Distributors, Markets, Logistics, etc.).
+- Each row must feature a quick-view pill showing their designated Sector, Governorate (Erbil, Sulaymaniyah, Baghdad, etc.), and Document Status.
+- Add an interactive "Review Core Application" button that opens a beautiful modal to inspect: Business Credentials, Government Licenses, Identity Cards, and their exact coordinates on an embedded Leaflet GPS Navigation Map.
+- Action Buttons inside the review panel: "Approve & Issue Trust Badge" (with options: Verified, Premium, Gold, Trusted), "Reject with Reason", and "Request More Info".
+
+4. Live Infrastructure Tabs (چاودێری گشتی بەکارهێنەران):
+Create an interactive tabbed navigation switcher at the center to display active system assets:
+- TAB 1: Suppliers Ledger (Monitor company profiles, uploaded PDF catalogs, and current inventory sizes).
+- TAB 2: Buyers Hub (Track supermarkets, restaurants, and hotels, alongside their active live Requests for Quotation (RFQs) and Delivery Lead Time stats).
+- TAB 3: Logistics Tracker (View transport companies, truck size metrics like Attico/Trala, and live simulator route statuses).
+
+5. Global Routing & Access:
+- Wire this view permanently to /admin-panel and make sure it reads the real-time dynamic registration data successfully so any new signup appears here instantly.

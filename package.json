@@ -1,0 +1,31 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.4",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c blue,green \"cross-env PORT=5000 pnpm dev:web\" \"cross-env PORT=5001 pnpm dev:api\"",
+    "dev:api": "pnpm --filter @workspace/api-server run dev",
+    "dev:web": "pnpm --filter @workspace/kurdish-pos run dev",
+    "build": "pnpm --filter @workspace/kurdish-pos --filter @workspace/api-server run build",
+    "build:api": "pnpm --filter @workspace/api-server run build",
+    "start": "pnpm --filter @workspace/api-server run start",
+    "start:api": "pnpm --filter @workspace/api-server run start",
+    "render:build": "pnpm install --frozen-lockfile && pnpm run build",
+    "render:start": "pnpm run start:api",
+    "postinstall": "node -e \"if(process.platform!=='win32'){require('child_process').execSync('find node_modules/.pnpm -name esbuild -path */bin/esbuild -exec chmod +x {} +',{stdio:'inherit'})}\""
+  },
+  "private": true,
+  "devDependencies": {
+    "@babel/code-frame": "^8.0.0",
+    "@babel/core": "^8.0.1",
+    "@rollup/rollup-win32-x64-msvc": "^4.62.4",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
+    "concurrently": "^9.2.1",
+    "lightningcss-win32-x64-msvc": "^1.33.0",
+    "typescript": "~5.9.2"
+  },
+  "dependencies": {
+    "cross-env": "^10.1.0"
+  }
+}

@@ -1,0 +1,13 @@
+packages:
+  "framer-motion": "For smooth page transitions and micro-interactions"
+  "recharts": "For the dashboard sales charts"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "For Zod schema validation in forms"
+  "date-fns": "For formatting dates in Kurdish"
+  "clsx": "For conditional class names"
+  "tailwind-merge": "For merging tailwind classes safely"
+
+notes:
+  - Assumes standard React Query setup and wouter for routing.
+  - Using generated API hooks from @workspace/api-client-react.
+  - The entire application uses dir="rtl" and the Vazirmatn font for proper Kurdish rendering.

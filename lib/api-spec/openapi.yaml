@@ -1,0 +1,574 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Kurdish POS and Debt Management API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: products
+    description: Product management
+  - name: sales
+    description: Sales and invoices
+  - name: customers
+    description: Customer management
+  - name: debts
+    description: Debt tracking and payments
+  - name: dashboard
+    description: Dashboard statistics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: getProducts
+      tags: [products]
+      summary: Get all products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProduct"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProduct"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /customers:
+    get:
+      operationId: getCustomers
+      tags: [customers]
+      summary: Get all customers
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomer"
+      responses:
+        "201":
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    put:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomer"
+      responses:
+        "200":
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /sales:
+    get:
+      operationId: getSales
+      tags: [sales]
+      summary: Get all sales
+      responses:
+        "200":
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+    post:
+      operationId: createSale
+      tags: [sales]
+      summary: Create a new sale/invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSale"
+      responses:
+        "201":
+          description: Sale created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+
+  /sales/{id}:
+    get:
+      operationId: getSale
+      tags: [sales]
+      summary: Get a sale by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sale found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+
+  /debts:
+    get:
+      operationId: getDebts
+      tags: [debts]
+      summary: Get all debts
+      responses:
+        "200":
+          description: List of debts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Debt"
+
+  /debts/{id}/pay:
+    post:
+      operationId: payDebt
+      tags: [debts]
+      summary: Record a debt payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayDebt"
+      responses:
+        "200":
+          description: Payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+        unit:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - price
+        - stock
+        - unit
+        - createdAt
+        - updatedAt
+
+    CreateProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+        unit:
+          type: string
+      required:
+        - name
+        - price
+        - stock
+        - unit
+
+    UpdateProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+        unit:
+          type: string
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        totalDebt:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - phone
+        - totalDebt
+        - createdAt
+
+    CreateCustomer:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+      required:
+        - name
+        - phone
+
+    UpdateCustomer:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+
+    SaleItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        total:
+          type: number
+        productName:
+          type: string
+      required:
+        - productId
+        - quantity
+        - unitPrice
+        - total
+
+    Sale:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        paymentType:
+          type: string
+          enum: [cash, debt]
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SaleItem"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - paymentType
+        - totalAmount
+        - paidAmount
+        - items
+        - createdAt
+
+    CreateSaleItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      required:
+        - productId
+        - quantity
+        - unitPrice
+
+    CreateSale:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        paymentType:
+          type: string
+          enum: [cash, debt]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateSaleItem"
+      required:
+        - paymentType
+        - items
+
+    Debt:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        saleId:
+          type: integer
+        originalAmount:
+          type: number
+        remainingAmount:
+          type: number
+        status:
+          type: string
+          enum: [pending, partial, paid]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - customerId
+        - customerName
+        - saleId
+        - originalAmount
+        - remainingAmount
+        - status
+        - createdAt
+
+    PayDebt:
+      type: object
+      properties:
+        amount:
+          type: number
+      required:
+        - amount
+
+    DashboardStats:
+      type: object
+      properties:
+        totalSales:
+          type: number
+        totalDebts:
+          type: number
+        totalCustomers:
+          type: integer
+        totalProducts:
+          type: integer
+        recentSales:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sale"
+        topDebtors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+      required:
+        - totalSales
+        - totalDebts
+        - totalCustomers
+        - totalProducts
+        - recentSales
+        - topDebtors

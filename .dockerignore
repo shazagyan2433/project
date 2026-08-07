@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+.data
+**/.vite
+**/dist
+.cursor
+terminals
+*.log
+.env
+.env.*
+!.env.docker.example
+agent-transcripts
+.local

@@ -1,0 +1,40 @@
+Please refactor the Onboarding/Registration component inside the source directory to dynamically render forms based on the user's selected sector, keeping the premium glassmorphism theme and 3-language (Kurdish, Arabic, English) localization.
+
+1. STEP 1: Mandatory Sector Selection Grid:
+- The very first screen must force the user to pick 1 of these 11 sectors before any form appears:
+  * دابەشکار (Distributor)
+  * کارگە (Manufacturer)
+  * نەخۆشخانە/کلینیک (Hospital/Clinic)
+  * مارکێت (Supermarket)
+  * دوکانی فرۆشتنی تاکەکەسی (Retail Shop)
+  * چێشتخانە (Restaurant)
+  * هۆتێل (Hotel)
+  * دەرمانسازی (Pharmacy)
+  * کۆمپانیای گەیاندن (Delivery Company)
+  * Office (نووسینگە)
+  * بزنسی تر (Other Business)
+
+2. STEPS 2 & 3: Conditional Fields & Uploads based on Selection:
+Dynamically alter the input fields and required documents depending on the selected sector:
+
+- IF "دابەشکار" or "کارگە":
+  * Fields: Company Name, Company License Number, Company Profile, Manager Name, Email, Mobile + WhatsApp, Country, Governorate, City, and interactive GPS Location button.
+  * Required Uploads: Commercial Registration Certificate, Manufacturing License, Owner ID/Passport.
+  * Optional Uploads: ISO Certificates, Product Catalog PDF.
+  * Custom Info: Product Categories, Brands, Production Capacity, and Delivery Area (Dropdown: ناوشار / دەرەوەی شار / هەردووکی).
+
+- IF "مارکێت", "چێشتخانە", or "هۆتێل":
+  * Fields: Business Name, Manager Name, Phone Number, Email, and GPS Location.
+  * Custom Setting: Delivery Lead Time preference selector (numeric 1-10 slider or input).
+  * Required Uploads: ONLY Owner ID (ناسنامەی خاوەنەکەی) to minimize friction.
+
+- IF "کۆمپانیای گەیاندن":
+  * Fields: Company Registration, Phone Number, National ID.
+  * Custom Inputs: Truck Sizes checkboxes (ئەتیکۆ, ترێلە, پیکاب, کیا, ماتۆڕی بار), Coverage Area (ناوشار / دەرەوەی شار / هەردووکی), and Number of Trucks slots.
+
+3. STEP 4 & 5: Approval Status Handling:
+- Upon submission, set the registration state to "Pending Review" (چاوەڕوانی پێداچوونەوە). 
+- Block direct system entry and display a high-end glassmorphic lock screen explaining that the central Admin must verify their documents and GPS location before activation.
+
+4. Dynamic Scalability:
+- Store these sectors in a clean object array model so that future sectors (Agriculture, Construction, etc.) can be generated dynamically later without rewrites.

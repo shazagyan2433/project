@@ -1,0 +1,31 @@
+Please look at the reference layout shown from image 1000274158.jpg to 1000274150.jpg. Currently, clicking on the sidebar items shows empty grid cards or a "Coming Soon" badge. I need all these features fully implemented with rich visual components and simulated real-world B2B data right now.
+
+Please systematically build out the UI views for these routes using beautiful Glassmorphic cards, custom metrics, and tables:
+
+1. کۆگا (Warehouse/Inventory - Image 1000274150.jpg):
+   - Replace placeholder with an Inventory Summary Grid (Total SKUs, Out of Stock, Low Stock Alert).
+   - Add a clean data table showcasing registered items with columns: Product Name, Category, Stock Level, and Status badge (In Stock / Low).
+
+2. گەیاندن (Logistics/Delivery - Image 1000274151.jpg):
+   - Implement a Fleet & Delivery tracking monitor view.
+   - Show Active Shipments, Dispatched Drivers, and Pending Orders with beautiful progress steps.
+
+3. گفتوگۆ (B2B Chat/Negotiation - Image 1000274152.jpg):
+   - Replace with an active messaging interface split view: Left side shows client list (Distributors, Stores), right side shows active chat window with sleek glass design message bubbles.
+
+4. دارایی (Finance/CFO - Image 1000274153.jpg):
+   - Create a premium financial breakdown layout. 
+   - Metrics: Total Revenue, Outstanding Receivables, Net Cash Flow. Add a beautifully simulated line chart or bars for recent monthly performance.
+
+5. زانیاری بازار (Market Intelligence - Image 1000274154.jpg):
+   - Build a market trends panel showing price fluctuations, high-demand product scores, and analytics cards with upward/downward percentage indicators.
+
+6. تۆماری فرۆشیاران & دابینکاری (Suppliers & RFQ - Image 1000274155.jpg & 1000274156.jpg):
+   - Design a Vendor Catalog and active RFQ (Request for Quote) system layout. 
+   - Show available verified wholesale entities and active quote submissions.
+
+7. خەڵاتەکان & ئاگادارییەکان (Rewards & Notifications - Image 1000274157.jpg & 1000274158.jpg):
+   - Build a beautiful milestone/loyalty point gauge showing achievement steps and gamified B2B target levels.
+   - For notifications, list an activity feed of recent operations.
+
+Ensure all views fully remove the "Coming Soon" wrappers, match the dark glowing theme perfectly, and support smooth tab switching. Update the code across these router views now.

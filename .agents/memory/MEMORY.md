@@ -1,0 +1,7 @@
+- [Workspace Bootstrap](workspace-bootstrap.md) — pnpm monorepo in zip-repl/ but artifacts run from root; requires manual setup on fresh env.
+- [Register Refactor](register-refactor.md) — 3-step sector-driven registration flow with pending review lock screen; locale edits must be done via Node.js JSON parse/write (not edit tool) due to Unicode matching failures.
+- [i18n Namespace System](i18n-namespaces.md) — 3 namespaces (common, auth, supplier) added alongside legacy flat "translation" default; all existing t() calls unchanged.
+- [Layout Shell Refactor](layout-shell-refactor.md) — collapsible sidebar (inline style width anim), RTL-aware chevron, Cmd+K search, profile/quick-action dropdowns, breadcrumbs.
+- [Role Portal Architecture](role-portal-architecture.md) — wrapper-page pattern for supplier/buyer/driver portals; paddingBottom: 72px on original role page root divs is intentional.
+- [Industry Context Refactor](industry-context-refactor.md) — shared industry module, AuthUser.sectorKey, sidebar nav filtering, marketplace i18n + sector isolation.
+- [Generated Type Schema Rule](generated-type-schema-rule.md) — Product/CreateProduct/UpdateProduct types live in 4 files that must be kept in sync when adding product fields.

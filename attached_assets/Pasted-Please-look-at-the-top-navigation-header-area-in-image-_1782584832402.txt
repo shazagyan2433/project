@@ -1,0 +1,20 @@
+Please look at the top navigation header area in image 0d99480b-5a29-43a6-b300-7da7cd705773. The layout components (User Profile, Notifications Bell, and Language Switcher) are cluttered, unevenly scaled, and look unpolished. I need a complete UI restructure for this top navbar to match a high-end cyber terminal dashboard interface.
+
+Please execute these changes immediately in the Header component:
+
+1. Clean Flex Layout Alignment & Spacing:
+- Structure the left/right sections cleanly using a proper flex grid (flex items-center justify-between w-full h-16 px-6).
+- Put the user profile badge and platform identity cleanly on one end, and space out the actions on the other side with elegant spacing (space-x-4 or space-x-reverse-4).
+
+2. Redesign the Language Switcher (EN / عربي / کوردی):
+- Replace that bulky pill button layout with a sleek, minimalist dropdown menu or tiny unified premium segmented control tabs.
+- Ensure active text has a premium active glow and inactive text is cleanly muted (text-gray-400). Ensure the Kurdish font renders cleanly and perfectly without breaking character connectivity.
+
+3. Fix the Notification Bell Icon & Active Alerts:
+- Style the notification bell button within a smooth dark circle canvas (bg-white/5 border border-white/10 hover:bg-white/10 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all).
+- When clicking the notification bell icon, implement a smooth dropdown list popup component ("ئاگادارکردنەوەکان") that lists a couple of simulated premium B2B events (e.g., "داواکاری نوێی RFQ هاتووە", "بارستەی نوێ لە ڕێگایە") inside a floating glassmorphic box (backdrop-filter: blur(20px)).
+
+4. Clean Glassmorphism Top Bar:
+- Apply a subtle dark semi-transparent glass aesthetic to the whole top bar wrapper: background: rgba(11, 15, 23, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05);.
+
+Apply these clean interface adjustments to make the entire header look incredibly cohesive, symmetrical, and beautiful.

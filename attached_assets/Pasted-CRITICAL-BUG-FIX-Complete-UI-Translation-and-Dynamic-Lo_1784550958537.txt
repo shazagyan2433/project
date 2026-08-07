@@ -1,0 +1,26 @@
+CRITICAL BUG FIX: Complete UI Translation and Dynamic Localization Sync
+
+Look at my dashboard layout. Right now, when I switch the language to English or Arabic, ONLY the sidebar navigation menus are translating. The actual page content, analytics cards, AI insights, table text, headings, and labels are stuck in Kurdish. This creates a broken, mixed-language experience. 
+
+Based on our LINQi Localization Requirements, 100% of the visible interface must translate instantly without mixed languages or page refreshes.
+
+Please refactor the current dashboard view with these strict requirements:
+
+1. Zero Hardcoded Content:
+   Extract ALL text strings inside the dashboard widgets, charts, alert banners, and stats summaries into their respective i18n JSON files (`/locales/en/`, `/locales/ar/`, `/locales/ku/`).
+   - Move the "پێشبینی داهات - مانگی داهاتوو" card texts, "ئاگادارکردنەوەی کەمبوونەوەی کۆگا" alerts, "هەواڵی مارکێت" summaries, and lower table actions into dynamic translation keys.
+
+2. Strict Grammar & High-End Business Terminology (No Machine Translation):
+   Ensure the translations in JSON match premium SaaS standards exactly:
+   - English: "Revenue Forecast", "Inventory Alerts", "Market Insights", "Pending Approvals", "Active Customers".
+   - Arabic (Formal MSA): "توقعات الإيرادات", "تنبيهات المخزون", "أخبار السوق", "الموافقات المعلقة", "العملاء النشطون".
+   - Kurdish (Formal Sorani): "پێشبینی داهات", "ئاگادارکردنەوەی کۆگا", "زانیارییەکانی مارکێت", "پەسەندکردنی هەڵپەسێردراوەکان".
+
+3. Dynamic Financial & Numerical Context:
+   - When switching to Arabic or Kurdish, automatically parse numbers and text right-to-left. For example, "3,070,000 د.ع" must dynamically switch to "IQD 3,070,000" in English with proper commas.
+   - The date badge ("١٤ ی تەمموز" / "١٤ يوليو" / "July 14") must update its internal locale instantly according to the active language.
+
+4. Layout Polish:
+   Maintain my exact dark theme, glowing card borders, layout metrics, and component structures, but ensure that all typography adjusts smoothly across en/ar/ku without text clipping or layout breaks.
+
+Refactor the components now so that the entire page changes language flawlessly from top to bottom.

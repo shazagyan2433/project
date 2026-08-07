@@ -1,0 +1,25 @@
+# Render Blueprint — LinQi API (optional)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: linqi-api
+    runtime: node
+    plan: free
+    buildCommand: pnpm run render:build
+    startCommand: pnpm run render:start
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_SSL
+        value: "true"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+    # Link your Postgres manually in the dashboard, or add a databases block:
+    # databases:
+    #   - name: linqi-db
+    #     databaseName: linqi_db
+    #     user: linqi_db_user
+    #     plan: free
