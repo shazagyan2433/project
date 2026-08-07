@@ -15,22 +15,39 @@ async function copyFrontendStatic(distDir) {
   const frontendCandidates = [
     path.resolve(artifactDir, "../kurdish-pos/dist/public"),
     path.resolve(artifactDir, "../kurdish-pos/dist"),
+    path.resolve(process.cwd(), "artifacts/kurdish-pos/dist/public"),
+    path.resolve(process.cwd(), "artifacts/kurdish-pos/dist"),
   ];
+
+  console.log("[build] Looking for frontend SPA to copy into api-server/dist/public");
+  for (const dir of frontendCandidates) {
+    const index = path.join(dir, "index.html");
+    console.log(
+      `[build]   ${dir} → dir=${fs.existsSync(dir)} index.html=${fs.existsSync(index)}`,
+    );
+  }
 
   const source = frontendCandidates.find((dir) =>
     fs.existsSync(path.join(dir, "index.html")),
   );
+
   if (!source) {
-    console.warn(
-      "[build] Frontend SPA not found — run kurdish-pos build first. Skipping static copy.",
-    );
-    return;
+    console.error("[build] FATAL: Frontend SPA not found — kurdish-pos build must run first");
+    process.exit(1);
   }
 
   const target = path.join(distDir, "public");
   await rm(target, { recursive: true, force: true });
   await cp(source, target, { recursive: true });
+
+  const targetIndex = path.join(target, "index.html");
+  if (!fs.existsSync(targetIndex)) {
+    console.error(`[build] FATAL: SPA copy failed — missing ${targetIndex}`);
+    process.exit(1);
+  }
+
   console.log(`[build] Copied SPA ${source} → ${target}`);
+  console.log(`[build] Verified index.html at ${targetIndex}`);
 }
 
 async function buildAll() {
