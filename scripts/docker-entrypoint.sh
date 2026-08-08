@@ -1,6 +1,6 @@
 #!/bin/sh
-# Production entrypoint (Docker / VPS). Must not block forever — Render/DO
-# health checks require the HTTP process to bind process.env.PORT quickly.
+# Production entrypoint (Docker / VPS / Render Docker).
+# HTTP must bind immediately — never block on drizzle-kit push.
 set -e
 
 cd /app
@@ -17,7 +17,6 @@ resolve_pg_host() {
     return
   fi
   if [ -n "${DATABASE_URL}" ]; then
-    # postgresql://user:pass@host:port/db  or  postgresql://user:pass@host/db
     echo "${DATABASE_URL}" | sed -E 's|^[a-zA-Z0-9+.-]+://([^@/]+@)?([^:/?]+).*|\2|'
     return
   fi
@@ -67,19 +66,26 @@ wait_for_postgres() {
     sleep 2
   done
 
-  echo "[entrypoint] WARNING: PostgreSQL wait timed out after ${MAX_ATTEMPTS} attempts — starting HTTP server anyway"
+  echo "[entrypoint] WARNING: PostgreSQL wait timed out — starting HTTP server anyway"
   return 0
 }
 
 wait_for_postgres
 
+# Background schema push — MUST NOT block HTTP listen / Render port scan
 if [ -n "${DATABASE_URL}" ] && [ "${SKIP_DB_PUSH}" != "true" ]; then
-  echo "[entrypoint] Applying database schema (drizzle push)..."
-  # Do not abort container start if push fails (DB may still be warming up)
-  pnpm --filter @workspace/db run push \
-    || echo "[entrypoint] WARNING: schema push failed — API will still start"
+  (
+    echo "[entrypoint] Background drizzle push starting..."
+    if pnpm --filter @workspace/db run push; then
+      echo "[entrypoint] schema push OK"
+    else
+      echo "[entrypoint] WARNING: schema push failed — HTTP server continues"
+    fi
+  ) &
+else
+  echo "[entrypoint] Skipping drizzle push (no DATABASE_URL or SKIP_DB_PUSH=true)"
 fi
 
-echo "[entrypoint] Starting API on 0.0.0.0:${PORT}..."
+echo "[entrypoint] Starting API on 0.0.0.0:${PORT} (schema push is non-blocking)..."
 cd /app/artifacts/api-server
 exec node --enable-source-maps dist/index.mjs

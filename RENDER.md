@@ -62,6 +62,8 @@ In the Web Service → **Environment** tab, add:
 | `DATABASE_SSL` | `true` | If SSL errors occur without `sslmode` in URL |
 | `SESSION_SECRET` | Long random string | JWT signing — **required** |
 | `ALLOWED_ORIGINS` | `https://your-frontend.com` | Frontend URL(s), comma-separated (CORS + Socket.io) |
+| `SKIP_DB_PUSH` | `true` (optional) | Skip background schema push entirely |
+| `RUN_DB_PUSH` | `true` (optional) | On Render only: enable one background `drizzle-kit push` after listen |
 
 **Do not set** `USE_LOCAL_DB` on Render.
 
@@ -125,7 +127,8 @@ This repo includes `render.yaml` for one-click Blueprint deploy. You can use **N
 
 | Issue | Fix |
 |-------|-----|
-| **No open ports / Port scan timeout** | Ensure Start command is `pnpm run render:start` (binds `0.0.0.0:$PORT`). Check logs for `Server listening`. Set `SESSION_SECRET` and `DATABASE_URL` — missing secrets crash before bind. |
+| **drizzle-kit push failed on startup** | Push is **non-blocking**. On Render it is **skipped by default**. Set `RUN_DB_PUSH=true` only when you need a one-time schema sync, or run `pnpm --filter @workspace/db run push` from a shell with `DATABASE_URL` + `DATABASE_SSL=true`. |
+| **No open ports / Port scan timeout** | Ensure Start command is `pnpm run render:start` (binds `0.0.0.0:$PORT`). Check logs for `Server listening`. Set `SESSION_SECRET` and `DATABASE_URL`. |
 | Build fails on `pnpm` | Ensure `pnpm-lock.yaml` is committed; Render uses `packageManager` field |
 | `DATABASE_URL must be set` | Add `DATABASE_URL` in Environment; redeploy |
 | SSL / connection errors | Set `DATABASE_SSL=true` or use URL with `?sslmode=require` |

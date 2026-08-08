@@ -1,6 +1,6 @@
 /**
- * Render-safe start: bind HTTP ASAP; optionally push schema without blocking forever.
- * Usage: node scripts/render-start.mjs  (from repo root via `pnpm run render:start`)
+ * Render-safe start: bind HTTP immediately; schema push is optional & never blocks.
+ * Usage: node scripts/render-start.mjs  (via `pnpm run render:start`)
  */
 import { spawn } from "node:child_process";
 import path from "node:path";
@@ -20,12 +20,42 @@ if (!process.env.SESSION_SECRET) {
   console.error("[render-start] WARNING: SESSION_SECRET is not set");
 }
 
+/** Append sslmode=require for managed Postgres when missing. */
+function envWithSsl(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  const url = env.DATABASE_URL;
+  if (!url) return env;
+
+  const needsSsl =
+    env.DATABASE_SSL === "true" ||
+    env.DATABASE_SSL === "1" ||
+    /\.render\.com|\.railway\.app|\.supabase\.co|\.neon\.tech/i.test(url);
+
+  if (needsSsl) {
+    env.DATABASE_SSL = env.DATABASE_SSL || "true";
+    if (!/[?&]sslmode=/i.test(url)) {
+      env.DATABASE_URL = url + (url.includes("?") ? "&" : "?") + "sslmode=require";
+    }
+  }
+  return env;
+}
+
 function startServer() {
   const child = spawn(process.execPath, ["--enable-source-maps", serverEntry], {
     cwd: root,
-    env: process.env,
+    env: envWithSsl(),
     stdio: "inherit",
   });
+
+  const shutdown = (signal) => {
+    try {
+      child.kill(signal);
+    } catch {
+      /* ignore */
+    }
+  };
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 
   child.on("exit", (code, signal) => {
     if (signal) {
@@ -36,37 +66,58 @@ function startServer() {
   });
 }
 
-async function maybePushSchema() {
-  if (!process.env.DATABASE_URL || process.env.SKIP_DB_PUSH === "true") {
+/**
+ * Fire-and-forget schema push. Never awaited before listen.
+ * Disabled by default on Render unless RUN_DB_PUSH=true (schema should be applied once manually or via API bootstrap).
+ */
+function maybePushSchemaInBackground() {
+  const onRender = Boolean(process.env.RENDER);
+  const skip =
+    process.env.SKIP_DB_PUSH === "true" ||
+    !process.env.DATABASE_URL ||
+    (onRender && process.env.RUN_DB_PUSH !== "true");
+
+  if (skip) {
+    console.log(
+      "[render-start] Skipping drizzle push on startup" +
+        (onRender ? " (set RUN_DB_PUSH=true to enable background push)" : ""),
+    );
     return;
   }
 
-  console.log("[render-start] Attempting drizzle schema push (timeout 45s)...");
-  await new Promise((resolve) => {
-    const push = spawn(
-      "pnpm",
-      ["--filter", "@workspace/db", "run", "push"],
-      { cwd: root, env: process.env, stdio: "inherit", shell: true },
-    );
+  console.log("[render-start] Starting background drizzle push (will not block HTTP)...");
+  const push = spawn(
+    "pnpm",
+    ["--filter", "@workspace/db", "run", "push"],
+    { cwd: root, env: envWithSsl(), stdio: "inherit", shell: true },
+  );
 
-    const timer = setTimeout(() => {
-      console.warn("[render-start] schema push timed out — continuing to start server");
+  const timer = setTimeout(() => {
+    console.warn("[render-start] drizzle push timed out — killing push process (server keeps running)");
+    try {
       push.kill("SIGTERM");
-      resolve(undefined);
-    }, 45_000);
+    } catch {
+      /* ignore */
+    }
+  }, Number(process.env.DB_PUSH_TIMEOUT_MS ?? 45_000));
 
-    push.on("exit", (code) => {
-      clearTimeout(timer);
-      if (code !== 0) {
-        console.warn(`[render-start] schema push exited ${code} — starting server anyway`);
-      } else {
-        console.log("[render-start] schema push OK");
-      }
-      resolve(undefined);
-    });
+  push.on("exit", (code) => {
+    clearTimeout(timer);
+    if (code === 0) {
+      console.log("[render-start] schema push OK");
+    } else {
+      console.warn(
+        `[render-start] WARNING: schema push exited with code ${code} — HTTP server continues`,
+      );
+    }
+  });
+
+  push.on("error", (err) => {
+    clearTimeout(timer);
+    console.warn(`[render-start] WARNING: schema push failed to start: ${err.message}`);
   });
 }
 
-// Start HTTP server first so Render port scan succeeds, then push schema in parallel
+// Bind HTTP first — critical for Render port detection
 startServer();
-void maybePushSchema();
+maybePushSchemaInBackground();
