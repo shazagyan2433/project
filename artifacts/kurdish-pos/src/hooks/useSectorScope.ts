@@ -9,6 +9,8 @@ import {
   normalizeSectorKey,
   getSectorNavFeatures,
   getAllowedCategoriesForSector,
+  getStrictSectorCategories,
+  CATEGORY_LABELS_KU,
   filterProductsBySector,
   isNavFeatureAllowed,
 } from "@/lib/industries";
@@ -16,7 +18,27 @@ import {
 /** Resolved onboarding sector for the current merchant session. */
 export function useUserSectorKey(): string | null {
   const { user } = useAuth();
-  return normalizeSectorKey(resolveUserSectorKey(user?.sectorKey));
+  const raw =
+    user?.sectorKey ??
+    (user as { businessSector?: string } | null)?.businessSector ??
+    null;
+  return normalizeSectorKey(resolveUserSectorKey(raw));
+}
+
+/** Localized category dropdown options for the active sector — strict allowlist only. */
+export function useSectorCategoryOptions(): Array<{ key: CatKey; label: string }> {
+  const sectorKey = useUserSectorKey();
+  const { t, i18n } = useTranslation();
+  return useMemo(() => {
+    // Never fall back to ALL_CAT_KEYS / static defaults — empty if sector unknown
+    const keys = getStrictSectorCategories(sectorKey);
+    return keys.map((k) => ({
+      key: k,
+      label: t(`marketplace.cats.${k}`, {
+        defaultValue: CATEGORY_LABELS_KU[k] ?? k,
+      }),
+    }));
+  }, [sectorKey, t, i18n.language]);
 }
 
 /** Localized display name for the logged-in user's onboarding sector. */

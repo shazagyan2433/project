@@ -6,27 +6,33 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useSectorLabel } from "@/hooks/useSectorScope";
+import { PageHeader } from "@/components/PageHeader";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import {
+  C,
+  glassCard,
+  chipInactiveStyle,
+  heroGradient,
+  PAGE_TEXT as TEXT,
+  PAGE_MUTED as MUTED,
+  PAGE_SUB as SUB,
+} from "./dashboard-tokens";
 
 /* ─────────────────────────────────────────────────────────────────── */
-/*  DESIGN TOKENS                                                       */
+/*  ACCENT COLORS (semantic — not theme text)                          */
 /* ─────────────────────────────────────────────────────────────────── */
 const PURPLE = "#8b5cf6";
 const CYAN   = "#06b6d4";
 const GREEN  = "#10b981";
 const BLUE   = "#3b82f6";
-const TEXT   = "#f1f5f9";
-const MUTED  = "#64748b";
-const SUB    = "#94a3b8";
 
-const glass = (extra?: React.CSSProperties): React.CSSProperties => ({
-  background:           "rgba(255,255,255,0.03)",
-  backdropFilter:       "blur(24px)",
-  WebkitBackdropFilter: "blur(24px)",
-  border:               "1px solid rgba(255,255,255,0.06)",
-  borderRadius:         "16px",
-  ...extra,
-});
+/** Text accents — mode-aware via CSS variables (readable on light + dark) */
+const GREEN_TXT  = C.green;
+const CYAN_TXT   = C.cyan;
+const BLUE_TXT   = C.blue;
+const PURPLE_TXT = C.purple;
+
+const glass = glassCard;
 
 /* ─────────────────────────────────────────────────────────────────── */
 /*  LANGUAGE DETECTION                                                  */
@@ -65,8 +71,8 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "سڵاو! من یارمەتیدەری زیرەکی LinQiـم. چۆن دەتوانم ئەمڕۆ لە بەڕێوەبردنی کارەکەتدا یارمەتیت بدەم؟",
     ],
     sales: [
-      "زۆر باشە. فرۆشی مانگی حوزەیران بە شێوەیەکی باش پێشکەوتووە — کۆی فرۆشەکان گەیشتووەتە ٤٨.٧ ملیۆن د.ع، ئەمەش ١٢.٤٪ زیاترە لە مانگی پێشوو.\n\nباشترین بەرهەمی فرۆشراو ئەم هەفتەیە روونی زەیتوون بووە، پاشانیش ماکارۆنی ئیتالی و شەکری سپی. پێشبینیم ئەوەیە کە مانگی داهاتوو گەشەی ١٠–١٤٪ هەبێت بە مەرجی ئەوەی ئەنبارەکانت پربمێننەوە.\n\nدەتەوێت شیکارییەکی قووڵتری بۆ بەرهەمێکی دیاری بکەم؟",
-      "بێگومان، دەتوانم شیکاری زیاترت بۆ بکەم. ئەم هەفتەیە ٦ مامەڵەی نوێ تۆمارکراوە، کۆی ئەوانەش ١٢.٣ ملیۆن د.ع دەبێت.\n\nئاوێنەیەکی باشی کار نیشان دەدات ئەم مانگە. ئایا دەتەوێت بزانیت کام کڕیارت زیاتر فرۆشی کردووە؟",
+      "هیچ ئامارێک بەردەست نییە بۆ فرۆشی ئێستا. کاتێک مامەڵەکان تۆمار بکرێن، دەتوانم شیکاریی فرۆشت بۆ ئامادە بکەم.",
+      "هێشتا داتای فرۆش نییە. دوای تۆمارکردنی فرۆشەکان، دەتوانم وردەکارییەکان پیشان بدەم.",
     ],
     inventory: [
       "بێگومان، ئەنبارەکانت لەگەڵ دووی دەبێت چاودێریان بکرێت. ٣ بەرهەمت هەیە کە زۆر نزیک دایە بۆ ئاستی تەخشیر:\n\nروونی زەیتوون ٣٢ دەبەی مایەوە — ئاستی ئەمنیت ٥٠ دەبەیە. دانەی قاوە ١٨ کیلۆی مایەوە، پێویستی فوری هەیە. سابوونی ماشینیش ٦٤ کارتۆن لە ئاستی هۆشداریدایە.\n\nپیشنیارم ئەوەیە کە ئیمڕۆ داواکاری B2B بنێریت بۆ شیرکەتی ئەڵفا. دەتەوێت ئەمەی بۆت دروست بکەم؟",
@@ -76,7 +82,7 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "زۆر باشە. لەسەر بنیادی دیتای مانگانەی کارەکەت، یەکەم شتی کە چاوم لێ دەکەوێت ئەوەیە کە ٦٨٪ لە فرۆشەکانت نەقدی بوو — ئەمە باشە بۆ گەردشی پارە، بەڵام فرصەتێکی گەورەی B2B هەیتە کە هێشتا تەواو نەیخۆشکراوەتەوە.\n\nئەگەر ٣–٤ کۆمپانیای نوێی مامەڵەکار بخەیتە ناو شبەکەیەتدا، دەتوانیت فرۆشی مانگانە ٢٠–٢٥٪ بەرزبکەیتەوە. بازاڕی دهۆک و کرکوکیش تاوەکو ئێستا بێ هەریمدە مانەوەتەوە بۆ بریکارانت.\n\nئایا دەتەوێت پلانی گسترینەوە بۆ ئەو ناوچانە ئامادە بکەم؟",
     ],
     report: [
-      "بێگومان، ڕاپۆرتی مانگی حوزەیران ئامادەم کردووە:\n\nکۆی فرۆش ٤٨.٧ ملیۆن د.ع — گەشەی ١٢.٤٪ لە مانگی پێشوو. داواکارییەکانیش لە ٤٣ گەیشتووەتە ٥٧، کڕیارانی نوێ ٨ بووە. ئاستی جێبەجێکردن ٩٤٪ بووە کە ٥٪ باشترە لە مانگی پێشوو.\n\nبەگشتی مانگێکی بەهێزی کاری بووە. ئایا دەتەوێت ئەم ڕاپۆرتە بۆ Excel هەناردم بکەم؟",
+      "هیچ ئامارێک بەردەست نییە بۆ ڕاپۆرتی ئێستا. کاتێک فرۆش و مامەڵەکان تۆمار بکرێن، دەتوانم ڕاپۆرتی مانگانە ئامادە بکەم.",
     ],
     market: [
       "زۆر باشە. بازاڕی B2B لە هەرێمی کوردستان لەماوەی ئەمساڵدا ١٤٪ گەشەی کردووە. داوای دیجیتاڵی بازرگانی ٢٧٪ لە هەموو کڕینەکانی B2B تەواو دەکات.\n\nدوو فرصەتی گەورە دەبینم بۆ کارەکەت: بازاڕی کرکوک تاوەکو ئێستا ناخۆشکراوەتەوە — بریکاری تازە لەوێ دەتوانیت ٢٣٪ گەشەی نوێت بدات. هەروەها گەیاندنی خێرای ٤٨ کاتژمێر کانالێکی جیاوازی B2Bیە کە کۆمپانیاکان زیاتر باوەڕیان پێیدایە.\n\nدەتەوێت پلانی دەستپێکردن ئامادە بکەم؟",
@@ -96,8 +102,8 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "أهلاً وسهلاً! أنا مساعد LinQi الذكي. كيف يمكنني مساعدتك في إدارة أعمالك اليوم؟",
     ],
     sales: [
-      "بالتأكيد، يمكنني مساعدتك في تحليل المبيعات. إجمالي مبيعات شهر حزيران بلغ ٤٨.٧ مليون دينار عراقي — بزيادة ١٢.٤٪ عن الشهر الماضي.\n\nأفضل المنتجات مبيعاً كانت زيت الزيتون والمعكرونة الإيطالية والسكر الأبيض. التوقعات تشير إلى نمو بين ١٠–١٤٪ الشهر القادم شريطة توفر المخزون الكافي.\n\nهل تريد تحليلاً أعمق لمنتج معين؟",
-      "بالطبع، لديّ بيانات المبيعات جاهزة. سُجّلت ٦ صفقات جديدة هذا الأسبوع بإجمالي ١٢.٣ مليون دينار. هل تريد معرفة أي العملاء حقق أعلى المبيعات؟",
+      "لا تتوفر أي إحصائيات للمبيعات حالياً. عند تسجيل المعاملات، يمكنني إعداد تحليل المبيعات لك.",
+      "لا توجد بيانات مبيعات بعد. بعد تسجيل المبيعات، يمكنني عرض التفاصيل.",
     ],
     inventory: [
       "بالتأكيد، سأراجع مستوى مخزونك. هناك ٣ منتجات وصلت إلى مستوى تحذيري:\n\nزيت الزيتون: ٣٢ علبة متبقية — الحد الأدنى الآمن ٥٠ علبة. حبوب القهوة: ١٨ كيلوغرام فقط — يحتاج طلباً عاجلاً. صابون الغسيل: ٦٤ كرتون في منطقة التحذير.\n\nهل تريد أن أُرسل طلب توريد B2B تلقائياً؟",
@@ -106,7 +112,7 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "بالتأكيد، إليك توصياتي الاستراتيجية بناءً على بيانات أعمالك:\n\nأولاً، ٦٨٪ من مبيعاتك نقدية — هذا جيد لتدفق السيولة، لكن هناك فرصة B2B لم تستغلها بالكامل بعد. إضافة ٣–٤ شركاء تجاريين جدد قد يرفع مبيعاتك الشهرية بنسبة ٢٠–٢٥٪.\n\nثانياً، أسواق دهوك وكركوك لا تزال غير مستثمرة من قِبل موزعيك — فرصة نمو تصل إلى ٢٣٪.\n\nهل تريد إعداد خطة توسع لتلك المناطق؟",
     ],
     report: [
-      "بالتأكيد، إليك تقرير شهر حزيران:\n\nإجمالي المبيعات ٤٨.٧ مليون دينار — نمو ١٢.٤٪. الطلبات ارتفعت من ٤٣ إلى ٥٧. عملاء جدد ٨. نسبة تنفيذ الطلبات ٩٤٪ — أفضل بـ٥٪ من الشهر الماضي.\n\nبشكل عام، كان شهراً ممتازاً. هل تريد تصدير هذا التقرير إلى Excel؟",
+      "لا تتوفر أي إحصائيات للتقرير حالياً. عند تسجيل المبيعات والمعاملات، يمكنني إعداد التقرير الشهري.",
     ],
     market: [
       "بالتأكيد، سأحلل السوق لك. نما سوق B2B في إقليم كردستان بنسبة ١٤٪ هذا العام، والتجارة الرقمية تمثل الآن ٢٧٪ من إجمالي صفقات B2B.\n\nأرى فرصتين كبيرتين: السوق في كركوك غير مستغل بالكامل — موزع جديد هناك قد يضيف ٢٣٪ نمواً. كذلك التوصيل السريع خلال ٤٨ ساعة أصبح ميزة تنافسية مهمة.\n\nهل تريد إعداد خطة الانطلاق؟",
@@ -126,8 +132,8 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "Hello! I'm the LinQi AI Business Assistant. How can I help you manage your operations today?",
     ],
     sales: [
-      "Absolutely! Here's your sales overview: June revenue reached 48.7M IQD — that's a 12.4% increase over last month.\n\nTop performers were olive oil (5L), Italian pasta, and white sugar. Forecast for next month is 10–14% growth, provided your inventory stays stocked.\n\nWould you like a deeper breakdown by product or customer?",
-      "Great question. This week you've logged 6 new transactions totaling 12.3M IQD. Your sales pipeline looks healthy. Want to know which customer drove the highest revenue?",
+      "No sales statistics are available yet. Once transactions are recorded, I can prepare sales analysis for you.",
+      "There is no sales data yet. After sales are recorded, I can show you the details.",
     ],
     inventory: [
       "Sure, let me check your stock levels. You currently have 3 products approaching critical thresholds:\n\nOlive oil: 32 units left — safety stock is 50. Coffee beans: 18 kg remaining — urgent reorder needed. Laundry detergent: 64 cartons in the warning zone.\n\nShould I automatically generate a B2B purchase order to your verified suppliers?",
@@ -136,7 +142,7 @@ const BANKS: Record<Lang, Record<string, string[]>> = {
       "Great, here are my strategic recommendations based on your data:\n\nFirst, 68% of your sales are cash transactions — while good for liquidity, there's an untapped B2B opportunity. Adding 3–4 corporate accounts could grow monthly revenue by 20–25%.\n\nSecond, the Duhok and Kirkuk markets remain uncovered by your distributors — that's a potential 23% growth opportunity.\n\nWould you like me to draft an expansion plan for those regions?",
     ],
     report: [
-      "Absolutely! Here's your June business report:\n\nTotal sales: 48.7M IQD — up 12.4%. Orders increased from 43 to 57. New customers: 8. Order fulfillment rate: 94% — 5% better than last month.\n\nOverall, an excellent month. Would you like me to export this as an Excel file?",
+      "No statistics are available for a report yet. Once sales and transactions are recorded, I can prepare a monthly report.",
     ],
     market: [
       "Of course! B2B market in Kurdistan Region grew 14% this year, with digital commerce now accounting for 27% of all B2B transactions.\n\nI see two major opportunities for your business: the Kirkuk market remains largely untapped — a new distributor there could add 23% growth. Also, 48-hour fast delivery has become a key differentiator that corporate buyers increasingly value.\n\nShould I prepare a go-to-market plan?",
@@ -190,14 +196,14 @@ function route(text: string, lang: Lang): string {
 /* ─────────────────────────────────────────────────────────────────── */
 /*  QUICK-ACTION BUTTONS                                                */
 /* ─────────────────────────────────────────────────────────────────── */
-const QUICK_ACTIONS = [
-  { icon: BarChart3,   color: CYAN,     label: "چاتی کارەبایی",     sub: "شیکاری فرۆشی ئەمسەر",   prompt: "دەمەوێت شیکارییەک بۆ فرۆشی ئەمسەر بکەم"          },
-  { icon: Lightbulb,   color: PURPLE,   label: "پێشنیازی ستراتیژی", sub: "بۆ گەشەکردنی کارەکانت", prompt: "پێشنیازی ستراتیژیی بدەم بۆ بەهێزکردنی کارەکانم"   },
-  { icon: FileText,    color: GREEN,    label: "دروستکردنی ڕاپۆرت", sub: "ڕاپۆرتی پڕۆفیشناڵ",     prompt: "ڕاپۆرتی کاری مانگانەم بۆ حوزەیران دروست بکە"      },
-  { icon: Package,     color: "#f97316",label: "شیکاری ئەنبار",    sub: "ستۆک و کەمبوونەکان",     prompt: "ئاستی ئەنبارم شیبکەرەوە و پێشنیارم بدە"          },
-  { icon: TrendingUp,  color: BLUE,     label: "پیشبینیی بازاڕ",   sub: "تووێژ و فرصەتەکان",     prompt: "شیکاری بازاڕی B2B و فرصەتەکانم پیشانم بدە"       },
-  { icon: Brain,       color: "#ec4899",label: "فێربوونی تایبەتی", sub: "پیشنیاز لەسەر کارەکانت", prompt: "لەسەر بنیادی مێژووی کارەکانم چی پێشنیاز دەکەی؟"  },
-];
+const QUICK_ACTION_DEFS = [
+  { key: "sales",     icon: BarChart3,   color: CYAN },
+  { key: "strategy",  icon: Lightbulb,   color: PURPLE },
+  { key: "report",    icon: FileText,    color: GREEN },
+  { key: "inventory", icon: Package,     color: "#f97316" },
+  { key: "market",    icon: TrendingUp,  color: BLUE },
+  { key: "personal",  icon: Brain,       color: "#ec4899" },
+] as const;
 
 /* ─────────────────────────────────────────────────────────────────── */
 /*  TYPES                                                               */
@@ -290,21 +296,33 @@ function RichText({ text, lang, streaming }: { text: string; lang: Lang; streami
 /* ─────────────────────────────────────────────────────────────────── */
 /*  MAIN PAGE                                                           */
 /* ─────────────────────────────────────────────────────────────────── */
-const WELCOME: Message = {
-  id: "welcome", role: "assistant", state: "done", lang: "ku", ts: new Date(),
-  fullText: "سڵاو! من یارمەتیدەری زیرەکی LinQiـم. چۆن دەتوانم ئەمڕۆ لە بەڕێوەبردنی کارەکەتدا یارمەتیت بدەم؟",
-};
-
-const LANG_LABEL: Record<Lang, string> = { ku: "کوردی", ar: "عربی", en: "English" };
+const WELCOME_ID = "welcome";
 
 export default function AIAssistant() {
-  const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
-  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const { t, i18n } = useTranslation("common");
+  const { dir } = useLocaleDir("common");
+
+  const makeWelcome = useCallback((): Message => ({
+    id: WELCOME_ID,
+    role: "assistant",
+    state: "done",
+    lang: (i18n.language === "en" ? "en" : i18n.language === "ar" ? "ar" : "ku") as Lang,
+    ts: new Date(),
+    fullText: t("aiChat.welcome"),
+  }), [t, i18n.language]);
+
+  const [messages, setMessages] = useState<Message[]>(() => []);
   const [input,    setInput]    = useState("");
   const [busy,     setBusy]     = useState(false);
   const bottomRef               = useRef<HTMLDivElement>(null);
   const taRef                   = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setMessages([makeWelcome()]);
+  }, [makeWelcome]);
+
+  const langLabel = (lang: Lang) =>
+    lang === "en" ? t("language.en") : lang === "ar" ? t("language.ar") : t("language.ku");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -350,21 +368,25 @@ export default function AIAssistant() {
   const reset = () => {
     setBusy(false);
     setInput("");
-    setMessages([{ ...WELCOME, id: `w-${Date.now()}`, ts: new Date() }]);
+    setMessages([{ ...makeWelcome(), id: `w-${Date.now()}`, ts: new Date() }]);
   };
 
-  const fmtTime = (d: Date) => d.toLocaleTimeString("ar-IQ", { hour: "2-digit", minute: "2-digit" });
+  const fmtTime = (d: Date) =>
+    d.toLocaleTimeString(i18n.language === "en" ? "en-US" : i18n.language === "ar" ? "ar-IQ" : "ku-IQ", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   /* Detect language of input as user types (for input bubble alignment) */
   const inputLang = input.trim() ? detectLang(input) : "ku";
 
   return (
-    <div dir="rtl" style={{ minHeight: "100%", display: "flex", flexDirection: "column", gap: "18px" }}>
+    <div dir={dir} style={{ minHeight: "100%", display: "flex", flexDirection: "column", gap: "18px" }}>
 
       {/* ══ HEADER ══════════════════════════════════════════════════ */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }}
         className="relative overflow-hidden rounded-2xl p-5"
-        style={{ background: `linear-gradient(135deg,${PURPLE}18 0%,rgba(8,13,30,.97) 60%)`,
+        style={{ background: heroGradient(PURPLE),
           border: `1px solid ${PURPLE}30`, boxShadow: `0 8px 48px ${PURPLE}14` }}>
         <div style={{ position:"absolute",top:"-30px",insetInlineEnd:"-20px",width:"150px",height:"150px",
           borderRadius:"50%",background:`radial-gradient(circle,${PURPLE}22,transparent 70%)`,
@@ -372,20 +394,22 @@ export default function AIAssistant() {
         <div className="relative flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
             style={{ background:`${PURPLE}22`,border:`1.5px solid ${PURPLE}45`,boxShadow:`0 0 24px ${PURPLE}28` }}>
-            <Bot className="w-6 h-6" style={{ color:"#c4b5fd" }} />
+            <Bot className="w-6 h-6" style={{ color: PURPLE_TXT }} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h1 className="text-lg font-extrabold" style={{ color:TEXT,fontFamily:"Vazirmatn,sans-serif" }}>
-                {t("pageTitles.aiAssistant", { sector: sectorLabel })}
-              </h1>
+              <PageHeader
+                id="aiAssistant"
+                showDescription={false}
+                titleClassName="text-lg font-extrabold text-slate-900 dark:text-slate-100 linqi-page-header-title"
+              />
               <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full"
-                style={{ background:`${PURPLE}20`,color:"#c4b5fd",border:`1px solid ${PURPLE}45` }}>
+                style={{ background:`${PURPLE}20`,color:PURPLE_TXT,border:`1px solid ${PURPLE}45` }}>
                 AI · B2B
               </span>
             </div>
-            <p className="text-[11px]" style={{ color:"rgba(255,255,255,.45)",fontFamily:"Vazirmatn,sans-serif" }}>
-              {t("pageTitles.aiAssistantSubtitle", { sector: sectorLabel })}
+            <p className="text-[11px] linqi-page-subtitle linqi-page-header-subtitle" style={{ fontFamily:"Vazirmatn,sans-serif" }}>
+              {t("pageDescriptions.aiAssistant")}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1.5">
@@ -397,12 +421,12 @@ export default function AIAssistant() {
                   style={{ background:GREEN }} />
                 <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background:GREEN }} />
               </span>
-              <span className="text-[10px] font-bold" style={{ color:"#34d399" }}>ئۆنلاینە</span>
+              <span className="text-[10px] font-bold" style={{ color: GREEN_TXT }}>{t("aiChat.online")}</span>
             </div>
             {/* Active language pill */}
             <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background:"rgba(6,182,212,.12)",color:CYAN,border:`1px solid ${CYAN}30` }}>
-              {LANG_LABEL[inputLang]}
+              style={{ background:"rgba(6,182,212,.12)",color:CYAN_TXT,border:`1px solid ${CYAN}30` }}>
+              {langLabel(inputLang)}
             </span>
           </div>
         </div>
@@ -413,25 +437,28 @@ export default function AIAssistant() {
         <p className="text-[10px] font-bold mb-3 flex items-center gap-1.5"
           style={{ color:MUTED,fontFamily:"Vazirmatn,sans-serif" }}>
           <Zap className="w-3 h-3" />
-          دوگمەکانی خێرا — کلیک بکە بۆ دەستپێکردن
+          {t("aiChat.quickActionsTitle")}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
-          {QUICK_ACTIONS.map((qa, i) => {
+          {QUICK_ACTION_DEFS.map((qa, i) => {
             const Icon = qa.icon;
+            const label = t(`aiChat.quickActions.${qa.key}.label`);
+            const sub = t(`aiChat.quickActions.${qa.key}.sub`);
+            const prompt = t(`aiChat.quickActions.${qa.key}.prompt`);
             return (
-              <motion.button key={qa.label}
+              <motion.button key={qa.key}
                 initial={{ opacity:0,y:12 }} animate={{ opacity:1,y:0 }}
                 transition={{ delay: i*0.04 }}
-                onClick={() => send(qa.prompt)}
+                onClick={() => send(prompt)}
                 disabled={busy}
                 className="flex flex-col items-start gap-2 p-3.5 rounded-2xl text-start"
                 style={{ ...glass(), cursor: busy ? "not-allowed":"pointer", opacity: busy ? 0.45:1, transition:"all 0.17s" }}
                 onMouseEnter={e => { if (!busy) { const el = e.currentTarget as HTMLElement;
-                  el.style.background="rgba(255,255,255,.055)"; el.style.borderColor=`${qa.color}38`;
-                  el.style.transform="translateY(-2px)"; el.style.boxShadow=`0 8px 24px rgba(0,0,0,.3),0 0 0 1px ${qa.color}20`;
+                  el.style.background = C.glassHover; el.style.borderColor=`${qa.color}38`;
+                  el.style.transform="translateY(-2px)"; el.style.boxShadow=`0 8px 24px rgba(0,0,0,.12),0 0 0 1px ${qa.color}20`;
                 }}}
                 onMouseLeave={e => { const el = e.currentTarget as HTMLElement;
-                  el.style.background="rgba(255,255,255,.03)"; el.style.borderColor="rgba(255,255,255,.06)";
+                  el.style.background = C.glass; el.style.borderColor = C.border;
                   el.style.transform="translateY(0)"; el.style.boxShadow="none";
                 }}>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
@@ -440,9 +467,9 @@ export default function AIAssistant() {
                 </div>
                 <div className="flex-1">
                   <p className="text-[11px] font-extrabold leading-snug"
-                    style={{ color:TEXT,fontFamily:"Vazirmatn,sans-serif" }}>{qa.label}</p>
+                    style={{ color:TEXT,fontFamily:"Vazirmatn,sans-serif" }}>{label}</p>
                   <p className="text-[9px] mt-0.5"
-                    style={{ color:MUTED,fontFamily:"Vazirmatn,sans-serif" }}>{qa.sub}</p>
+                    style={{ color:MUTED,fontFamily:"Vazirmatn,sans-serif" }}>{sub}</p>
                 </div>
                 <ChevronRight className="w-3 h-3 self-end" style={{ color:qa.color,opacity:.55 }} />
               </motion.button>
@@ -457,26 +484,25 @@ export default function AIAssistant() {
         style={{ ...glass(), flex:1, minHeight:"360px", overflow:"hidden" }}>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3"
-          style={{ borderBottom:"1px solid rgba(255,255,255,.055)" }}>
+        <div className="flex items-center justify-between px-5 py-3 linqi-page-divider border-b">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" style={{ color:PURPLE }} />
             <span className="text-[12px] font-bold" style={{ color:TEXT,fontFamily:"Vazirmatn,sans-serif" }}>
-              کۆنسۆڵی LinQi AI
+              {t("aiChat.consoleTitle")}
             </span>
             {busy && (
               <span className="text-[9px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-                style={{ background:`${PURPLE}15`,color:"#c4b5fd",border:`1px solid ${PURPLE}30` }}>
-                دەنووسێت…
+                style={{ background:`${PURPLE}15`,color:PURPLE_TXT,border:`1px solid ${PURPLE}30` }}>
+                {t("aiChat.typing")}
               </span>
             )}
           </div>
           <button onClick={reset}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all"
-            style={{ background:"rgba(255,255,255,.04)",color:MUTED,border:"1px solid rgba(255,255,255,.06)" }}
-            onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.borderColor=`${PURPLE}35`;(e.currentTarget as HTMLElement).style.color="#c4b5fd";}}
-            onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.borderColor="rgba(255,255,255,.06)";(e.currentTarget as HTMLElement).style.color=MUTED;}}>
-            <RefreshCw className="w-3 h-3" />نوێکردنەوە
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all hover:border-[color-mix(in_srgb,var(--terminal-accent)_35%,var(--shell-border))]"
+            style={chipInactiveStyle()}
+            onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.borderColor=`${PURPLE}35`;(e.currentTarget as HTMLElement).style.color="#7c3aed";}}
+            onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.borderColor=C.border;(e.currentTarget as HTMLElement).style.color=MUTED;}}>
+            <RefreshCw className="w-3 h-3" />{t("aiChat.refresh")}
           </button>
         </div>
 
@@ -497,8 +523,8 @@ export default function AIAssistant() {
                       ? { background:`${PURPLE}20`,border:`1.5px solid ${PURPLE}40` }
                       : { background:"rgba(6,182,212,.18)",border:`1.5px solid ${CYAN}40` }}>
                     {msg.role==="assistant"
-                      ? <Bot className="w-4 h-4" style={{ color:"#c4b5fd" }} />
-                      : <Users className="w-4 h-4" style={{ color:CYAN }} />}
+                      ? <Bot className="w-4 h-4" style={{ color: PURPLE_TXT }} />
+                      : <Users className="w-4 h-4" style={{ color: CYAN_TXT }} />}
                   </div>
 
                   {/* Bubble */}
@@ -529,13 +555,13 @@ export default function AIAssistant() {
                     </div>
                     {/* Time + lang tag */}
                     <div className={`flex items-center gap-1.5 mt-1 px-1 ${msg.role==="user" ? "justify-end" : ""}`}>
-                      <span className="text-[9px]" style={{ color:"rgba(100,116,139,.6)" }}>
+                      <span className="text-[9px] linqi-page-muted">
                         {fmtTime(msg.ts)}
                       </span>
                       {msg.role === "assistant" && (
-                        <span className="text-[8px] font-bold px-1.5 py-px rounded-full"
-                          style={{ background:"rgba(255,255,255,.05)",color:"rgba(100,116,139,.7)" }}>
-                          {LANG_LABEL[msg.lang]}
+                        <span className="text-[8px] font-bold px-1.5 py-px rounded-full linqi-page-chip-inactive"
+                          style={{ color: MUTED }}>
+                          {langLabel(msg.lang)}
                         </span>
                       )}
                     </div>
@@ -548,29 +574,30 @@ export default function AIAssistant() {
         </div>
 
         {/* ── Input bar ── */}
-        <div className="px-4 pb-4 pt-3" style={{ borderTop:"1px solid rgba(255,255,255,.05)" }}>
+        <div className="px-4 pb-4 pt-3 linqi-page-divider border-t">
           {/* Live lang indicator above input */}
           <div className="flex items-center gap-1.5 mb-2">
             <span className="text-[9px]" style={{ color:MUTED,fontFamily:"Vazirmatn,sans-serif" }}>
-              زمانی ئێستا:
+              {t("aiChat.currentLanguage")}
             </span>
             <span className="text-[9px] font-bold px-1.5 py-px rounded-full"
-              style={{ background:"rgba(6,182,212,.12)",color:CYAN,border:`1px solid ${CYAN}25` }}>
-              {LANG_LABEL[inputLang]}
+              style={{ background:"rgba(6,182,212,.12)",color:CYAN_TXT,border:`1px solid ${CYAN}25` }}>
+              {langLabel(inputLang)}
             </span>
           </div>
-          <div className="flex items-end gap-3 rounded-2xl p-2"
-            style={{ background:"rgba(255,255,255,.04)",
-              border:`1px solid ${busy ? `${PURPLE}35`:"rgba(255,255,255,.08)"}`,
+          <div className="flex items-end gap-3 rounded-2xl p-2 linqi-shell-input"
+            style={{
+              border:`1px solid ${busy ? `${PURPLE}35` : C.border}`,
               transition:"border-color 0.2s,box-shadow 0.2s",
-              boxShadow: busy ? `0 0 0 3px ${PURPLE}12`:"none" }}>
+              boxShadow: busy ? `0 0 0 3px ${PURPLE}12`:"none",
+            }}>
             <textarea ref={taRef}
               value={input} rows={1}
               dir={inputLang === "en" ? "ltr" : "rtl"}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               disabled={busy}
-              placeholder="لێرە پرسیارەکەت بنووسە… / Type your question…"
+              placeholder={t("aiChat.placeholder")}
               className="flex-1 bg-transparent outline-none resize-none text-[13px] leading-relaxed"
               style={{ color:TEXT,fontFamily:"Vazirmatn,sans-serif",
                 maxHeight:"110px",minHeight:"24px",paddingInlineStart:"6px",
@@ -585,17 +612,16 @@ export default function AIAssistant() {
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
               style={input.trim() && !busy
                 ? { background:`linear-gradient(135deg,${PURPLE},${BLUE})`,boxShadow:`0 4px 16px ${PURPLE}40`,cursor:"pointer" }
-                : { background:"rgba(255,255,255,.06)",cursor:"not-allowed",opacity:.4 }}>
+                : { background:C.glassHover,cursor:"not-allowed",opacity:.5 }}>
               {busy
                 ? <motion.div animate={{ rotate:360 }} transition={{ duration:1,repeat:Infinity,ease:"linear" }}>
-                    <RefreshCw className="w-3.5 h-3.5" style={{ color:"#c4b5fd" }} />
+                    <RefreshCw className="w-3.5 h-3.5" style={{ color: PURPLE_TXT }} />
                   </motion.div>
                 : <Send className="w-3.5 h-3.5" style={{ color: input.trim() ? TEXT : MUTED }} />}
             </button>
           </div>
-          <p className="text-[9px] mt-1.5 text-center"
-            style={{ color:"rgba(100,116,139,.4)",fontFamily:"Vazirmatn,sans-serif" }}>
-            Enter · ناردن &nbsp;|&nbsp; Shift+Enter · هێڵی نوێ
+          <p className="text-[9px] mt-1.5 text-center linqi-page-muted" style={{ fontFamily:"Vazirmatn,sans-serif" }}>
+            {t("aiChat.inputHint")}
           </p>
         </div>
       </motion.div>

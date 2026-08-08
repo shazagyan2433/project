@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { signToken, requireAuth } from "../middlewares/auth";
+import { assertValidRegistration, initialRegistrationStatus } from "../lib/registration-policy";
 
 const router: IRouter = Router();
 
@@ -47,6 +48,13 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       extraData:    z.record(z.unknown()).optional(),
     });
     const body = schema.parse(req.body);
+
+    assertValidRegistration({
+      businessName: body.businessName,
+      mobile: body.mobile,
+      sectorKey: body.sectorKey,
+      sectorGroup: body.sectorGroup,
+    });
 
     // Check username uniqueness
     const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.username, body.username));
@@ -94,7 +102,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       if (updated) profileUser = updated;
     }
 
-    // Business registration record (auto-approved — no admin review gate)
+    const regStatus = initialRegistrationStatus(body.sectorGroup, body.sectorKey);
     await db.insert(businessRegistrationsTable).values({
       sectorKey:    body.sectorKey,
       sectorGroup:  body.sectorGroup,
@@ -105,9 +113,9 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       city:         body.city || null,
       address:      body.address || null,
       extraData:    body.extraData ?? null,
-      status:       "approved",
-      reviewedAt:   new Date(),
-      reviewedBy:   "auto",
+      status:       regStatus,
+      reviewedAt:   regStatus === "approved" ? new Date() : null,
+      reviewedBy:   regStatus === "approved" ? "auto" : null,
     }).catch(() => { /* non-fatal */ });
 
     const token = signToken({
@@ -125,7 +133,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     });
   } catch (err) {
     req.log.error({ err }, "Registration failed");
-    res.status(400).json({ message: "داتاکان هەڵەن" });
+    const message = err instanceof Error ? err.message : "داتاکان هەڵەن";
+    res.status(400).json({ message });
   }
 });
 
@@ -245,6 +254,43 @@ router.patch("/auth/me/password", requireAuth, async (req, res): Promise<void> =
     res.json({ message: "وشەی نهێنی بە سەرکەوتوویی گۆڕدرا" });
   } catch (err) {
     req.log.error({ err }, "Failed to change password");
+    res.status(400).json({ message: "داتاکان هەڵەن" });
+  }
+});
+
+/* ─── POST /auth/portal/session — JWT for portal drivers (delivery API) ─── */
+router.post("/auth/portal/session", async (req, res): Promise<void> => {
+  try {
+    const schema = z.object({
+      portalUserId: z.number().int().positive(),
+      role: z.enum(["driver", "buyer", "supplier"]),
+      name: z.string().min(1),
+    });
+    const body = schema.parse(req.body);
+
+    if (body.role !== "driver") {
+      res.status(403).json({ message: "Portal session only supported for drivers" });
+      return;
+    }
+
+    const token = signToken({
+      userId: body.portalUserId,
+      username: `portal-driver-${body.portalUserId}`,
+      role: "driver",
+      name: body.name,
+    });
+
+    res.json({
+      token,
+      user: {
+        id: body.portalUserId,
+        name: body.name,
+        username: `portal-driver-${body.portalUserId}`,
+        role: "driver",
+      },
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to create portal session");
     res.status(400).json({ message: "داتاکان هەڵەن" });
   }
 });

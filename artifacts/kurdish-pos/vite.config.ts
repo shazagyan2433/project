@@ -2,19 +2,23 @@ import { defineConfig, type ProxyOptions } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { VitePWA } from "vite-plugin-pwa";
 
-const rawPort = process.env.PORT;
-const port = rawPort && !Number.isNaN(Number(rawPort)) && Number(rawPort) > 0
-  ? Number(rawPort)
-  : 5173;
+/** Vite dev server port — WEB_PORT first, then PORT, then 5173 */
+const webPortRaw = process.env.WEB_PORT ?? process.env.PORT;
+const port =
+  webPortRaw && !Number.isNaN(Number(webPortRaw)) && Number(webPortRaw) > 0
+    ? Number(webPortRaw)
+    : 5173;
 
 const basePath = process.env.BASE_PATH || "/";
 
-/** Backend port for Vite proxy — defaults to 5001 (api-server in dev) */
+/** Backend port for Vite proxy — must match api-server (default 5001) */
 const apiPort = process.env.API_PORT ?? process.env.VITE_API_PORT ?? "5001";
 const apiTarget = `http://127.0.0.1:${apiPort}`;
+
+console.info(`[vite] dev server → http://localhost:${port}`);
+console.info(`[vite] API proxy   → ${apiTarget}/api`);
 
 function proxyWithOfflineFallback(path: string): ProxyOptions {
   return {
@@ -42,7 +46,13 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
+    ...(process.env.NODE_ENV !== "production"
+      ? [
+          await import("@replit/vite-plugin-runtime-error-modal").then((m) =>
+            m.default(),
+          ),
+        ]
+      : []),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null,
@@ -181,7 +191,7 @@ export default defineConfig({
   },
   server: {
     port,
-    strictPort: true,
+    strictPort: false,
     host: "0.0.0.0",
     open: process.env.NODE_ENV !== "production" ? "/onboarding" : false,
     allowedHosts: true,

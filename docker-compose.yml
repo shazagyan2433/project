@@ -32,7 +32,8 @@ services:
       PGUSER: ${POSTGRES_USER:-linqi}
       PGDATABASE: ${POSTGRES_DB:-linqi}
       DATABASE_URL: postgresql://${POSTGRES_USER:-linqi}:${POSTGRES_PASSWORD:-linqi}@postgres:5432/${POSTGRES_DB:-linqi}
-      SESSION_SECRET: ${SESSION_SECRET:-change-this-secret-before-going-live}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set in .env}
+      SEED_DEFAULT_ADMIN: ${SEED_DEFAULT_ADMIN:-false}
       PUBLIC_STATIC_DIR: /app/artifacts/kurdish-pos/dist/public
       # Optional: set to your droplet URL if you access from another origin
       # ALLOWED_ORIGINS: http://YOUR_DROPLET_IP

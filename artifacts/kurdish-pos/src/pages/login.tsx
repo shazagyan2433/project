@@ -37,6 +37,7 @@ export default function Login() {
   }, [user, navigate]);
 
   const finishOfflineAdminLogin = () => {
+    if (import.meta.env.PROD) return false;
     const session = applyOfflineAdminSession(username, password);
     if (!session) return false;
 
@@ -204,9 +205,11 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-slate-500 text-xs mt-6">
-            {t("auth.defaultAccount")}: <span className="text-slate-400 font-mono">admin / admin123</span>
-          </p>
+          {import.meta.env.DEV && (
+            <p className="text-center text-slate-500 text-xs mt-6">
+              {t("auth.defaultAccount")}: <span className="text-slate-400 font-mono">admin / admin123</span>
+            </p>
+          )}
         </div>
       </motion.div>
     </div>

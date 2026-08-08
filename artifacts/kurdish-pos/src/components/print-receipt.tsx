@@ -1,4 +1,5 @@
 import { Printer } from "lucide-react";
+import { formatMoneyIqd } from "@/lib/currency-format";
 
 interface ReceiptItem {
   name: string;
@@ -16,10 +17,8 @@ interface PrintReceiptProps {
   customerName?: string | null;
 }
 
-function formatIQD(amount: number) {
-  return new Intl.NumberFormat("ar-IQ", {
-    maximumFractionDigits: 0,
-  }).format(amount) + " د.ع";
+function formatReceiptAmount(amount: number) {
+  return formatMoneyIqd(amount, { lang: document.documentElement.lang?.slice(0, 2) || "ku" });
 }
 
 export function PrintReceipt({
@@ -47,8 +46,8 @@ export function PrintReceipt({
         <tr>
           <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:right">${item.name}</td>
           <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:center">${item.quantity} ${item.unit}</td>
-          <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:center">${formatIQD(item.unitPrice)}</td>
-          <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:left;font-weight:700">${formatIQD(item.total)}</td>
+          <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:center">${formatReceiptAmount(item.unitPrice)}</td>
+          <td style="padding:5px 4px;border-bottom:1px dashed #ccc;text-align:left;font-weight:700">${formatReceiptAmount(item.total)}</td>
         </tr>`
       )
       .join("");
@@ -178,7 +177,7 @@ export function PrintReceipt({
 
   <div class="total-row">
     <span class="total-label">کۆی گشتی</span>
-    <span class="total-value">${formatIQD(totalAmount)}</span>
+    <span class="total-value">${formatReceiptAmount(totalAmount)}</span>
   </div>
 
   <div style="text-align:center;margin-top:6px">

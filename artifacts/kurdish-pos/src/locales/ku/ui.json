@@ -1,0 +1,284 @@
+{
+  "notFound": {
+    "title": "404 — پەڕە نەدۆزرایەوە",
+    "description": "پەڕەی داواکراو بوونی نییە یان گواستراوەتەوە.",
+    "backHome": "گەڕانەوە بۆ داشبۆرد"
+  },
+  "notifications": {
+    "title": "ئاگادارکردنەوەکان",
+    "subtitle": "ناوەندی ئاگادارکردنەوە",
+    "markAllRead": "هەمووی وەک خوێندراو",
+    "newCount": "{{count}} نوێ",
+    "viewAll": "هەموو ئاگادارکردنەوەکان ببینە",
+    "timeAgo": "{{time}} پێش ئێستا",
+    "empty": "هیچ ئاگادارییەکی نوێ بەردەست نییە",
+    "filters": {
+      "all": "هەموو",
+      "sale": "فرۆشتن",
+      "rfq": "RFQ",
+      "stock": "کۆگا",
+      "delivery": "گەیاندن",
+      "reward": "خەڵات",
+      "system": "سیستەم"
+    },
+    "items": {},
+    "live": {
+      "sale": {
+        "title": "فرۆشتنی نوێ",
+        "body": "داواکاری #{{id}} — {{customer}} — {{amount}}"
+      },
+      "rfq": {
+        "title": "داواکاری RFQ نوێ",
+        "body": "{{code}} — {{product}} ({{qty}} {{unit}})"
+      },
+      "rfqResponse": {
+        "title": "وەڵامی RFQ",
+        "body": "{{code}} — {{product}} — {{price}}"
+      },
+      "stock": {
+        "title": "ئاگاداری کۆگا",
+        "body": "{{product}}: تەنها {{stock}} {{unit}} ماوە"
+      },
+      "delivery": {
+        "title": "گەیاندن چالاکە",
+        "body": "{{orderId}} — {{customer}} لە {{shop}}"
+      },
+      "deliveryDone": {
+        "title": "گەیاندن تەواو بوو",
+        "body": "{{orderId}} — {{customer}}"
+      },
+      "codCollected": {
+        "title": "پارەی گەیاندن وەرگیرا",
+        "body": "داواکاری #{{orderId}} گەیەندرا و بڕی {{amount}} لە لایەن شۆفێرەکەوە وەرگیرا"
+      },
+      "system": {
+        "title": "سیستەم",
+        "body": "چالاکی سیستەم"
+      }
+    }
+  },
+  "rewards": {
+    "subtitle": "خەڵات و دڵسۆزی B2B",
+    "currentTierLabel": "ئاستی ئێستا",
+    "pointsToNext": "{{count}} خاڵ تا {{tier}}",
+    "pointsMin": "{{min}}+ خاڵ",
+    "spinWheel": "گەڕانی چەرخ",
+    "spinning": "دەگەڕێت...",
+    "spinBtn": "بگەڕێنە ✦",
+    "spinWon": "+{{count}} خاڵ بردیتەوە!",
+    "spinPrizeWon": "بردیتەوە: {{prize}}",
+    "spinCooldown": "دووبارە سبینێ بگەڕێنەوە",
+    "spinPrizes": {
+      "points50": "+٥٠ خاڵ",
+      "discount5": "داشکاندنی ٥٪",
+      "points100": "+١٠٠ خاڵ",
+      "points200": "+٢٠٠ خاڵ",
+      "specialGift": "دیاری تایبەت",
+      "spinAgain": "دووبارە بگەڕێنەوە"
+    },
+    "weeklyChallenge": "ئاڵنگارییەکانی ئەم هەفتەیە",
+    "leaderboard": "خشتەی خاڵەکان",
+    "emptyLeaderboard": "هێشتا هیچ تۆمارێک نییە",
+    "noChallenges": "ئاڵنگاری چالاک نییە",
+    "points": "خاڵ",
+    "tierStandard": "ئاسایی",
+    "tierSilver": "ئاستی زیو",
+    "tierGold": "ئاستی زێڕین",
+    "tierDiamond": "ئاستی ئەڵماس",
+    "challengeProgress": "{{done}}/{{total}} تەواو کراوە",
+    "perks": {
+      "marketAccess": "دەستگەیشتن بە بازاڕ",
+      "tierAlerts": "ئاگاداریی ئاست",
+      "discount5": "داشکاندنی ٥٪",
+      "rfqPriority": "پێشینەی داواکاری نرخ",
+      "discount12": "داشکاندنی ١٢٪",
+      "deliverySupport": "پاشکۆی گەیاندن",
+      "support247": "پشتیبانی ٢٤/٧",
+      "discount20": "داشکاندنی ٢٠٪",
+      "dedicatedManager": "مەنەجەری تایبەت",
+      "earlyAccess": "دەستگەیشتنی زوو"
+    },
+    "challenges": {
+      "orders": "١٠ سفارشی ئەم هەفتەیە",
+      "suppliers": "زیادکردنی ٣ فرۆشیاری نوێ",
+      "deliveryStars": "کەسبکردنی ٥ ستار بۆ گەیاندن",
+      "salesMilestone": "ئامانجی فرۆشتنی ١M دینار"
+    }
+  },
+  "bulkImport": {
+    "title": "زیادکردنی بەرهەم بە کۆمەڵ",
+    "subtitle": "PDF، پسوڵە، یان لیستی فرۆشیار — پێش پاشەکەوت پێداچوونەوە",
+    "selectFile": "فایل هەڵبژێرە",
+    "dropHint": "PDF یان لیست لێرە دابنێ",
+    "dropDetail": "پسوڵە، لیستی فرۆشیار، کاتالۆگ — دەق دەهێنرێت و بەرهەمەکان دەناسێنرێن",
+    "noDbWrite": "تا پشتڕاستکردنەوە هیچ شت نانووسرێت. هەموو ڕیزەکان دەستکاری بکە.",
+    "readyRows": "{{count}} ڕیز ئامادە",
+    "invalidRows": "{{count}} ڕیز پێویستی دەستکاری هەیە",
+    "confirmSave": "پشتڕاستکردن و پاشەکەوت ({{count}})",
+    "saving": "پاشەکەوت…",
+    "addBlankRow": "ڕیزی بەتاڵ زیاد بکە",
+    "close": "داخستن",
+    "fileFailed": "هاوردەکردن سەرکەوتوو نەبوو",
+    "fileNotRecognized": "فایل نەناسراوە",
+    "retryFile": "فایلی تر تاقی بکەوە",
+    "parsing": "شیکارکردنی فایل…",
+    "networkHint": "دڵنیابە کە سێرڤەری API لە کارە (pnpm dev) و پەیوەندی تۆڕەکەت بەردەستە.",
+    "pages": "{{count}} پەڕە",
+    "steps": {
+      "receive": "وەرگرتنی فایل",
+      "extract": "دەهێنانی دەق",
+      "analyze": "ناسینەوەی بەرهەم",
+      "ready": "ئامادەی پێشاندان"
+    },
+    "columns": {
+      "name": "ناوی بەرهەم",
+      "category": "پۆل",
+      "cost": "نرخی کڕین",
+      "price": "نرخی فرۆشتن",
+      "stock": "ژمارە",
+      "unit": "یەکە",
+      "barcode": "بارکۆد",
+      "supplier": "فرۆشیار"
+    },
+    "validation": {
+      "nameRequired": "ناو پێویستە",
+      "priceRequired": "نرخی فرۆشتن > 0",
+      "stockInvalid": "ژمارەی کۆگا نادروست",
+      "unitRequired": "یەکە پێویستە",
+      "costInvalid": "نرخی کڕین نادروست"
+    }
+  },
+  "inventory": {
+    "allCategories": "هەموو پۆلەکان",
+    "bulkImport": "زیادکردنی بەرهەم بە کۆمەڵ",
+    "addProduct": "زیادکردنی بەرهەم",
+    "productImage": "وێنەی بەرهەم",
+    "imageHint": "PNG · JPG · WEBP — زۆرینەی 2MB",
+    "name": "ناوی بەرهەم",
+    "category": "پۆل",
+    "uncategorized": "— بێ پۆل",
+    "costPrice": "نرخی کڕین",
+    "salePrice": "نرخی فرۆشتن",
+    "stock": "ژمارەی کۆگا",
+    "unit": "یەکە",
+    "barcode": "بارکۆد",
+    "supplier": "فرۆشیار",
+    "saveProduct": "پاشەکەوتکردنی بەرهەم",
+    "deleteConfirm": "ئەم بەرهەمە بسڕیتەوە؟",
+    "importSuccess": "{{count}} بەرهەم بە سەرکەوتوویی زیادکرا",
+    "lowStock": "کۆگای کەم",
+    "inStock": "لە کۆگا",
+    "outOfStock": "بڕاوەتەوە",
+    "editProduct": "دەستکاری کاڵا",
+    "refresh": "نوێکردنەوە",
+    "namePlaceholder": "بۆ نموونە: شەکری سپی ١کگ",
+    "categorySection": "جۆری بەش",
+    "imageProcessing": "پرۆسەکردن...",
+    "changeImage": "گۆڕینی وێنە",
+    "selectImage": "هەڵبژاردنی وێنە",
+    "usdConverter": "بەرانبەرکردنی دۆلار — ١$ = {{rate}} د.ع",
+    "saveUpdated": "کاڵاکە نوێکرایەوە",
+    "saveCreated": "کاڵای نوێ زیادکرا ✓",
+    "kpiTotal": "کۆی کاڵا",
+    "kpiTotalSub": "SKU تۆمارکراو",
+    "kpiOut": "بڕاوەتەوە",
+    "kpiOutSub": "پێویستی دابینکردنە",
+    "kpiLow": "ستۆکی کەم",
+    "kpiLowSub": "لەژێر ئاستی هشیارکەر",
+    "kpiOk": "باش",
+    "kpiOkSub": "{{pct}}% ئامادەیە",
+    "searchPlaceholder": "گەڕان لە بەرهەم…",
+    "defaultUnit": "دانە",
+    "filterAll": "هەموو",
+    "filterOk": "باش",
+    "filterLow": "کەم",
+    "filterOut": "بڕاوە",
+    "colImage": "وێنە",
+    "colName": "ناوی کاڵا",
+    "colCategory": "کاتاگۆری",
+    "colBarcode": "بارکۆد",
+    "colCost": "نرخی کۆ",
+    "colSale": "نرخی فرۆشتن",
+    "colStock": "بڕ / یەکە",
+    "colStatus": "دۆخ",
+    "colActions": "کردار",
+    "emptyFiltered": "هیچ کاڵایەک بە ئەم فلتەرە نەدۆزرایەوە",
+    "emptyNone": "هێشتا هیچ کاڵایەک زیاد نەکراوە",
+    "addFirst": "+ زیادکردنی کاڵای یەکەم",
+    "barcodeSku": "بارکۆد / SKU",
+    "barcodePlaceholder": "بۆ نموونە: 6009876543210",
+    "supplierName": "ناوی دابینکەر",
+    "supplierPlaceholder": "ناوی فرۆشیار",
+    "save": "پاشەکەوتکردن",
+    "close": "داخستن",
+    "nameRequired": "ناوی کاڵا پێویستە",
+    "priceRequired": "نرخ پێویستە",
+    "imageUploadFailed": "وێنە نەتوانرا باربکرێت",
+    "deleteNamedConfirm": "دڵنیای لە سڕینەوەی \"{{name}}\"؟",
+    "deleted": "کاڵاکە سڕایەوە",
+    "units": {
+      "piece": "دانە",
+      "kg": "کیلۆ",
+      "liter": "لیتر",
+      "carton": "کارتۆن",
+      "box": "بۆکس",
+      "pack": "پاکەت",
+      "dozen": "دەبە",
+      "bag": "کیسە",
+      "meter": "مەتر",
+      "gram": "گرام"
+    }
+  },
+  "procurement": {
+    "suppliers": "فرۆشیارەکان",
+    "created": "دروستکراوە",
+    "newRfq": "RFQ نوێ",
+    "totalRfqs": "کۆی RFQ",
+    "pending": "چاوەڕوان",
+    "responded": "وەڵامدراو",
+    "approved": "پەسەندکراو",
+    "statusPending": "چاوەڕوانە",
+    "statusResponded": "وەڵامی هات",
+    "statusApproved": "پەسەند",
+    "statusDeclined": "ڕەتکرا",
+    "supplierCount": "{{count}} فرۆشیار",
+    "deadlineLabel": "کاتی دوایی: {{date}}",
+    "decline": "ڕەتکردنەوە",
+    "approve": "پەسەندکردن",
+    "cancel": "هەڵوەشاندنەوە",
+    "manage": "بەڕێوەبردن"
+  },
+  "logistics": {
+    "manifest": "مانیفێستی گەیاندن",
+    "deliveries": "گەیاندنەکان"
+  },
+  "financial": {
+    "invoices": "پسوڵەکان",
+    "cashflow": "داخڵ و دەرچووی هەفتانە"
+  },
+  "marketIntel": {
+    "demandScore": "نمرەی داواکاری",
+    "salesForecast": "پێشبینی فرۆشتنی نوێ"
+  },
+  "ai": {
+    "online": "ئۆنلاین"
+  },
+  "portals": {
+    "orders": "داواکاریەکان",
+    "noOrders": "داواکاری نەدۆزرایەوە",
+    "inventory": "بەرپرسیاری کۆگا",
+    "attentionStock": "ئاگاداری و کۆگا",
+    "salesAnalytics": "شیکاری فرۆشتن",
+    "weeklyRevenue": "داهاتی هەفتانە — ئەم ماوەیە",
+    "topProducts": "بەرهەمە سەرەکیەکان",
+    "transactions": "مامەڵەکان",
+    "myPayments": "مێژووی پارەدان",
+    "myProfile": "پرۆفایلم",
+    "deliveryHistory": "مێژووی گەیاندن",
+    "completedDeliveries": "گەیاندنە تەواوەکان",
+    "myEarnings": "قازانجەکانم",
+    "weeklyEarnings": "قازانجی هەفتانە",
+    "earningSlips": "پسوڵەی قازانج",
+    "filterOrders": "فلتەری داواکاری"
+  }
+}

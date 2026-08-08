@@ -21,7 +21,7 @@ export interface Preset {
    PRESETS
 ══════════════════════════════════════════════════════════════════ */
 export const DARK_PRESETS: Preset[] = [
-  { name: "terminal", label: "تێرمیناڵی شەو", colors: { bg: "#0b0f17", text: "#f1f5f9", accent: "#1A6AFF" } },
+  { name: "terminal", label: "تێرمیناڵی شەو", colors: { bg: "#020617", text: "#f1f5f9", accent: "#1A6AFF" } },
   { name: "purple",   label: "پەرپووری شەو",   colors: { bg: "#0d0b14", text: "#f0eeff", accent: "#8b5cf6" } },
   { name: "emerald",  label: "زەیتوونی شەو",   colors: { bg: "#091210", text: "#ecfdf5", accent: "#10b981" } },
   { name: "amber",    label: "زێرینی شەو",     colors: { bg: "#0f0d07", text: "#fffbeb", accent: "#f59e0b" } },
@@ -70,6 +70,22 @@ function readStoredPresetName(): string {
 function colorsForPreset(mode: ColorMode, name: string): CustomColors {
   const preset = presetsForMode(mode).find(p => p.name === name);
   return preset ? { ...preset.colors } : defaultColorsForMode(mode);
+}
+
+function loadColorsForMode(mode: ColorMode): CustomColors {
+  const presetName = readStoredPresetName();
+  const base = colorsForPreset(mode, presetName);
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Partial<CustomColors>;
+      // Only preserve accent customization — bg/text must stay mode-appropriate
+      if (parsed.accent) {
+        return { ...base, accent: parsed.accent };
+      }
+    }
+  } catch { /* ignore */ }
+  return base;
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -151,15 +167,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ColorMode>(readColorMode);
 
-  const [colors, setColorsState] = useState<CustomColors>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return { ...defaultColorsForMode(readColorMode()), ...JSON.parse(stored) };
-      }
-    } catch { /* ignore */ }
-    return colorsForPreset(readColorMode(), readStoredPresetName());
-  });
+  const [colors, setColorsState] = useState<CustomColors>(() => loadColorsForMode(readColorMode()));
 
   useEffect(() => {
     applyColorModeToDOM(theme);

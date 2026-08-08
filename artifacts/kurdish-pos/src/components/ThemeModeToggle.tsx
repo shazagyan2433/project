@@ -54,7 +54,7 @@ export function ThemeModeToggle({ variant = "sidebar", className }: ThemeModeTog
         )}
       </div>
       <span
-        className="truncate text-[13px] font-bold leading-none linqi-sidebar-label"
+        className="truncate text-[13px] font-bold leading-none linqi-sidebar-label text-slate-900 dark:text-inherit"
         style={{ fontFamily: "Vazirmatn, sans-serif" }}
       >
         {label}

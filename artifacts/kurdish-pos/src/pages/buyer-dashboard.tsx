@@ -10,8 +10,11 @@ import {
   TrendingDown, BadgePercent,
 } from "lucide-react";
 import i18n from "@/i18n";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useUserSectorKey } from "@/hooks/useSectorScope";
 import { isBuyerCategoryAllowedForSector } from "@/lib/industries";
+import { cn } from "@/lib/utils";
+import { PAGE_SELECT } from "@/lib/page-theme";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface VolumeTier {
@@ -71,92 +74,7 @@ const CATEGORIES = [
   { id: "health",     ku: "تەندروستی",  en: "Health",        ar: "صحة"         },
 ];
 
-const DEMO_PRODUCTS: BuyerProduct[] = [
-  {
-    id: "bp-1", title: "شیری سمارت — کارتۆن", description: "شیری پاستۆرکراو، ١٢ دانە لە هەر کارتۆنێکدا، تازە و خالص",
-    category: "dairy", images: [], supplierName: "کۆمپانیای ئەڵبان", supplierProvince: "erbil",
-    standardPrice: 25000, wholesalePrice: 22000, promoPrice: 20000,
-    volumeTiers: [{ minQty: 100, discountPct: 10 }, { minQty: 500, discountPct: 15 }],
-    certifications: "ISO 9001", hasCert: true, unit: "کارتۆن", inStock: true, featured: true,
-  },
-  {
-    id: "bp-2", title: "ئاوی مادێرال — ١٢ بوتڵ", description: "ئاوی خواردنەوەی سروشتی لە چیایەکانی کوردستان",
-    category: "beverages", images: [], supplierName: "شیرکەتی دەشتاو", supplierProvince: "duhok",
-    standardPrice: 18000, wholesalePrice: 15000, promoPrice: 0,
-    volumeTiers: [{ minQty: 50, discountPct: 8 }],
-    certifications: "", hasCert: false, unit: "پاکێت", inStock: true, featured: true,
-  },
-  {
-    id: "bp-3", title: "شەکری سپی پارمالات — کیسە ٥ کیلۆ", description: "شەکری سپی یەکجار خاوی خالص، بۆ بازرگانی و خانوو",
-    category: "food", images: [], supplierName: "بازرگانی ئەمین", supplierProvince: "sulaymaniyah",
-    standardPrice: 15000, wholesalePrice: 12500, promoPrice: 11000,
-    volumeTiers: [{ minQty: 200, discountPct: 12 }],
-    certifications: "HACCP", hasCert: true, unit: "کیسە", inStock: true, featured: false,
-  },
-  {
-    id: "bp-4", title: "زەیتی زەیتوون — لیتر ٥", description: "زەیتی زەیتوونی تازە کڕاوە لە تورکیا",
-    category: "food", images: [], supplierName: "ئیمپۆرتی ئارام", supplierProvince: "erbil",
-    standardPrice: 45000, wholesalePrice: 40000, promoPrice: 38000,
-    volumeTiers: [{ minQty: 50, discountPct: 7 }, { minQty: 200, discountPct: 12 }],
-    certifications: "ISO 22000", hasCert: true, unit: "شیشە", inStock: true, featured: true,
-  },
-  {
-    id: "bp-5", title: "پووڕی گەنم — کیسە ٢٥ کیلۆ", description: "پووڕی گەنمی ناوخۆیی ئامادەکراو لە کوردستان",
-    category: "grains", images: [], supplierName: "کەرزەی ئاوینتا", supplierProvince: "kirkuk",
-    standardPrice: 35000, wholesalePrice: 30000, promoPrice: 0,
-    volumeTiers: [{ minQty: 100, discountPct: 5 }, { minQty: 500, discountPct: 10 }],
-    certifications: "", hasCert: false, unit: "کیسە", inStock: true, featured: false,
-  },
-  {
-    id: "bp-6", title: "شامپووی پانتین — ٦ قوتووبی", description: "شامپووی پانتینی تایبەت بۆ فرۆشگاکان، ئۆرجینال",
-    category: "health", images: [], supplierName: "دیستریبیوتەری ماجد", supplierProvince: "baghdad",
-    standardPrice: 48000, wholesalePrice: 42000, promoPrice: 40000,
-    volumeTiers: [{ minQty: 24, discountPct: 6 }],
-    certifications: "", hasCert: false, unit: "کارتۆن", inStock: true, featured: false,
-  },
-  {
-    id: "bp-7", title: "دێترجێنتی ئەریێل — ٢٤ کیسە", description: "دێترجێنتی جلشۆردنی ئەریێل، ٥٠٠ گرامی تایبەت بۆ دووکانداران",
-    category: "cleaning", images: [], supplierName: "ئیمپۆرتی دانا", supplierProvince: "sulaymaniyah",
-    standardPrice: 72000, wholesalePrice: 63000, promoPrice: 60000,
-    volumeTiers: [{ minQty: 48, discountPct: 10 }, { minQty: 120, discountPct: 15 }],
-    certifications: "ISO 9001", hasCert: true, unit: "کارتۆن", inStock: true, featured: true,
-  },
-  {
-    id: "bp-8", title: "شیری دانی — کارتۆن ٢٤", description: "شیری دانی بە چێشتی جۆراوجۆر، لە تورکیا دروستکراوە",
-    category: "dairy", images: [], supplierName: "تریدینگی بلوستار", supplierProvince: "duhok",
-    standardPrice: 30000, wholesalePrice: 26000, promoPrice: 24000,
-    volumeTiers: [{ minQty: 72, discountPct: 8 }],
-    certifications: "", hasCert: false, unit: "کارتۆن", inStock: true, featured: false,
-  },
-  {
-    id: "bp-9", title: "نەشاستەی ئەژدەها — ١٢ بوتڵ", description: "خواردنەوەی وزەدار بۆ فرۆشگاکان",
-    category: "beverages", images: [], supplierName: "شیرکەتی دەشتاو", supplierProvince: "duhok",
-    standardPrice: 36000, wholesalePrice: 31000, promoPrice: 0,
-    volumeTiers: [{ minQty: 48, discountPct: 9 }],
-    certifications: "", hasCert: false, unit: "پاکێت", inStock: true, featured: false,
-  },
-  {
-    id: "bp-10", title: "برنجی ئیرانی — کیسە ٥ کیلۆ", description: "برنجی تایبەتی ئیرانی بە ئەرۆمایەکی تایبەت",
-    category: "grains", images: [], supplierName: "گرووپی ئەلفاتح", supplierProvince: "baghdad",
-    standardPrice: 28000, wholesalePrice: 24000, promoPrice: 22000,
-    volumeTiers: [{ minQty: 100, discountPct: 10 }, { minQty: 300, discountPct: 14 }],
-    certifications: "ISO 22000", hasCert: true, unit: "کیسە", inStock: true, featured: true,
-  },
-  {
-    id: "bp-11", title: "پێنیری سپی — ٦ دەبە", description: "پێنیری سپی کوردستانی تازە، بە شێوەی سووننەتی",
-    category: "dairy", images: [], supplierName: "کۆمپانیای ئەڵبان", supplierProvince: "erbil",
-    standardPrice: 55000, wholesalePrice: 48000, promoPrice: 45000,
-    volumeTiers: [{ minQty: 30, discountPct: 8 }],
-    certifications: "ISO 9001", hasCert: true, unit: "دەبە", inStock: true, featured: false,
-  },
-  {
-    id: "bp-12", title: "تووتونی پیاز — ١٠ کیلۆ", description: "تووتونی ناوخۆیی کوردستان، تازە کردراوەتەوە",
-    category: "food", images: [], supplierName: "کەرزەی ئاوینتا", supplierProvince: "kirkuk",
-    standardPrice: 12000, wholesalePrice: 9500, promoPrice: 0,
-    volumeTiers: [{ minQty: 100, discountPct: 8 }, { minQty: 500, discountPct: 13 }],
-    certifications: "", hasCert: false, unit: "کیسە", inStock: true, featured: false,
-  },
-];
+const DEMO_PRODUCTS: BuyerProduct[] = [];
 
 const BUYER_CATALOG_KEY = "buyer_product_catalog";
 function loadCatalog(): BuyerProduct[] {
@@ -164,7 +82,7 @@ function loadCatalog(): BuyerProduct[] {
     const raw = localStorage.getItem(BUYER_CATALOG_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return DEMO_PRODUCTS;
+  return [];
 }
 
 // ─── Language helpers ─────────────────────────────────────────────────────────
@@ -186,11 +104,6 @@ function getCategoryName(categoryId: string) {
   const found = CATEGORIES.find(c => c.id === categoryId);
   if (!found) return categoryId;
   return lang === "ar" ? found.ar : lang === "en" ? found.en : found.ku;
-}
-
-function fmtPrice(n: number) {
-  if (!n) return "—";
-  return n.toLocaleString();
 }
 
 // ─── Cart pricing logic ───────────────────────────────────────────────────────
@@ -228,6 +141,7 @@ function CartDrawer({
   onPlaceOrder: () => void;
 }) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
 
   const subtotal = cart.reduce((s, ci) => s + ci.effectivePrice * ci.quantity, 0);
   const originalTotal = cart.reduce((s, ci) => s + ci.basePrice * ci.quantity, 0);
@@ -348,10 +262,10 @@ function CartDrawer({
                       {/* Price */}
                       <div className="text-right">
                         <p className="text-[11px] font-extrabold" style={{ color: "rgba(147,197,253,1)" }}>
-                          {fmtPrice(ci.effectivePrice * ci.quantity)} {t("common.currency")}
+                          {formatMoney(ci.effectivePrice * ci.quantity)}
                         </p>
                         <p className="text-[9px] text-white/35">
-                          {fmtPrice(ci.effectivePrice)} × {ci.quantity}
+                          {formatMoney(ci.effectivePrice)} × {ci.quantity}
                         </p>
                       </div>
                     </div>
@@ -393,7 +307,7 @@ function CartDrawer({
                       </span>
                     </div>
                     <span className="text-[12px] font-extrabold" style={{ color: "rgba(110,231,183,1)" }}>
-                      -{fmtPrice(totalSaved)} {t("common.currency")}
+                      -{formatMoney(totalSaved)}
                     </span>
                   </motion.div>
                 )}
@@ -403,13 +317,13 @@ function CartDrawer({
                   {totalSaved > 0 && (
                     <div className="flex items-center justify-between">
                       <span className="text-white/35 text-[11px]">{t("cart.originalTotal")}</span>
-                      <span className="text-white/30 text-[11px] line-through">{fmtPrice(originalTotal)} {t("common.currency")}</span>
+                      <span className="text-white/30 text-[11px] line-through">{formatMoney(originalTotal)}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between">
                     <span className="text-white/60 text-sm font-semibold">{t("cart.finalTotal")}</span>
                     <span className="text-white font-extrabold text-lg" style={{ color: "rgba(147,197,253,1)" }}>
-                      {fmtPrice(subtotal)} {t("common.currency")}
+                      {formatMoney(subtotal)}
                     </span>
                   </div>
                 </div>
@@ -449,6 +363,7 @@ function OrderConfirmModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
   const total = cart.reduce((s, ci) => s + ci.effectivePrice * ci.quantity, 0);
   const orderId = useMemo(() => `ORD-${Date.now().toString(36).toUpperCase()}`, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -515,7 +430,7 @@ function OrderConfirmModal({
                         <p className="text-white/35 text-[9px]">×{ci.quantity} {ci.product.unit}</p>
                       </div>
                       <p className="text-[11px] font-bold shrink-0" style={{ color: "rgba(147,197,253,0.9)" }}>
-                        {fmtPrice(ci.effectivePrice * ci.quantity)}
+                        {formatMoney(ci.effectivePrice * ci.quantity)}
                       </p>
                     </div>
                   ))}
@@ -528,7 +443,7 @@ function OrderConfirmModal({
                   style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)" }}>
                   <span className="text-white/70 text-sm font-semibold">{t("cart.finalTotal")}</span>
                   <span className="font-extrabold text-base" style={{ color: "rgba(147,197,253,1)" }}>
-                    {fmtPrice(total)} {t("common.currency")}
+                    {formatMoney(total)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
@@ -571,6 +486,7 @@ function ProductCard({
   onUpdateQty: (productId: string, qty: number) => void;
 }) {
   const { t } = useTranslation();
+  const { formatMoney, currencyLabel } = useCurrency();
   const [showPricing, setShowPricing] = useState(false);
   const [inputQty, setInputQty] = useState(1);
   const [showQtySelector, setShowQtySelector] = useState(false);
@@ -695,21 +611,21 @@ function ProductCard({
             {hasPromo ? (
               <div className="flex items-baseline gap-1.5 flex-wrap">
                 <span className="text-base font-extrabold" style={{ color: "rgba(147,197,253,1)" }}>
-                  {fmtPrice(product.promoPrice)}
+                  {formatMoney(product.promoPrice)}
                 </span>
-                <span className="text-[10px] text-white/30 line-through">{fmtPrice(product.standardPrice)}</span>
+                <span className="text-[10px] text-white/30 line-through">{formatMoney(product.standardPrice)}</span>
               </div>
             ) : (
               <span className="text-base font-extrabold" style={{ color: "rgba(147,197,253,1)" }}>
-                {fmtPrice(product.standardPrice)}
+                {formatMoney(product.standardPrice)}
               </span>
             )}
-            <span className="text-[9px] text-white/35 block">{t("common.currency")} / {product.unit}</span>
+            <span className="text-[9px] text-white/35 block">{currencyLabel} / {product.unit}</span>
           </div>
           {product.wholesalePrice > 0 && (
             <div className="text-right">
               <span className="text-[11px] font-bold" style={{ color: "rgba(110,231,183,0.85)" }}>
-                {fmtPrice(product.wholesalePrice)}
+                {formatMoney(product.wholesalePrice)}
               </span>
               <span className="text-[9px] text-white/30 block">{t("buyer.wholesaleShort")}</span>
             </div>
@@ -745,7 +661,7 @@ function ProductCard({
                   <div key={row.label} className="flex items-center justify-between">
                     <span className="text-[10px] text-white/45">{row.label}</span>
                     <span className="text-[11px] font-bold" style={{ color: row.value ? row.color : "rgba(255,255,255,0.2)" }}>
-                      {row.value ? `${fmtPrice(row.value)} ${t("common.currency")}` : "—"}
+                      {row.value ? formatMoney(row.value) : "—"}
                     </span>
                   </div>
                 ))}
@@ -816,7 +732,7 @@ function ProductCard({
                   <div>
                     <p className="text-[10px] text-white/40">{t("cart.effectivePrice")}</p>
                     <p className="text-sm font-extrabold" style={{ color: activeTier ? "rgba(167,139,250,1)" : "rgba(147,197,253,1)" }}>
-                      {fmtPrice(effectivePrice)} {t("common.currency")}
+                      {formatMoney(effectivePrice)}
                       <span className="text-[9px] text-white/30 font-normal ml-1">/ {product.unit}</span>
                     </p>
                     {activeTier && (
@@ -828,11 +744,11 @@ function ProductCard({
                   <div className="text-right">
                     <p className="text-[10px] text-white/40">{t("cart.lineTotal")}</p>
                     <p className="text-sm font-extrabold" style={{ color: "rgba(110,231,183,1)" }}>
-                      {fmtPrice(effectivePrice * inputQty)}
+                      {formatMoney(effectivePrice * inputQty)}
                     </p>
                     {volumeSaving > 0 && (
                       <p className="text-[9px]" style={{ color: "rgba(110,231,183,0.75)" }}>
-                        -{fmtPrice(volumeSaving)} {t("cart.saved")}
+                        -{formatMoney(volumeSaving)} {t("cart.saved")}
                       </p>
                     )}
                   </div>
@@ -915,21 +831,18 @@ function FilterSelect({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="appearance-none w-full pl-3 pr-8 py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
-        style={{
-          background: value ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.05)",
-          border: value ? "1px solid rgba(59,130,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
-          color: value ? "rgba(147,197,253,1)" : "rgba(255,255,255,0.45)",
-          outline: "none",
-        }}
+        className={cn(
+          PAGE_SELECT,
+          "appearance-none w-full pl-3 pr-8 py-2.5 text-xs font-semibold min-w-0",
+          value && "text-primary border-primary/30 bg-blue-50 dark:bg-blue-500/15"
+        )}
       >
-        <option value="" style={{ background: "#0a1629" }}>{placeholder}</option>
+        <option value="">{placeholder}</option>
         {options.map(o => (
-          <option key={o.value} value={o.value} style={{ background: "#0a1629" }}>{o.label}</option>
+          <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-      <ChevronDown className="absolute ltr:right-2.5 rtl:left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
-        style={{ color: "rgba(147,197,253,0.5)" }} />
+      <ChevronDown className="absolute ltr:right-2.5 rtl:left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-slate-400 dark:text-blue-300/50" />
     </div>
   );
 }

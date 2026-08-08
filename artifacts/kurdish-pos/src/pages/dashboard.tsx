@@ -5,7 +5,7 @@ import FactoryDashboard     from "./dashboard-factory";
 import MarketDashboard      from "./dashboard-market";
 import { PriorityWidgets }  from "@/components/PriorityWidgets";
 import { BG } from "./dashboard-tokens";
-import { normalizeSectorKey } from "@/lib/industries";
+import { useUserSectorKey } from "@/hooks/useSectorScope";
 
 /* ─────────────────────────────────────────────────────────────────
    SECTOR → DASHBOARD ROUTER
@@ -18,10 +18,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { t: td } = useTranslation("dashboard");
 
-  const sector: string =
-    normalizeSectorKey(user?.sectorKey) ??
-    normalizeSectorKey(localStorage.getItem("linqi_sector")) ??
-    "other";
+  const sector: string = useUserSectorKey() ?? "other";
 
   const Header = (
     <div

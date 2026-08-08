@@ -16,6 +16,8 @@ import verificationsRouter from "./verifications";
 import deliveriesRouter from "./deliveries";
 import suppliersRouter from "./suppliers";
 import rfqsRouter from "./rfqs";
+import notificationsRouter from "./notifications";
+import rewardsRouter from "./rewards";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -40,5 +42,7 @@ router.use(adminRouter);
 router.use(deliveriesRouter);
 router.use(suppliersRouter);
 router.use(rfqsRouter);
+router.use(notificationsRouter);
+router.use(rewardsRouter);
 
 export default router;

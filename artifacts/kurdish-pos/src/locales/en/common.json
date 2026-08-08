@@ -26,9 +26,24 @@
     "aiAssistant": "LinQi Assistant — {{sector}}",
     "aiAssistantSubtitle": "AI co-pilot tailored to {{sector}}"
   },
+  "pageDescriptions": {
+    "dashboard": "Overview of your business operations",
+    "marketplace": "B2B commerce platform",
+    "inventory": "Stock and catalog management",
+    "procurement": "RFQ and purchasing console",
+    "suppliers": "Verified supplier directory",
+    "marketIntel": "Pricing and demand insights",
+    "logistics": "Tracking and delivery",
+    "financial": "Financial dashboard",
+    "negotiation": "B2B negotiation chat",
+    "aiAssistant": "AI co-pilot for your business",
+    "settings": "Manage profile, store, approvals, and security"
+  },
   "emptyStates": {
-    "noSuppliers": "No suppliers found",
-    "noSuppliersSubtitle": "No registered suppliers yet for this sector",
+    "noSuppliers": "No sellers are registered in the system",
+    "noSuppliersSubtitle": "New sellers will appear here when they register",
+    "noSuppliersFilter": "No sellers match your search",
+    "noSuppliersFilterSubtitle": "Try adjusting your search or filters",
     "noRfqs": "No active RFQs",
     "noRfqsSubtitle": "Create a new RFQ or wait for responses",
     "noAnalytics": "No analytics data available",
@@ -45,11 +60,23 @@
     "noNotifications": "No notifications",
     "loadError": "Failed to load data",
     "searchSuppliers": "Search by name or product...",
+    "filterAllCategories": "All categories",
+    "filterAllCities": "All cities",
+    "dealsCount": "{{count}} deals",
+    "contactSupplier": "Contact",
     "verifiedCount": "verified",
     "totalSuppliers": "total suppliers",
     "noSuppliersForRfq": "No suppliers available to select",
     "noCustomer": "Walk-in customer",
     "customerRole": "Customer"
+  },
+  "supplierProfile": {
+    "viewInfo": "Info",
+    "backToDirectory": "Back to seller directory",
+    "notFound": "Seller not found",
+    "products": "Products",
+    "call": "Call",
+    "viewCatalog": "View marketplace"
   },
   "language": {
     "select": "Language",
@@ -90,7 +117,8 @@
     "rewardsCenter": "Rewards Center",
     "b2bTerminal": "B2B Terminal",
     "posSystem": "POS System",
-    "tools": "Tools"
+    "tools": "Tools",
+    "settings": "Settings"
   },
   "top": {
     "search": "Search the terminal...",
@@ -174,7 +202,26 @@
       "request": "Request",
       "listPrice": "List Price",
       "lowStock": "Low Stock",
-      "allCategories": "All"
+      "allCategories": "All",
+      "categoriesLabel": "Categories",
+      "sectorOnlyHint": "Products in your business sector only"
+    },
+    "requestModal": {
+      "title": "Price Request (RFQ)",
+      "subtitle": "Review details and submit your request",
+      "subtitleSupplier": "Request for {{supplier}}",
+      "product": "Product name",
+      "productPlaceholder": "Product name",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "unitPlaceholder": "carton, bag…",
+      "deadline": "Deadline",
+      "listPriceHint": "Market list price:",
+      "suppliers": "Suppliers",
+      "submit": "Submit request",
+      "successTitle": "Request sent ✓",
+      "successBody": "Your request was sent to suppliers. Track it in Procurement.",
+      "errorTitle": "Submission failed"
     },
     "sellers": {
       "contact": "Contact",
@@ -187,7 +234,8 @@
       "specialties": "Specialties",
       "orders": "Orders",
       "rating": "Rating",
-      "verifiedBadge": "Verified"
+      "verifiedBadge": "Verified",
+      "viewProcurement": "Procurement console"
     },
     "analytics": {
       "title": "Sales & Requests Analytics",
@@ -225,25 +273,138 @@
     },
     "cats": {
       "all": "All",
-      "electronic": "Electronics",
-      "stationery": "Stationery",
-      "babyCare": "Baby Care",
-      "cosmetics": "Cosmetics",
+      "medicine": "Medicine",
+      "medicalSupplies": "Medical Supplies",
+      "babyCare": "Baby & Milk",
+      "cosmetics": "Beauty & Personal Care",
       "homeLiving": "Home & Living",
       "gaming": "Gaming",
       "food": "Food & Beverages",
-      "medicine": "Medicine",
       "clothing": "Clothing",
       "automotive": "Automotive",
       "agriculture": "Agriculture",
       "construction": "Construction",
       "sports": "Sports",
       "beauty": "Beauty",
-      "cleaning": "Cleaning & Household",
+      "cleaning": "Cleaning",
       "office": "Office",
       "technology": "Technology",
       "printing": "Printing",
-      "books": "Books"
+      "books": "Books",
+      "mobile": "Mobile Phones",
+      "accessories": "Accessories",
+      "software": "Software",
+      "electronic": "Electronics",
+      "stationery": "Stationery",
+      "computer": "Computers",
+      "pcParts": "PC Parts",
+      "ticketsFlights": "Tickets & Flights",
+      "hotelsBooking": "Hotels & Booking",
+      "visasTours": "Visas & Tours",
+      "travelInsurance": "Insurance",
+      "pensionTransport": "Pension & Transport",
+      "officeSupplies": "Office Supplies",
+      "officeFurniture": "Soft Furnishings",
+      "officeServices": "Office Services",
+      "computerPrinting": "Computers & Printing"
+    }
+  },
+  "financial": {
+    "currencySuffix": " IQD",
+    "kpi": {
+      "totalRevenue": "Total Revenue",
+      "debt": "Outstanding Debt",
+      "netProfit": "Net Profit",
+      "transactions": "Transactions",
+      "transactionCount": "{{count}} transactions",
+      "debtorCount": "{{count}} customers",
+      "total": "total"
+    },
+    "chart": {
+      "performance": "Financial Performance",
+      "invoices": "Invoices",
+      "cashflow": "Cash In / Out (Weekly)",
+      "revenue": "Revenue",
+      "net": "Net",
+      "in": "In",
+      "out": "Out"
+    },
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "week": "W{{n}}"
+  },
+  "logistics": {
+    "steps": {
+      "received": "Received",
+      "prepared": "Prepared",
+      "shipped": "Shipped",
+      "delivered": "Delivered"
+    },
+    "stats": {
+      "activeShipments": "Active Shipments",
+      "totalDeliveries": "Total Deliveries",
+      "pending": "Pending",
+      "completed": "Completed",
+      "onRoute": "On route",
+      "registered": "Registered",
+      "active": "Active",
+      "done": "Done"
+    },
+    "shipmentTracker": "Shipment Tracker",
+    "deliveries": "Deliveries",
+    "urgent": "Urgent",
+    "onRoute": "On route",
+    "arrived": "Arrived",
+    "live": "Live",
+    "liveGps": "Live GPS",
+    "product": "Product",
+    "driver": "Driver",
+    "map": {
+      "title": "Live Tracking — {{id}}",
+      "loading": "Loading map…",
+      "pickup": "Pickup location",
+      "dropoff": "Drop-off location",
+      "driverLive": "Driver — live"
+    },
+    "driverStatus": {
+      "delivering": "On route",
+      "idle": "Ready",
+      "returning": "Returning"
+    }
+  },
+  "marketIntel": {
+    "demandScore": "Demand score",
+    "tabs": {
+      "price": "Price",
+      "region": "Region"
+    },
+    "chart": {
+      "sales": "Sales"
+    },
+    "prediction": {
+      "title": "Latest sales forecast"
+    }
+  },
+  "aiChat": {
+    "online": "Online",
+    "quickActionsTitle": "Quick actions — click to start",
+    "consoleTitle": "LinQi AI Console",
+    "typing": "Typing…",
+    "refresh": "Refresh",
+    "currentLanguage": "Current language:",
+    "placeholder": "Type your question here…",
+    "inputHint": "Enter · Send | Shift+Enter · New line",
+    "welcome": "Hello! I'm the LinQi AI assistant. How can I help you manage your business today?",
+    "quickActions": {
+      "sales": { "label": "Sales chat", "sub": "This year's sales analysis", "prompt": "I want an analysis of this year's sales" },
+      "strategy": { "label": "Strategy tips", "sub": "Grow your business", "prompt": "Give me strategic advice to strengthen my business" },
+      "report": { "label": "Create report", "sub": "Professional report", "prompt": "Create my monthly work report for June" },
+      "inventory": { "label": "Inventory analysis", "sub": "Stock & shortages", "prompt": "Review my inventory levels and recommend actions" },
+      "market": { "label": "Market forecast", "sub": "Research & opportunities", "prompt": "Show me B2B market analysis and opportunities" },
+      "personal": { "label": "Personal learning", "sub": "Based on your history", "prompt": "Based on my business history, what do you recommend?" }
     }
   }
 }

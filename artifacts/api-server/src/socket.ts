@@ -32,6 +32,12 @@ export function initSocketIO(httpServer: HttpServer): SocketIOServer {
   io.on("connection", (socket) => {
     logger.debug({ socketId: socket.id }, "Socket connected");
 
+    // ── Admin: subscribe to real-time admin notifications ─────────
+    socket.on("admin:join", () => {
+      socket.join("admin");
+      logger.debug({ socketId: socket.id }, "Admin joined notification room");
+    });
+
     // ── Driver: join the room for their active order ──────────────
     socket.on("driver:join", ({ orderId }: { orderId: string }) => {
       if (!orderId) return;

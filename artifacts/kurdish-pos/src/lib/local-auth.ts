@@ -26,11 +26,12 @@ export function isLocalFallbackToken(token: string | null | undefined): boolean 
   );
 }
 
-/** Validate hardcoded offline credentials (e.g. admin / admin123). */
+/** Validate hardcoded offline credentials (e.g. admin / admin123). Dev-only. */
 export function tryLocalFallbackLogin(
   username: string,
   password: string,
 ): { token: string; user: AuthUser } | null {
+  if (import.meta.env.PROD) return null;
   const key = username.trim().toLowerCase();
   const entry = LOCAL_USERS[key];
   if (!entry || entry.password !== password) return null;
@@ -40,11 +41,13 @@ export function tryLocalFallbackLogin(
 /**
  * Persist mock admin session for offline login — sets admin_token and auth keys.
  * Returns the session payload when credentials match; otherwise null.
+ * Disabled in production builds.
  */
 export function applyOfflineAdminSession(
   username: string,
   password: string,
 ): { token: string; user: AuthUser } | null {
+  if (import.meta.env.PROD) return null;
   const local = tryLocalFallbackLogin(username, password);
   if (!local) return null;
 

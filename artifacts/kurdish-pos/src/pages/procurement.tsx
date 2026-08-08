@@ -1,13 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileSearch, Send, Clock, CheckCircle2, XCircle, Plus, ChevronDown,
   Package, Calendar, Loader2,
 } from "lucide-react";
-import { useUserSectorKey, useSectorLabel } from "@/hooks/useSectorScope";
-import { isRawCategoryAllowedForSector, getSectorCategoryChips, type CatKey } from "@/lib/industries";
+import { useUserSectorKey, useSectorCategoryOptions } from "@/hooks/useSectorScope";
+import { PageHeader } from "@/components/PageHeader";
+import { isRawCategoryAllowedForSector, getDefaultSectorCategory, getSectorCategoryChips, isSupplierSectorAllowedForBuyer, type CatKey } from "@/lib/industries";
 import { useRfqs, useCreateRfq, useSuppliers, type RfqStatus } from "@/hooks/useB2bData";
 import { useTranslation } from "react-i18next";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import { PAGE_SURFACE_SM, PAGE_BTN_SUCCESS_XS, PAGE_BADGE_SUCCESS, PAGE_BADGE_WARNING, PAGE_BADGE_INFO, PAGE_BADGE_DANGER, PAGE_STAT_LABEL_SUCCESS, PAGE_BTN_SUCCESS, RFQ_BTN_CANCEL, RFQ_FIELD_INPUT, RFQ_FIELD_LABEL, RFQ_INLINE_PANEL, RFQ_MODAL_TITLE, RFQ_MODAL_SUBTITLE, RFQ_SUPPLIER_CHIP } from "@/lib/page-theme";
+import { cn } from "@/lib/utils";
 
 interface RFQ {
   id: string;
@@ -22,11 +26,18 @@ interface RFQ {
   deadline: string;
 }
 
-const STATUS_META: Record<RfqStatus, { label: string; color: string; bg: string; Icon: typeof Clock }> = {
-  pending:   { label: "چاوەڕوانە",  color: "#FBBF24", bg: "rgba(251,191,36,0.12)",  Icon: Clock        },
-  responded: { label: "وەڵامی هات", color: "#3B82F6", bg: "rgba(59,130,246,0.12)",  Icon: Send         },
-  approved:  { label: "پەسەند",     color: "#34D399", bg: "rgba(52,211,153,0.12)",  Icon: CheckCircle2 },
-  declined:  { label: "ڕەتکرا",    color: "#F87171", bg: "rgba(248,113,113,0.12)", Icon: XCircle      },
+const STATUS_BADGE: Record<RfqStatus, string> = {
+  pending:   PAGE_BADGE_WARNING,
+  responded: PAGE_BADGE_INFO,
+  approved:  PAGE_BADGE_SUCCESS,
+  declined:  PAGE_BADGE_DANGER,
+};
+
+const STATUS_META_KEYS: Record<RfqStatus, { labelKey: string; iconCls: string; Icon: typeof Clock }> = {
+  pending:   { labelKey: "procurement.statusPending",  iconCls: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400", Icon: Clock        },
+  responded: { labelKey: "procurement.statusResponded", iconCls: "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400", Icon: Send         },
+  approved:  { labelKey: "procurement.statusApproved",     iconCls: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400", Icon: CheckCircle2 },
+  declined:  { labelKey: "procurement.statusDeclined",    iconCls: "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400", Icon: XCircle      },
 };
 
 function NewRFQForm({
@@ -47,7 +58,14 @@ function NewRFQForm({
   const [selectedSuppliers, setSelectedSuppliers] = useState<Set<string>>(new Set());
 
   const chips = getSectorCategoryChips(sectorKey);
-  const defaultCat = chips[0] ?? "food";
+  const categoryOptions = useSectorCategoryOptions();
+  const [category, setCategory] = useState<CatKey | "">(() => getDefaultSectorCategory(sectorKey) ?? "");
+
+  useEffect(() => {
+    if (!category || !chips.includes(category as CatKey)) {
+      setCategory(getDefaultSectorCategory(sectorKey) ?? "");
+    }
+  }, [sectorKey, chips, category]);
 
   const toggleSupplier = (name: string) => {
     setSelectedSuppliers((prev) => {
@@ -59,13 +77,13 @@ function NewRFQForm({
   };
 
   const handleSubmit = async () => {
-    if (!product.trim() || !quantity.trim() || !unit.trim()) return;
+    if (!product.trim() || !quantity.trim() || !unit.trim() || !category) return;
     try {
       await createRfq.mutateAsync({
         product: product.trim(),
         quantity: quantity.trim(),
         unit: unit.trim(),
-        category: defaultCat,
+        category: category as CatKey,
         sectorKey,
         suppliers: Array.from(selectedSuppliers),
         deadline: deadline || undefined,
@@ -81,66 +99,81 @@ function NewRFQForm({
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="rounded-2xl p-5 space-y-4"
-      style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.25)" }}
+      className={cn(RFQ_INLINE_PANEL, "p-5 space-y-4")}
     >
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-extrabold text-white">داواکاریی نرخی نوێ (RFQ)</p>
-        <button onClick={onClose} className="text-white/30 hover:text-white/60 text-lg leading-none">×</button>
+      <div className="flex items-center justify-between gap-3">
+        <p className={RFQ_MODAL_TITLE}>{t("marketplace.requestModal.title")}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 text-lg leading-none p-1"
+          aria-label={t("common.close")}
+        >
+          ×
+        </button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">ناوی بەرهەم</label>
+          <label className={RFQ_FIELD_LABEL}>{t("marketplace.requestModal.product")}</label>
           <input
             value={product}
             onChange={(e) => setProduct(e.target.value)}
-            placeholder="رووغەن، شەکر..."
-            className="w-full px-3 py-2 rounded-xl text-sm text-white/80 placeholder-white/25 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
+            placeholder={t("marketplace.requestModal.productPlaceholder")}
+            className={RFQ_FIELD_INPUT}
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">بڕی داواکراو</label>
+          <label className={RFQ_FIELD_LABEL}>{t("marketplace.requestModal.quantity")}</label>
           <input
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            placeholder="١٠٠"
-            className="w-full px-3 py-2 rounded-xl text-sm text-white/80 placeholder-white/25 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
+            placeholder="100"
+            className={RFQ_FIELD_INPUT}
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">یەکە</label>
+          <label className={RFQ_FIELD_LABEL}>{t("marketplace.requestModal.unit")}</label>
           <input
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
-            placeholder="کارتۆن، کیس..."
-            className="w-full px-3 py-2 rounded-xl text-sm text-white/80 placeholder-white/25 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
+            placeholder={t("marketplace.requestModal.unitPlaceholder")}
+            className={RFQ_FIELD_INPUT}
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">کاتی دوایی</label>
+          <label className={RFQ_FIELD_LABEL}>{t("marketplace.catalog.categoriesLabel")}</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CatKey)}
+            className={RFQ_FIELD_INPUT}
+            disabled={categoryOptions.length === 0}
+          >
+            {categoryOptions.map((opt) => (
+              <option key={opt.key} value={opt.key}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={RFQ_FIELD_LABEL}>{t("marketplace.requestModal.deadline")}</label>
           <input
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-sm text-white/80 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
+            className={cn(RFQ_FIELD_INPUT, "linqi-rfq-date")}
           />
         </div>
       </div>
       <div>
-        <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">فرۆشیارەکان</label>
+        <label className={RFQ_FIELD_LABEL}>{t("marketplace.requestModal.suppliers")}</label>
         {supplierNames.length === 0 ? (
-          <p className="text-xs text-white/30">{t("emptyStates.noSuppliersForRfq")}</p>
+          <p className={RFQ_MODAL_SUBTITLE}>{t("emptyStates.noSuppliersForRfq")}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {supplierNames.map((s) => (
-              <label key={s} className="flex items-center gap-1.5 text-xs text-white/60 cursor-pointer">
+              <label key={s} className={RFQ_SUPPLIER_CHIP}>
                 <input
                   type="checkbox"
-                  className="accent-purple-500"
+                  className="accent-blue-600 dark:accent-blue-400"
                   checked={selectedSuppliers.has(s)}
                   onChange={() => toggleSupplier(s)}
                 />
@@ -151,21 +184,17 @@ function NewRFQForm({
         )}
       </div>
       <div className="flex gap-3 pt-1">
-        <button
-          onClick={onClose}
-          className="flex-1 py-2 rounded-xl text-sm font-bold text-white/40"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          هەڵبژێرە
+        <button type="button" onClick={onClose} className={RFQ_BTN_CANCEL}>
+          {t("common.cancel")}
         </button>
         <button
+          type="button"
           onClick={handleSubmit}
-          disabled={createRfq.isPending || !product.trim()}
-          className="flex-1 py-2 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)" }}
+          disabled={createRfq.isPending || !product.trim() || !category}
+          className={cn(PAGE_BTN_SUCCESS, "flex-1 py-2.5 text-sm justify-center")}
         >
           {createRfq.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-          ناردن
+          {t("marketplace.requestModal.submit")}
         </button>
       </div>
     </motion.div>
@@ -174,7 +203,8 @@ function NewRFQForm({
 
 export default function Procurement() {
   const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
+  const { t: tu } = useTranslation("ui");
+  const { dir } = useLocaleDir("ui");
   const sectorKey = useUserSectorKey();
   const { data: rfqsRaw = [], isLoading } = useRfqs(sectorKey);
   const { data: suppliers = [] } = useSuppliers();
@@ -185,20 +215,26 @@ export default function Procurement() {
     [rfqsRaw, sectorKey],
   );
 
-  const supplierNames = useMemo(() => suppliers.map((s) => s.name), [suppliers]);
+  const supplierNames = useMemo(
+    () =>
+      suppliers
+        .filter((s) => isSupplierSectorAllowedForBuyer(s.sectorKey, sectorKey))
+        .map((s) => s.name),
+    [suppliers, sectorKey],
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const SUMMARY = [
-    { label: "کۆی RFQ",       value: sectorRfqs.length.toString(),                                      color: "#A855F7" },
-    { label: "چاوەڕوان",      value: sectorRfqs.filter((r) => r.status === "pending").length.toString(),    color: "#F59E0B" },
-    { label: "وەڵام هاتووە",  value: sectorRfqs.filter((r) => r.status === "responded").length.toString(),  color: "#3B82F6" },
-    { label: "پەسەندکراو",    value: sectorRfqs.filter((r) => r.status === "approved").length.toString(),   color: "#10B981" },
+    { label: tu("procurement.totalRfqs"),       value: sectorRfqs.length.toString(),                                      color: "#A855F7" },
+    { label: tu("procurement.pending"),      value: sectorRfqs.filter((r) => r.status === "pending").length.toString(),    color: "#F59E0B" },
+    { label: tu("procurement.responded"),  value: sectorRfqs.filter((r) => r.status === "responded").length.toString(),  color: "#3B82F6" },
+    { label: tu("procurement.approved"),    value: sectorRfqs.filter((r) => r.status === "approved").length.toString(),   color: "#10B981" },
   ];
 
   return (
-    <div className="space-y-5 pb-8">
+    <div dir={dir} className="space-y-5 pb-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
@@ -208,8 +244,7 @@ export default function Procurement() {
             <FileSearch className="w-5 h-5" style={{ color: "#A855F7" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-white">{t("pageTitles.procurement", { sector: sectorLabel })}</h1>
-            <p className="text-xs text-white/40">{t("pageTitles.procurementSubtitle", { sector: sectorLabel })}</p>
+            <PageHeader id="procurement" />
           </div>
         </div>
         <button
@@ -217,7 +252,7 @@ export default function Procurement() {
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all"
           style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 4px 16px rgba(168,85,247,0.3)" }}
         >
-          <Plus className="w-4 h-4" /> RFQ نوێ
+          <Plus className="w-4 h-4" /> {tu("procurement.newRfq")}
         </button>
       </div>
 
@@ -239,7 +274,7 @@ export default function Procurement() {
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <p className="text-2xl font-extrabold text-white">{s.value}</p>
-            <p className="text-xs mt-0.5 font-semibold" style={{ color: s.color }}>{s.label}</p>
+            <p className={cn("text-xs mt-0.5 font-semibold", s.color === "#10B981" ? PAGE_STAT_LABEL_SUCCESS : "")} style={s.color !== "#10B981" ? { color: s.color } : undefined}>{s.label}</p>
           </div>
         ))}
       </div>
@@ -260,7 +295,8 @@ export default function Procurement() {
 
       <div className="space-y-3">
         {sectorRfqs.map((rfq, i) => {
-          const meta = STATUS_META[rfq.status];
+          const meta = STATUS_META_KEYS[rfq.status];
+          const statusLabel = tu(meta.labelKey);
           const isOpen = expanded === rfq.id;
           return (
             <motion.div
@@ -275,26 +311,23 @@ export default function Procurement() {
                 className="w-full flex items-center gap-4 px-5 py-4 text-start"
                 onClick={() => setExpanded(isOpen ? null : rfq.id)}
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: meta.bg }}>
-                  <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
+                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", meta.iconCls)}>
+                  <meta.Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-bold text-white">{rfq.product}</p>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-lg"
-                      style={{ color: meta.color, background: meta.bg }}
-                    >
-                      {meta.label}
+                    <span className={STATUS_BADGE[rfq.status]}>
+                      {statusLabel}
                     </span>
                   </div>
                   <p className="text-xs text-white/40 mt-0.5">
-                    {rfq.id} · {rfq.qty} {rfq.unit} · {rfq.suppliers.length} فرۆشیار
+                    {rfq.id} · {rfq.qty} {rfq.unit} · {tu("procurement.supplierCount", { count: rfq.suppliers.length })}
                   </p>
                 </div>
                 <div className="text-end shrink-0">
                   {rfq.bestPrice && <p className="text-sm font-extrabold text-white">{rfq.bestPrice}</p>}
-                  {rfq.deadline && <p className="text-[10px] text-white/30">کاتی دوایی: {rfq.deadline}</p>}
+                  {rfq.deadline && <p className="text-[10px] text-white/30">{tu("procurement.deadlineLabel", { date: rfq.deadline })}</p>}
                 </div>
                 <ChevronDown
                   className="w-4 h-4 text-white/30 shrink-0 transition-transform"
@@ -313,7 +346,7 @@ export default function Procurement() {
                   >
                     <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <p className="text-[10px] text-white/30 mb-1 uppercase font-bold tracking-wider">فرۆشیارەکان</p>
+                        <p className="text-[10px] text-white/30 mb-1 uppercase font-bold tracking-wider">{tu("procurement.suppliers")}</p>
                         {rfq.suppliers.length === 0 ? (
                           <p className="text-xs text-white/30">—</p>
                         ) : (
@@ -332,7 +365,7 @@ export default function Procurement() {
                       </div>
                       <div className="flex items-start gap-3">
                         <div>
-                          <p className="text-[10px] text-white/30 mb-1 uppercase font-bold tracking-wider">دروستکراوە</p>
+                          <p className="text-[10px] text-white/30 mb-1 uppercase font-bold tracking-wider">{tu("procurement.created")}</p>
                           <div className="flex items-center gap-1.5">
                             <Calendar className="w-3 h-3 text-white/40" />
                             <span className="text-xs text-white/60">{rfq.created}</span>
@@ -343,16 +376,12 @@ export default function Procurement() {
                         {rfq.status === "responded" && (
                           <>
                             <button
-                              className="px-3 py-1.5 rounded-xl text-xs font-bold"
-                              style={{ background: "rgba(248,113,113,0.1)", color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
+                              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30 dark:hover:bg-red-500/25 transition-all duration-200"
                             >
-                              ڕەتکردنەوە
+                              {tu("procurement.decline")}
                             </button>
-                            <button
-                              className="px-3 py-1.5 rounded-xl text-xs font-bold"
-                              style={{ background: "rgba(52,211,153,0.1)", color: "#34D399", border: "1px solid rgba(52,211,153,0.2)" }}
-                            >
-                              پەسەندکردن
+                            <button className={PAGE_BTN_SUCCESS_XS}>
+                              {tu("procurement.approve")}
                             </button>
                           </>
                         )}
@@ -361,15 +390,12 @@ export default function Procurement() {
                             className="px-3 py-1.5 rounded-xl text-xs font-bold"
                             style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.1)" }}
                           >
-                            هەڵوەشاندنەوە
+                            {tu("procurement.cancel")}
                           </button>
                         )}
                         {rfq.status === "approved" && (
-                          <button
-                            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5"
-                            style={{ background: "rgba(52,211,153,0.1)", color: "#34D399", border: "1px solid rgba(52,211,153,0.2)" }}
-                          >
-                            <Package className="w-3 h-3" /> بەڕێوەبردن
+                          <button className={cn(PAGE_BTN_SUCCESS_XS, "flex items-center gap-1.5")}>
+                            <Package className="w-3 h-3" /> {tu("procurement.manage")}
                           </button>
                         )}
                       </div>

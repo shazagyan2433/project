@@ -1,158 +1,316 @@
-import { motion } from "framer-motion";
-import { Trophy, Star, Zap, Gift, Target, Users, Crown, Medal } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Trophy, Star, Zap, Target, Users, Crown, Loader2, AlertTriangle, type LucideIcon,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { PageHeader } from "@/components/PageHeader";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import {
+  useRewardsConfig,
+  useRewardsProfile,
+  useChallenges,
+  useRewardsLeaderboard,
+  useSpinWheel,
+  challengeTitle,
+  spinPrizeLabel,
+  type TierKey,
+} from "@/hooks/useRewards";
+import { SpinWheel, spinAngleForPrize } from "@/components/rewards/SpinWheel";
+import { cn } from "@/lib/utils";
 
-const TIERS = [
-  { name: "سروشتی",  en: "Standard", min: 0,    max: 999,   color: "#94A3B8", icon: "🥉", perks: ["دەستگەیشتن بە بازاڕ","ئاگادارییی پایە"] },
-  { name: "زیو",    en: "Silver",   min: 1000,  max: 4999,  color: "#94A3B8", icon: "🥈", perks: ["داشکاندنی ٥%","RFQ پێشیار"] },
-  { name: "زێڕین",  en: "Gold",     min: 5000,  max: 14999, color: "#F59E0B", icon: "🥇", perks: ["داشکاندنی ١٢%","پاشکۆی گەیاندن","پشتیبانی ٢٤/٧"] },
-  { name: "دیمەنت", en: "Diamond",  min: 15000, max: Infinity, color: "#06B6D4", icon: "💎", perks:["داشکاندنی ٢٠%","مەنەجەری تایبەت","دەستگەیشتنی زوو"] },
-];
+const TIER_NAME_KEYS: Record<TierKey, string> = {
+  standard: "rewards.tierStandard",
+  silver: "rewards.tierSilver",
+  gold: "rewards.tierGold",
+  diamond: "rewards.tierDiamond",
+};
 
-const CHALLENGES = [
-  { title: "١٠ سفارشی ئەمەی هەفتە",     pts: 500,  done: 7,  total: 10, icon: Target,  color: "#3B82F6" },
-  { title: "سیستەمیکردنی ٣ فرۆشیاری نوێ", pts: 800,  done: 1,  total: 3,  icon: Users,   color: "#10B981" },
-  { title: "کەسبکردنی ٥ ستار بۆ گەیاندن", pts: 300,  done: 5,  total: 5,  icon: Star,    color: "#F59E0B" },
-  { title: "تۆپی فرۆشتنی ١M دینار",      pts: 1200, done: 650, total: 1000, icon: Zap,   color: "#A855F7" },
-];
+const CHALLENGE_ICONS: Record<string, LucideIcon> = {
+  target: Target,
+  users: Users,
+  star: Star,
+  zap: Zap,
+};
 
-const LEADERBOARD = [
-  { rank: 1, name: "کۆمپانیای ستار",    pts: "٢٤،٥٠٠", tier: "دیمەنت", badge: "💎" },
-  { rank: 2, name: "مارکێتی ئازادی",    pts: "١٨،٨٠٠", tier: "دیمەنت", badge: "💎" },
-  { rank: 3, name: "دابینکاری خێرا",    pts: "١٣،٤٠٠", tier: "زێڕین",  badge: "🥇" },
-  { rank: 4, name: "سوپەرمارکێتی نوێ", pts: "٩،٢٠٠",  tier: "زێڕین",  badge: "🥇" },
-  { rank: 5, name: "فرۆشگەی بەرز",     pts: "٦،١٠٠",  tier: "زیو",   badge: "🥈" },
-];
+const CARD =
+  "rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm " +
+  "dark:border-slate-700/60 dark:bg-slate-900/80 dark:shadow-lg dark:backdrop-blur-sm";
 
-const MY_POINTS = 7_240;
-const CURRENT_TIER = TIERS[2];
-const NEXT_TIER = TIERS[3];
-const progress = ((MY_POINTS - CURRENT_TIER.min) / (NEXT_TIER.min - CURRENT_TIER.min)) * 100;
+const CARD_TITLE = "text-sm font-extrabold tracking-tight text-slate-900 dark:text-white";
+const CARD_HEADING = "text-lg font-extrabold text-slate-900 dark:text-white";
+const CARD_LABEL = "text-xs font-semibold text-slate-600 dark:text-slate-300";
+const CARD_META = "text-[10px] font-medium text-slate-600 dark:text-slate-300";
+const CARD_BODY = "text-[11px] font-semibold text-slate-900 dark:text-white";
+
+const TIER_CARD =
+  "rounded-2xl border border-slate-200/80 bg-white p-4 text-center shadow-sm transition-colors " +
+  "dark:border-slate-700/60 dark:bg-slate-900/80 dark:shadow-none";
+const TIER_CARD_ACTIVE =
+  "border-amber-500/70 bg-amber-50/90 ring-1 ring-amber-500/40 dark:bg-slate-800/90";
 
 export default function RewardsCenter() {
-  const [spinning, setSpinning] = useState(false);
-  const [angle, setAngle] = useState(0);
+  const { t, i18n } = useTranslation("ui");
+  const { dir } = useLocaleDir("ui");
+  const lang = i18n.language;
 
-  const spin = () => {
-    if (spinning) return;
+  const { data: config, isLoading: configLoading, isError: configError } = useRewardsConfig();
+  const { data: profile, isLoading: profileLoading, isError: profileError } = useRewardsProfile();
+  const { data: challenges = [], isLoading: challengesLoading } = useChallenges();
+  const { data: leaderboard = [] } = useRewardsLeaderboard(10);
+  const spinMutation = useSpinWheel();
+
+  const [angle, setAngle] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [lastPrizeId, setLastPrizeId] = useState<string | null>(null);
+  const [lastWon, setLastWon] = useState<number | null>(null);
+
+  if (configLoading || profileLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-600 dark:text-slate-400">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm">{t("common.loading", { ns: "common" })}</p>
+      </div>
+    );
+  }
+
+  if (configError || profileError || !config || !profile) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3 text-center max-w-md mx-auto">
+        <AlertTriangle className="w-10 h-10 text-amber-500" />
+        <p className="text-sm text-slate-700 dark:text-slate-300">{t("common.loadError", { ns: "common" })}</p>
+      </div>
+    );
+  }
+
+  const tiers = [...config.tiers].sort((a, b) => a.sortOrder - b.sortOrder);
+  const spinPrizes = config.spinPrizes ?? [];
+  const activeSpinCount = spinPrizes.filter((p) => p.active !== false).length || 1;
+  const tierName = (key: TierKey) => t(TIER_NAME_KEYS[key]);
+
+  const spin = async () => {
+    if (spinning || !profile.spinAvailable) return;
     setSpinning(true);
-    const newAngle = angle + 1440 + Math.floor(Math.random() * 360);
-    setAngle(newAngle);
-    setTimeout(() => setSpinning(false), 2500);
+    setLastWon(null);
+    setLastPrizeId(null);
+    try {
+      const result = await spinMutation.mutateAsync();
+      setAngle(spinAngleForPrize(result.prizeIndex, activeSpinCount, angle));
+      setTimeout(() => {
+        setLastPrizeId(result.prizeId);
+        setLastWon(result.won);
+        setSpinning(false);
+      }, 2500);
+    } catch {
+      setSpinning(false);
+    }
   };
 
+  const currentTier = tiers.find((tier) => tier.key === profile.tierKey) ?? tiers[0];
+  const nextTier = tiers.find((tier) => tier.minPoints > profile.points);
+  const progress = profile.progressPercent ?? 0;
+
   return (
-    <div className="space-y-6 pb-8">
-      {/* Header */}
+    <div dir={dir} className="space-y-6 pb-8">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "rgba(234,179,8,0.15)", border: "1px solid rgba(234,179,8,0.3)" }}>
-          <Trophy className="w-5 h-5" style={{ color: "#EAB308" }} />
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-100 dark:bg-amber-500/20">
+          <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-white">خەڵاتەکان</h1>
-          <p className="text-xs text-white/40">B2B Loyalty & Rewards</p>
+          <PageHeader id="rewards" showDescription={false} />
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-300 linqi-page-header-subtitle">
+            {t("rewards.subtitle")}
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* My Level */}
-        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <span className="text-5xl mb-2">{CURRENT_TIER.icon}</span>
-          <p className="text-white font-extrabold text-lg">{CURRENT_TIER.name}</p>
-          <p className="text-white/40 text-xs mb-4">{CURRENT_TIER.en} Tier</p>
-          <div className="w-full mb-1.5">
-            <div className="flex justify-between text-[10px] text-white/40 mb-1">
-              <span>{MY_POINTS.toLocaleString()} خاڵ</span>
-              <span>{NEXT_TIER.min.toLocaleString()} → {NEXT_TIER.name}</span>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Tier progress */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={cn(CARD, "flex flex-col items-center text-center")}
+        >
+          <span className="mb-2 text-5xl drop-shadow-sm">{profile.tierIcon ?? currentTier?.icon}</span>
+          <p className={CARD_HEADING}>{tierName(profile.tierKey ?? "standard")}</p>
+          <p className={cn(CARD_LABEL, "mb-4")}>{t("rewards.currentTierLabel")}</p>
+          <div className="mb-1.5 w-full">
+            <div className="mb-1 flex justify-between gap-2 text-[10px]">
+              <span className={CARD_BODY}>
+                {profile.points.toLocaleString()} {t("rewards.points")}
+              </span>
+              {nextTier && (
+                <span className={CARD_META}>
+                  {nextTier.minPoints.toLocaleString()} → {tierName(nextTier.key)}
+                </span>
+              )}
             </div>
-            <div className="h-3 rounded-full bg-white/8 overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(100, progress)}%` }} transition={{ delay: 0.4, duration: 1.2 }}
-                className="h-full rounded-full" style={{ background: `linear-gradient(90deg,${CURRENT_TIER.color},${NEXT_TIER.color})` }} />
+            <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, progress)}%` }}
+                transition={{ delay: 0.3, duration: 1.1 }}
+                className="h-full rounded-full"
+                style={{
+                  background: `linear-gradient(90deg, ${currentTier?.color ?? "#F59E0B"}, ${nextTier?.color ?? "#06B6D4"})`,
+                }}
+              />
             </div>
           </div>
-          <p className="text-[10px] text-white/30 mt-1">{(NEXT_TIER.min - MY_POINTS).toLocaleString()} خاڵ تا {NEXT_TIER.name} {NEXT_TIER.icon}</p>
+          {nextTier && (
+            <p className={cn(CARD_META, "mt-1")}>
+              {t("rewards.pointsToNext", {
+                count: profile.pointsToNext.toLocaleString(),
+                tier: tierName(nextTier.key),
+              })}{" "}
+              {nextTier.icon}
+            </p>
+          )}
         </motion.div>
 
-        {/* Spin Wheel */}
-        <div className="rounded-2xl p-5 flex flex-col items-center justify-center gap-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm font-extrabold text-white">گەڕانی چەرخ</p>
-          <div className="relative w-32 h-32">
-            <motion.div className="w-32 h-32 rounded-full" style={{ background: "conic-gradient(#F59E0B 0deg 60deg, #3B82F6 60deg 120deg, #10B981 120deg 180deg, #EF4444 180deg 240deg, #A855F7 240deg 300deg, #06B6D4 300deg 360deg)", border: "3px solid rgba(255,255,255,0.15)" }}
-              animate={{ rotate: angle }} transition={{ duration: 2.5, ease: [0.17, 0.67, 0.35, 1] }}>
-              {["٥٠٠","١٠٠","٣٠٠","بۆش","٨٠٠","٢٠٠"].map((label, i) => (
-                <div key={i} className="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold text-white" style={{ transform: `rotate(${i * 60 + 30}deg)`, transformOrigin: "center", top: -36 }}>
-                  {label}
-                </div>
-              ))}
-            </motion.div>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-3 h-4 bg-white rounded-sm shadow-lg" style={{ clipPath: "polygon(50% 100%, 0 0, 100% 0)" }} />
-          </div>
-          <button onClick={spin} disabled={spinning}
-            className="px-6 py-2.5 rounded-xl font-extrabold text-sm text-white transition-all"
-            style={{ background: spinning ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#F59E0B,#EF4444)", opacity: spinning ? 0.6 : 1 }}>
-            {spinning ? "دەگەڕێت..." : "بگەڕێنە ✦"}
+        {/* Spin wheel */}
+        <div className={cn(CARD, "flex flex-col items-center justify-center gap-4")}>
+          <p className={CARD_TITLE}>{t("rewards.spinWheel")}</p>
+          <SpinWheel angle={angle} spinning={spinning} prizes={spinPrizes} lang={lang} />
+          <button
+            type="button"
+            onClick={spin}
+            disabled={spinning || !profile.spinAvailable}
+            className={cn(
+              "rounded-xl px-6 py-2.5 text-sm font-extrabold text-white transition-all",
+              spinning || !profile.spinAvailable
+                ? "cursor-not-allowed bg-slate-600 opacity-70"
+                : "bg-gradient-to-br from-amber-500 to-rose-600 hover:brightness-110",
+            )}
+          >
+            {spinning ? t("rewards.spinning") : t("rewards.spinBtn")}
           </button>
+          {lastPrizeId != null && (
+            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              {lastWon != null && lastWon > 0
+                ? t("rewards.spinWon", { count: lastWon })
+                : t("rewards.spinPrizeWon", {
+                    prize: spinPrizes.find((p) => p.id === lastPrizeId)
+                      ? spinPrizeLabel(spinPrizes.find((p) => p.id === lastPrizeId)!, lang)
+                      : t(`rewards.spinPrizes.${lastPrizeId}`),
+                  })}
+            </p>
+          )}
+          {!profile.spinAvailable && !spinning && (
+            <p className={CARD_META}>{t("rewards.spinCooldown")}</p>
+          )}
         </div>
 
-        {/* Weekly Challenges */}
-        <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm font-extrabold text-white mb-3">چالێنجی ئەمەی هەفتە</p>
-          {CHALLENGES.map((c, i) => (
-            <div key={i} className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <c.icon className="w-3.5 h-3.5 shrink-0" style={{ color: c.color }} />
-                  <span className="text-[11px] text-white/75">{c.title}</span>
+        {/* Weekly challenges */}
+        <div className={cn(CARD, "space-y-3")}>
+          <p className={cn(CARD_TITLE, "mb-1")}>{t("rewards.weeklyChallenge")}</p>
+          {challengesLoading ? (
+            <p className={CARD_LABEL}>{t("common.loading", { ns: "common" })}</p>
+          ) : challenges.length === 0 ? (
+            <p className={CARD_LABEL}>{t("rewards.noChallenges")}</p>
+          ) : (
+            challenges.map((c) => {
+              const Icon = CHALLENGE_ICONS[c.icon] ?? Target;
+              const pct = c.target > 0 ? Math.min(100, (c.done / c.target) * 100) : 0;
+              return (
+                <div key={c.id} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: c.color }} />
+                      <span className={cn(CARD_BODY, "truncate")}>
+                        {challengeTitle(c, lang)}
+                      </span>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-extrabold" style={{ color: c.color }}>
+                      +{c.points}
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, background: c.color }}
+                    />
+                  </div>
+                  <p className={CARD_META}>
+                    {t("rewards.challengeProgress", { done: c.done, total: c.target })}
+                  </p>
                 </div>
-                <span className="text-[10px] font-bold" style={{ color: c.color }}>+{c.pts}</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-white/8">
-                <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100,(c.done/c.total)*100)}%`, background: c.color }} />
-              </div>
-              <p className="text-[9px] text-white/30">{c.done} / {c.total}</p>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
 
-      {/* Tiers Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {TIERS.map((t, i) => (
-          <div key={i} className="rounded-2xl p-4 text-center" style={{
-            background: t.name === CURRENT_TIER.name ? `${t.color}15` : "rgba(255,255,255,0.03)",
-            border: `1px solid ${t.name === CURRENT_TIER.name ? `${t.color}35` : "rgba(255,255,255,0.07)"}` }}>
-            <span className="text-2xl">{t.icon}</span>
-            <p className="text-sm font-extrabold mt-1.5" style={{ color: t.color }}>{t.name}</p>
-            <p className="text-[9px] text-white/30 mb-2">{t.min.toLocaleString()}+ خاڵ</p>
-            {t.perks.map((p, j) => <p key={j} className="text-[10px] text-white/50 leading-tight">{p}</p>)}
-          </div>
-        ))}
+      {/* Tier perks */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiers.map((tier) => {
+          const active = tier.key === profile.tierKey;
+          return (
+            <div
+              key={tier.id}
+              className={cn(TIER_CARD, active && TIER_CARD_ACTIVE)}
+            >
+              <span className="text-2xl">{tier.icon}</span>
+              <p
+                className="mt-1.5 text-sm font-extrabold text-slate-900 dark:text-white"
+                style={{ color: tier.color }}
+              >
+                {tierName(tier.key)}
+              </p>
+              <p className={cn(CARD_META, "mb-2")}>
+                {t("rewards.pointsMin", { min: tier.minPoints.toLocaleString() })}
+              </p>
+              {tier.perks.map((p) => (
+                <p key={p} className={cn(CARD_LABEL, "leading-tight")}>
+                  {t(`rewards.perks.${p}`, { defaultValue: p })}
+                </p>
+              ))}
+            </div>
+          );
+        })}
       </div>
 
       {/* Leaderboard */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <Crown className="w-4 h-4 text-yellow-400" />
-          <p className="text-sm font-extrabold text-white/80">خشتەی پلەبەندی</p>
+      <div className={cn("overflow-hidden p-0", CARD)}>
+        <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+          <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <p className={CARD_TITLE}>{t("rewards.leaderboard")}</p>
         </div>
-        <table className="w-full">
-          <tbody>
-            {LEADERBOARD.map((row, i) => (
-              <tr key={i} style={{ borderBottom: i < LEADERBOARD.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
-                className="hover:bg-white/[0.02] transition-colors">
-                <td className="px-5 py-3 text-center">
-                  {row.rank <= 3
-                    ? <span className="text-lg">{["🥇","🥈","🥉"][row.rank-1]}</span>
-                    : <span className="text-sm font-extrabold text-white/30">#{row.rank}</span>}
-                </td>
-                <td className="px-4 py-3 text-sm font-semibold text-white/85">{row.name}</td>
-                <td className="px-4 py-3 text-center"><span className="text-sm">{row.badge}</span> <span className="text-xs text-white/40">{row.tier}</span></td>
-                <td className="px-5 py-3 text-end text-sm font-extrabold text-white">{row.pts} <span className="text-white/30 text-xs font-normal">خاڵ</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {leaderboard.length === 0 ? (
+          <p className={cn(CARD_LABEL, "px-5 py-8 text-center text-slate-600 dark:text-slate-400")}>
+            {t("rewards.emptyLeaderboard")}
+          </p>
+        ) : (
+          <table className="w-full">
+            <tbody>
+              {leaderboard.map((row) => (
+                <tr
+                  key={row.userId}
+                  className="border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                >
+                  <td className="px-5 py-3 text-center">
+                    {row.rank <= 3 ? (
+                      <span className="text-lg">{["🥇", "🥈", "🥉"][row.rank - 1]}</span>
+                    ) : (
+                      <span className="text-sm font-extrabold text-slate-500 dark:text-slate-500">#{row.rank}</span>
+                    )}
+                  </td>
+                  <td className={cn("px-4 py-3 text-sm font-bold", CARD_BODY)}>{row.name}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="text-sm">{row.tierIcon}</span>{" "}
+                    <span className={CARD_META}>{tierName(row.tierKey)}</span>
+                  </td>
+                  <td className="px-5 py-3 text-end">
+                    <span className={cn("text-sm font-extrabold", CARD_BODY)}>
+                      {row.points.toLocaleString()}
+                    </span>{" "}
+                    <span className={CARD_META}>{t("rewards.points")}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

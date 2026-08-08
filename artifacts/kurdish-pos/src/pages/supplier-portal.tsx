@@ -10,6 +10,7 @@ import {
   TrendingUp, AlertTriangle, CheckCircle2, Clock,
 } from "lucide-react";
 import i18n from "@/i18n";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import SupplierCatalog from "./supplier-catalog";
 import { RoleTabBar, type RoleTab } from "@/components/RoleTabBar";
 import {
@@ -46,15 +47,8 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; border: string }
   "هەڵوەشا":   { bg: "rgba(239,68,68,0.10)",    color: "#f87171", border: "rgba(239,68,68,0.22)"  },
 };
 
-/* ── Demo data ──────────────────────────────────────────────────── */
-const ORDERS = [
-  { id:"ORD-9841", buyer:"سووپەرمارکێتی ئەمین",  items:24, amount:1_840_000, status:"جێبەجێکرا", date:"١٤ی تیرمەه" },
-  { id:"ORD-9840", buyer:"فرۆشگای بەختیار",      items:8,  amount:620_000,   status:"بەرێوەیە",  date:"١٤ی تیرمەه" },
-  { id:"ORD-9839", buyer:"مارکێتی ئارام",         items:16, amount:1_250_000, status:"چاوەڕوانە", date:"١٣ی تیرمەه" },
-  { id:"ORD-9838", buyer:"هایپەری نوێ",            items:42, amount:3_100_000, status:"جێبەجێکرا", date:"١٣ی تیرمەه" },
-  { id:"ORD-9837", buyer:"دووکانی سەردەم",         items:6,  amount:480_000,   status:"هەڵوەشا",   date:"١٢ی تیرمەه" },
-  { id:"ORD-9836", buyer:"گرووپی تاجر",            items:30, amount:2_400_000, status:"جێبەجێکرا", date:"١٢ی تیرمەه" },
-];
+/* ── Demo data (financial lists empty until API wired) ─────────── */
+const ORDERS: Array<{ id: string; buyer: string; items: number; amount: number; status: string; date: string }> = [];
 
 const STOCK = [
   { name:"شیری سمارت — کارتۆن",  qty:450, min:100, unit:"کارتۆن", level:"کافی"   },
@@ -66,19 +60,9 @@ const STOCK = [
   { name:"قاوەی گۆلدەن",         qty:18,  min:50,  unit:"قوتی",   level:"فووری"  },
 ];
 
-const WEEK = [
-  { d:"دو", v:1_200_000 }, { d:"سێ", v:1_840_000 }, { d:"چو", v:980_000 },
-  { d:"پێ", v:2_100_000 }, { d:"هە", v:2_840_000 }, { d:"شە", v:3_200_000 },
-  { d:"یە", v:1_600_000 },
-];
+const WEEK: Array<{ d: string; v: number }> = [];
 
-const TXN = [
-  { id:"TXN-4421", type:"وەرگرتن",   amount:1_840_000, from:"سووپەرمارکێتی ئەمین", date:"١٤ی تیرمەه", status:"جێبەجێکرا" },
-  { id:"TXN-4420", type:"وەرگرتن",   amount:3_100_000, from:"هایپەری نوێ",          date:"١٣ی تیرمەه", status:"جێبەجێکرا" },
-  { id:"TXN-4419", type:"گەرانەوە",  amount:480_000,   from:"دووکانی سەردەم",       date:"١٢ی تیرمەه", status:"هەڵوەشا"  },
-  { id:"TXN-4418", type:"وەرگرتن",   amount:2_400_000, from:"گرووپی تاجر",          date:"١٢ی تیرمەه", status:"جێبەجێکرا" },
-  { id:"TXN-4417", type:"دەرهێنان",  amount:5_000_000, from:"هەژمارێکی بانک",       date:"١٠ی تیرمەه", status:"جێبەجێکرا" },
-];
+const TXN: Array<{ id: string; type: string; amount: number; from: string; date: string; status: string }> = [];
 
 /* ── Shared panel shell ─────────────────────────────────────────── */
 function PanelShell({ children }: { children: React.ReactNode }) {
@@ -112,6 +96,7 @@ function MiniMetric({ label, value, sub, color, Icon }: {
 /* ── ORDERS tab ─────────────────────────────────────────────────── */
 function OrdersPanel({ isLoading }: { isLoading: boolean }) {
   const [filter, setFilter] = useState("گشتی");
+  const { formatMoney } = useCurrency();
   const statuses = ["گشتی","جێبەجێکرا","بەرێوەیە","چاوەڕوانە","هەڵوەشا"];
   const rows = filter === "گشتی" ? ORDERS : ORDERS.filter(o => o.status === filter);
 
@@ -121,10 +106,10 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {isLoading ? [0,1,2,3].map(i => <MetricSkeleton key={i} />) : [
-          { label:"داواکاری گشتی",      value:"٤٨", sub:"ئەمسەر",    color:C.blue,   Icon:ShoppingCart },
-          { label:"داهاتی گشتی",        value:"٩.٧M",sub:"د.ع",      color:C.green,  Icon:DollarSign   },
-          { label:"چاوەڕوانی تەسلیم",   value:"٣",  sub:"داواکاری",  color:C.orange, Icon:Clock        },
-          { label:"جێبەجێکراو",         value:"٤٢", sub:"داواکاری",  color:C.purple, Icon:CheckCircle2 },
+          { label:"داواکاری گشتی",      value:"0", sub:"ئەمسەر",    color:C.blue,   Icon:ShoppingCart },
+          { label:"داهاتی گشتی",        value:formatMoney(0), sub:"", color:C.green,  Icon:DollarSign   },
+          { label:"چاوەڕوانی تەسلیم",   value:"0",  sub:"داواکاری",  color:C.orange, Icon:Clock        },
+          { label:"جێبەجێکراو",         value:"0", sub:"داواکاری",  color:C.purple, Icon:CheckCircle2 },
         ].map(m => <MiniMetric key={m.label} {...m} />)}
       </div>
 
@@ -166,8 +151,7 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
                     </div>
                     <div className="text-end shrink-0 space-y-0.5">
                       <p className="text-[12px] font-extrabold tabular-nums" style={{ color:"#34d399" }}>
-                        {new Intl.NumberFormat("ku-IQ").format(o.amount)}
-                        <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                        {formatMoney(o.amount)}
                       </p>
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold"
                         style={{ background:ss.bg, color:ss.color, border:`1px solid ${ss.border}` }}>
@@ -257,13 +241,8 @@ function InventoryPanel({ isLoading }: { isLoading: boolean }) {
 
 /* ── ANALYTICS tab ──────────────────────────────────────────────── */
 function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
-  const maxV = Math.max(...WEEK.map(d => d.v));
-  const topProducts = [
-    { name:"شیری سمارت — کارتۆن", rev:4_200_000, pct:100 },
-    { name:"ئاو مەدەنی — کارتۆن",  rev:3_100_000, pct:74  },
-    { name:"شەکری سپی",            rev:2_400_000, pct:57  },
-    { name:"رووناکی پاک",           rev:1_900_000, pct:45  },
-  ];
+  const { formatMoney } = useCurrency();
+  const hasChartData = WEEK.length > 0;
 
   return (
     <PanelShell>
@@ -271,10 +250,10 @@ function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {isLoading ? [0,1,2,3].map(i => <MetricSkeleton key={i} />) : [
-          { label:"داهاتی ئەمسەر",       value:"١٣.٨M", sub:"د.ع",  color:C.green,  Icon:TrendingUp  },
-          { label:"بازارگەری ئەمسەر",   value:"١٨٦",   sub:"داواکاری",color:C.blue,  Icon:ShoppingCart},
-          { label:"کڕیاری چالاک",       value:"٤٢",    sub:"کڕیار",  color:C.purple, Icon:CheckCircle2},
-          { label:"گەشەی مانگانە",      value:"+١٤٪",  sub:"پێوانه", color:C.orange, Icon:BarChart3   },
+          { label:"داهاتی ئەمسەر",       value:formatMoney(0), sub:"",  color:C.green,  Icon:TrendingUp  },
+          { label:"بازارگەری ئەمسەر",   value:"0",   sub:"داواکاری",color:C.blue,  Icon:ShoppingCart},
+          { label:"کڕیاری چالاک",       value:"0",    sub:"کڕیار",  color:C.purple, Icon:CheckCircle2},
+          { label:"گەشەی مانگانە",      value:"0%",  sub:"پێوانه", color:C.orange, Icon:BarChart3   },
         ].map(m => <MiniMetric key={m.label} {...m} />)}
       </div>
 
@@ -282,15 +261,23 @@ function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
         <h2 className="text-[12px] font-extrabold text-white mb-3">داهاتی ئەمجار — هەفتەیی</h2>
         {isLoading
           ? <ChartSkeleton height={160} />
-          : <div className="flex items-end gap-1.5" style={{ height:"160px" }} aria-label="هەفتەیی داهات چارت" role="img">
-              {WEEK.map(d => (
-                <div key={d.d} className="flex-1 flex flex-col items-center justify-end gap-1">
-                  <span className="text-[8px] font-bold" style={{ color:C.muted }}>{(d.v/1_000_000).toFixed(1)}M</span>
-                  <div className="w-full rounded-t-md" style={{ height:`${(d.v/maxV)*130}px`, background:"linear-gradient(180deg,#3b82f6,#1d4ed8)" }} />
-                  <span className="text-[8px]" style={{ color:"#475569" }}>{d.d}</span>
-                </div>
-              ))}
-            </div>
+          : hasChartData
+            ? <div className="flex items-end gap-1.5" style={{ height:"160px" }} aria-label="هەفتەیی داهات چارت" role="img">
+                {WEEK.map(d => {
+                  const maxV = Math.max(...WEEK.map(x => x.v), 1);
+                  return (
+                    <div key={d.d} className="flex-1 flex flex-col items-center justify-end gap-1">
+                      <span className="text-[8px] font-bold" style={{ color:C.muted }}>{formatMoney(d.v, { compact: true })}</span>
+                      <div className="w-full rounded-t-md" style={{ height:`${(d.v/maxV)*130}px`, background:"linear-gradient(180deg,#3b82f6,#1d4ed8)" }} />
+                      <span className="text-[8px]" style={{ color:"#475569" }}>{d.d}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            : <div className="flex flex-col items-center py-12 gap-2">
+                <BarChart3 className="w-8 h-8" style={{ color:"rgba(59,130,246,0.25)" }} />
+                <p className="text-white/40 text-xs font-semibold">هیچ داتای داهات نییە</p>
+              </div>
         }
       </div>
 
@@ -298,17 +285,7 @@ function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
         <h2 className="text-[12px] font-extrabold text-white mb-3">باشترین بەرهەمەکان</h2>
         {isLoading
           ? <TableRowSkeleton rows={4} />
-          : topProducts.map(item => (
-              <div key={item.name} className="flex items-center gap-3 mb-3">
-                <p className="text-[10px] font-bold text-white w-36 truncate shrink-0">{item.name}</p>
-                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background:"rgba(255,255,255,0.06)" }}>
-                  <div className="h-full rounded-full" style={{ width:`${item.pct}%`, background:C.blue }} />
-                </div>
-                <p className="text-[10px] font-extrabold shrink-0 tabular-nums" style={{ color:"#34d399" }}>
-                  {(item.rev/1_000_000).toFixed(1)}M
-                </p>
-              </div>
-            ))
+          : <p className="text-white/40 text-xs font-semibold py-6 text-center">هیچ داتای فرۆش نییە</p>
         }
       </div>
     </PanelShell>
@@ -317,19 +294,21 @@ function AnalyticsPanel({ isLoading }: { isLoading: boolean }) {
 
 /* ── FINANCE tab ────────────────────────────────────────────────── */
 function FinancePanel({ isLoading }: { isLoading: boolean }) {
+  const { formatMoney } = useCurrency();
+
   return (
     <PanelShell>
       <h1 className="text-sm font-extrabold text-white mb-4">دارایی</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         {isLoading ? [0,1,2].map(i => <MetricSkeleton key={i} />) : [
-          { label:"دەستی گشتی مانگانە", value:"١٣.٨M", sub:"د.ع", color:C.green  },
-          { label:"چاوەڕوانی پارەدان",  value:"٢.٤M",  sub:"د.ع", color:C.orange },
-          { label:"دەرهێنانی پێشوو",    value:"٥M",    sub:"د.ع", color:C.purple },
+          { label:"دەستی گشتی مانگانە", value:formatMoney(0), color:C.green  },
+          { label:"چاوەڕوانی پارەدان",  value:formatMoney(0), color:C.orange },
+          { label:"دەرهێنانی پێشوو",    value:formatMoney(0), color:C.purple },
         ].map(m => (
           <div key={m.label} style={GLASS} className="p-4">
             <p className="text-2xl font-extrabold" style={{ color:m.color }}>
-              {m.value} <span className="text-xs font-normal text-white/40">{m.sub}</span>
+              {m.value}
             </p>
             <p className="text-[10px] mt-1 font-semibold" style={{ color:C.muted }}>{m.label}</p>
           </div>
@@ -342,7 +321,12 @@ function FinancePanel({ isLoading }: { isLoading: boolean }) {
         </div>
         {isLoading
           ? <div className="p-4"><TableRowSkeleton rows={5} /></div>
-          : TXN.map((tx, idx) => {
+          : TXN.length === 0
+            ? <div className="flex flex-col items-center py-16 gap-3">
+                <DollarSign className="w-10 h-10" style={{ color:"rgba(16,185,129,0.35)" }} />
+                <p className="text-white/40 text-sm font-semibold">هیچ مامەڵەیەک نییە</p>
+              </div>
+            : TXN.map((tx, idx) => {
               const ss  = STATUS_STYLE[tx.status] ?? STATUS_STYLE["چاوەڕوانە"];
               const isC = tx.type === "وەرگرتن";
               return (
@@ -359,8 +343,7 @@ function FinancePanel({ isLoading }: { isLoading: boolean }) {
                   </div>
                   <div className="text-end shrink-0">
                     <p className="text-[12px] font-extrabold tabular-nums" style={{ color: isC ? "#34d399":"#f87171" }}>
-                      {isC ? "+" : "−"}{(tx.amount/1_000_000).toFixed(1)}M
-                      <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                      {isC ? "+" : "−"}{formatMoney(tx.amount)}
                     </p>
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
                       style={{ background:ss.bg, color:ss.color, border:`1px solid ${ss.border}` }}>

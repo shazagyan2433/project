@@ -1,14 +1,15 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Flame, BarChart2, Tag, Search } from "lucide-react";
+import { TrendingUp, TrendingDown, Flame, BarChart2, Search } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar,
 } from "recharts";
-import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useSectorLabel } from "@/hooks/useSectorScope";
+import { PageHeader } from "@/components/PageHeader";
 import { useGetProducts, useGetSales } from "@workspace/api-client-react";
 import { useSalesPrediction } from "@/hooks/useB2bData";
+import { useLocaleDir } from "@/lib/use-locale-dir";
 
 const Tip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; stroke?: string; value: number }>; label?: string }) => {
   if (!active || !payload?.length) return null;
@@ -23,8 +24,9 @@ const Tip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ n
 };
 
 export default function MarketIntel() {
-  const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
+  const { t, i18n } = useTranslation("common");
+  const { dir } = useLocaleDir("common");
+  const locale = i18n.language === "ar" ? "ar-IQ" : i18n.language === "en" ? "en-US" : "ku-IQ";
   const [tab, setTab] = useState<"price" | "region">("price");
   const { data: products = [] } = useGetProducts();
   const { data: sales = [] } = useGetSales();
@@ -53,24 +55,27 @@ export default function MarketIntel() {
   const priceTrend = useMemo(() => {
     const map: Record<string, number> = {};
     for (const sale of sales.slice(0, 30)) {
-      const key = new Date(sale.createdAt as string).toLocaleDateString("ku-IQ", { month: "short", day: "numeric" });
+      const key = new Date(sale.createdAt as string).toLocaleDateString(locale, { month: "short", day: "numeric" });
       map[key] = (map[key] ?? 0) + parseFloat(String(sale.totalAmount ?? 0));
     }
     return Object.entries(map).map(([d, total]) => ({ d, total: Math.round(total) }));
-  }, [sales]);
+  }, [sales, locale]);
 
   const hasData = products.length > 0 || sales.length > 0;
 
   if (!hasData) {
     return (
-      <div className="space-y-6 pb-8">
+      <div dir={dir} className="space-y-6 pb-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.3)" }}>
             <BarChart2 className="w-5 h-5" style={{ color: "#F97316" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-white">{t("pageTitles.marketIntel", { sector: sectorLabel })}</h1>
-            <p className="text-xs text-white/40">{t("pageTitles.marketIntelSubtitle", { sector: sectorLabel })}</p>
+            <PageHeader
+              id="marketIntel"
+              titleClassName="text-2xl font-extrabold text-slate-900 dark:text-white"
+              subtitleClassName="text-xs text-slate-600 dark:text-white/40"
+            />
           </div>
         </div>
         <div className="py-20 text-center">
@@ -83,14 +88,17 @@ export default function MarketIntel() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <div dir={dir} className="space-y-6 pb-8">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.3)" }}>
           <BarChart2 className="w-5 h-5" style={{ color: "#F97316" }} />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-white">{t("pageTitles.marketIntel", { sector: sectorLabel })}</h1>
-          <p className="text-xs text-white/40">{t("pageTitles.marketIntelSubtitle", { sector: sectorLabel })}</p>
+          <PageHeader
+            id="marketIntel"
+            titleClassName="text-2xl font-extrabold text-slate-900 dark:text-white"
+            subtitleClassName="text-xs text-slate-600 dark:text-white/40"
+          />
         </div>
       </div>
 
@@ -110,7 +118,7 @@ export default function MarketIntel() {
                 <span className="text-[10px] font-bold" style={{ color: d.up ? "#34D399" : "#F87171" }}>{d.delta}</span>
               </div>
               <p className="text-2xl font-extrabold text-white">{d.score}</p>
-              <p className="text-[10px] text-white/30 mt-0.5">نمرەی داواکاری</p>
+              <p className="text-[10px] text-white/30 mt-0.5">{t("marketIntel.demandScore")}</p>
               <div className="mt-2 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div className="h-full rounded-full" style={{ width: `${d.score}%`, background: "#F97316" }} />
               </div>
@@ -132,7 +140,7 @@ export default function MarketIntel() {
                 border: tab === k ? "1px solid rgba(249,115,22,0.3)" : "1px solid rgba(255,255,255,0.06)",
               }}
             >
-              {k === "price" ? "نرخ" : "ناوچە"}
+              {k === "price" ? t("marketIntel.tabs.price") : t("marketIntel.tabs.region")}
             </button>
           ))}
         </div>
@@ -144,7 +152,7 @@ export default function MarketIntel() {
               <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
               <Tooltip content={<Tip />} />
-              <Line type="monotone" dataKey="total" name="فرۆش" stroke="#F97316" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="total" name={t("marketIntel.chart.sales")} stroke="#F97316" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         ) : tab === "region" ? (
@@ -158,8 +166,8 @@ export default function MarketIntel() {
         <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)" }}>
           {prediction.trend === "up" ? <TrendingUp className="w-5 h-5 text-orange-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
           <div>
-            <p className="text-xs font-bold text-white">پێشبینی فرۆشی دوایی</p>
-            <p className="text-sm text-white/60">{prediction.prediction.toLocaleString()} د.ع</p>
+            <p className="text-xs font-bold text-white">{t("marketIntel.prediction.title")}</p>
+            <p className="text-sm text-white/60">{prediction.prediction.toLocaleString(locale)}{t("financial.currencySuffix")}</p>
           </div>
           <Flame className="w-4 h-4 text-orange-400 ms-auto" />
         </div>

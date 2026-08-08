@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, salesTable, saleItemsTable, productsTable, customersTable, debtsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { createCodDelivery } from "../lib/cod-service";
 
 const LINQI_COMMISSION_RATE = 0.025;
 
@@ -22,6 +23,8 @@ async function getSaleWithItems(saleId: number) {
     customerName,
     paymentType: sale.paymentType,
     paymentMethod: (sale as any).paymentMethod ?? "cash",
+    orderStatus: (sale as any).orderStatus ?? "completed",
+    paymentStatus: (sale as any).paymentStatus ?? "paid",
     totalAmount: parseFloat(sale.totalAmount),
     paidAmount: parseFloat(sale.paidAmount),
     discountAmount: sale.discountAmount ? parseFloat(sale.discountAmount) : null,
@@ -69,6 +72,17 @@ router.post("/sales", async (req, res): Promise<void> => {
       ).min(1),
       discountAmount: z.number().min(0).optional(),
       exchangeRate: z.number().positive().optional(),
+      delivery: z
+        .object({
+          shopLat: z.number(),
+          shopLng: z.number(),
+          shopName: z.string().min(1),
+          customerLat: z.number(),
+          customerLng: z.number(),
+          customerName: z.string().min(1),
+          currency: z.string().optional(),
+        })
+        .optional(),
     });
     const body = schema.parse(req.body);
 
@@ -108,8 +122,37 @@ router.post("/sales", async (req, res): Promise<void> => {
 
     const discountAmount = body.discountAmount ?? 0;
     const finalTotal = Math.max(0, totalAmount - discountAmount);
-    const paidAmount = body.paymentType === "cash" ? finalTotal : 0;
+    const isCod = body.paymentMethod === "cash_on_delivery";
+    const isDebt = body.paymentType === "debt";
+
+    let paidAmount = 0;
+    let orderStatus = "completed";
+    let paymentStatus = "paid";
+
+    if (isDebt) {
+      paidAmount = 0;
+      orderStatus = "completed";
+      paymentStatus = "unpaid";
+    } else if (isCod) {
+      paidAmount = 0;
+      orderStatus = "pending_delivery";
+      paymentStatus = "cash_pending";
+    } else {
+      paidAmount = finalTotal;
+      orderStatus = "completed";
+      paymentStatus = "paid";
+    }
+
     const commissionAmount = Math.round(finalTotal * LINQI_COMMISSION_RATE * 100) / 100;
+
+    let customerName = "Customer";
+    if (body.customerId) {
+      const [customer] = await db
+        .select({ name: customersTable.name })
+        .from(customersTable)
+        .where(eq(customersTable.id, body.customerId));
+      if (customer?.name) customerName = customer.name;
+    }
 
     const full = await db.transaction(async (tx) => {
       const [sale] = await tx
@@ -118,6 +161,8 @@ router.post("/sales", async (req, res): Promise<void> => {
           customerId: body.customerId ?? null,
           paymentType: body.paymentType,
           paymentMethod: body.paymentMethod ?? "cash",
+          orderStatus,
+          paymentStatus,
           totalAmount: finalTotal.toString(),
           paidAmount: paidAmount.toString(),
           discountAmount: discountAmount > 0 ? discountAmount.toString() : null,
@@ -149,6 +194,28 @@ router.post("/sales", async (req, res): Promise<void> => {
           originalAmount: finalTotal.toString(),
           remainingAmount: finalTotal.toString(),
           status: "pending",
+        });
+      }
+
+      if (isCod) {
+        const deliveryMeta = body.delivery ?? {
+          shopLat: 36.1901,
+          shopLng: 44.0091,
+          shopName: "LinQi Store",
+          customerLat: 36.1951,
+          customerLng: 44.0191,
+          customerName: customerName,
+        };
+        await createCodDelivery(tx, {
+          saleId: sale.id,
+          totalAmount: finalTotal,
+          currency: body.delivery?.currency ?? "IQD",
+          shopLat: deliveryMeta.shopLat,
+          shopLng: deliveryMeta.shopLng,
+          shopName: deliveryMeta.shopName,
+          customerLat: deliveryMeta.customerLat,
+          customerLng: deliveryMeta.customerLng,
+          customerName: deliveryMeta.customerName ?? customerName,
         });
       }
 

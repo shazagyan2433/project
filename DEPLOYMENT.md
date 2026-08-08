@@ -114,12 +114,12 @@ Admin dashboard:
 http://YOUR_DROPLET_IP/admin/dashboard
 ```
 
-Default admin (created on first boot if no users exist):
+Default admin (only when `SEED_DEFAULT_ADMIN=true` and no users exist yet):
 
 - Username: `admin`
 - Password: `admin123`
 
-**Change this password immediately** after first login.
+Set `SEED_DEFAULT_ADMIN=true` in `.env` for the **first** boot, then set it to `false` (or remove it) and **change the password immediately** after login.
 
 API health check:
 

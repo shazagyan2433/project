@@ -1,0 +1,284 @@
+{
+  "notFound": {
+    "title": "404 — Page Not Found",
+    "description": "The page you requested does not exist or was moved.",
+    "backHome": "Back to Dashboard"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Notification Center",
+    "markAllRead": "Mark all as read",
+    "newCount": "{{count}} new",
+    "viewAll": "View all notifications",
+    "timeAgo": "{{time}} ago",
+    "empty": "No new notifications available",
+    "filters": {
+      "all": "All",
+      "sale": "Sales",
+      "rfq": "RFQ",
+      "stock": "Stock",
+      "delivery": "Delivery",
+      "reward": "Rewards",
+      "system": "System"
+    },
+    "items": {},
+    "live": {
+      "sale": {
+        "title": "New sale",
+        "body": "Order #{{id}} — {{customer}} — {{amount}}"
+      },
+      "rfq": {
+        "title": "New RFQ",
+        "body": "{{code}} — {{product}} ({{qty}} {{unit}})"
+      },
+      "rfqResponse": {
+        "title": "RFQ response",
+        "body": "{{code}} — {{product}} — {{price}}"
+      },
+      "stock": {
+        "title": "Stock alert",
+        "body": "{{product}}: only {{stock}} {{unit}} left"
+      },
+      "delivery": {
+        "title": "Delivery in progress",
+        "body": "{{orderId}} — {{customer}} from {{shop}}"
+      },
+      "deliveryDone": {
+        "title": "Delivery completed",
+        "body": "{{orderId}} — {{customer}}"
+      },
+      "codCollected": {
+        "title": "COD payment received",
+        "body": "Order #{{orderId}} delivered — {{amount}} collected by driver"
+      },
+      "system": {
+        "title": "System",
+        "body": "System activity"
+      }
+    }
+  },
+  "rewards": {
+    "subtitle": "B2B Loyalty & Rewards",
+    "currentTierLabel": "Current tier",
+    "pointsToNext": "{{count}} points to {{tier}}",
+    "pointsMin": "{{min}}+ points",
+    "spinWheel": "Spin wheel",
+    "spinning": "Spinning…",
+    "spinBtn": "Spin ✦",
+    "spinWon": "You won +{{count}} points!",
+    "spinPrizeWon": "You won: {{prize}}",
+    "spinCooldown": "Come back tomorrow to spin again",
+    "spinPrizes": {
+      "points50": "+50 pts",
+      "discount5": "5% off",
+      "points100": "+100 pts",
+      "points200": "+200 pts",
+      "specialGift": "Special gift",
+      "spinAgain": "Spin again"
+    },
+    "weeklyChallenge": "This week's challenges",
+    "leaderboard": "Points leaderboard",
+    "emptyLeaderboard": "No rankings yet",
+    "noChallenges": "No active challenges",
+    "points": "pts",
+    "tierStandard": "Standard",
+    "tierSilver": "Silver tier",
+    "tierGold": "Gold tier",
+    "tierDiamond": "Diamond tier",
+    "challengeProgress": "{{done}}/{{total}} completed",
+    "perks": {
+      "marketAccess": "Marketplace access",
+      "tierAlerts": "Tier alerts",
+      "discount5": "5% discount",
+      "rfqPriority": "RFQ priority",
+      "discount12": "12% discount",
+      "deliverySupport": "Delivery support",
+      "support247": "24/7 support",
+      "discount20": "20% discount",
+      "dedicatedManager": "Dedicated manager",
+      "earlyAccess": "Early access"
+    },
+    "challenges": {
+      "orders": "10 orders this week",
+      "suppliers": "Onboard 3 new suppliers",
+      "deliveryStars": "Earn 5 delivery stars",
+      "salesMilestone": "1M IQD sales milestone"
+    }
+  },
+  "bulkImport": {
+    "title": "Bulk product import",
+    "subtitle": "PDF, invoice, or supplier list — review before saving",
+    "selectFile": "Select file",
+    "dropHint": "Drop your PDF or list here",
+    "dropDetail": "Invoice, supplier list, catalog — text is extracted and products are parsed",
+    "noDbWrite": "Nothing is written until you confirm save. Edit all rows first.",
+    "readyRows": "{{count}} rows ready",
+    "invalidRows": "{{count}} rows need edits",
+    "confirmSave": "Confirm & save ({{count}})",
+    "saving": "Saving…",
+    "addBlankRow": "Add blank row",
+    "close": "Close",
+    "fileFailed": "Import failed",
+    "fileNotRecognized": "File not recognized",
+    "retryFile": "Try another file",
+    "parsing": "Analyzing file…",
+    "networkHint": "Ensure the API server is running (pnpm dev) and your network connection is available.",
+    "pages": "{{count}} pages",
+    "steps": {
+      "receive": "Receiving file",
+      "extract": "Extracting text",
+      "analyze": "Detecting products",
+      "ready": "Ready for preview"
+    },
+    "columns": {
+      "name": "Product name",
+      "category": "Category",
+      "cost": "Cost",
+      "price": "Sale price",
+      "stock": "Qty",
+      "unit": "Unit",
+      "barcode": "Barcode",
+      "supplier": "Supplier"
+    },
+    "validation": {
+      "nameRequired": "Name required",
+      "priceRequired": "Sale price > 0",
+      "stockInvalid": "Invalid stock qty",
+      "unitRequired": "Unit required",
+      "costInvalid": "Invalid cost"
+    }
+  },
+  "inventory": {
+    "allCategories": "All categories",
+    "bulkImport": "Bulk import",
+    "addProduct": "Add product",
+    "productImage": "Product image",
+    "imageHint": "PNG · JPG · WEBP — max 2MB",
+    "name": "Product name",
+    "category": "Category",
+    "uncategorized": "— No category",
+    "costPrice": "Cost price",
+    "salePrice": "Sale price",
+    "stock": "Stock qty",
+    "unit": "Unit",
+    "barcode": "Barcode",
+    "supplier": "Supplier",
+    "saveProduct": "Save product",
+    "deleteConfirm": "Delete this product?",
+    "importSuccess": "{{count}} products added successfully",
+    "lowStock": "Low stock",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "editProduct": "Edit product",
+    "refresh": "Refresh",
+    "namePlaceholder": "e.g. White sugar 1kg",
+    "categorySection": "Category",
+    "imageProcessing": "Processing…",
+    "changeImage": "Change image",
+    "selectImage": "Select image",
+    "usdConverter": "USD converter — 1$ = {{rate}} IQD",
+    "saveUpdated": "Product updated",
+    "saveCreated": "New product added ✓",
+    "kpiTotal": "Total products",
+    "kpiTotalSub": "registered SKUs",
+    "kpiOut": "Out of stock",
+    "kpiOutSub": "needs replenishment",
+    "kpiLow": "Low stock",
+    "kpiLowSub": "below alert threshold",
+    "kpiOk": "Healthy",
+    "kpiOkSub": "{{pct}}% in stock",
+    "searchPlaceholder": "Search products…",
+    "defaultUnit": "piece",
+    "filterAll": "All",
+    "filterOk": "Healthy",
+    "filterLow": "Low",
+    "filterOut": "Out",
+    "colImage": "Image",
+    "colName": "Product name",
+    "colCategory": "Category",
+    "colBarcode": "Barcode",
+    "colCost": "Cost price",
+    "colSale": "Sale price",
+    "colStock": "Qty / unit",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "emptyFiltered": "No products match this filter",
+    "emptyNone": "No products added yet",
+    "addFirst": "+ Add first product",
+    "barcodeSku": "Barcode / SKU",
+    "barcodePlaceholder": "e.g. 6009876543210",
+    "supplierName": "Supplier name",
+    "supplierPlaceholder": "Vendor name",
+    "save": "Save",
+    "close": "Close",
+    "nameRequired": "Product name is required",
+    "priceRequired": "Price is required",
+    "imageUploadFailed": "Could not upload image",
+    "deleteNamedConfirm": "Delete \"{{name}}\"?",
+    "deleted": "Product deleted",
+    "units": {
+      "piece": "piece",
+      "kg": "kg",
+      "liter": "liter",
+      "carton": "carton",
+      "box": "box",
+      "pack": "pack",
+      "dozen": "dozen",
+      "bag": "bag",
+      "meter": "meter",
+      "gram": "gram"
+    }
+  },
+  "procurement": {
+    "suppliers": "Suppliers",
+    "created": "Created",
+    "newRfq": "New RFQ",
+    "totalRfqs": "Total RFQs",
+    "pending": "Pending",
+    "responded": "Responded",
+    "approved": "Approved",
+    "statusPending": "Pending",
+    "statusResponded": "Responded",
+    "statusApproved": "Approved",
+    "statusDeclined": "Declined",
+    "supplierCount": "{{count}} suppliers",
+    "deadlineLabel": "Deadline: {{date}}",
+    "decline": "Decline",
+    "approve": "Approve",
+    "cancel": "Cancel",
+    "manage": "Manage"
+  },
+  "logistics": {
+    "manifest": "Shipping manifest",
+    "deliveries": "Deliveries"
+  },
+  "financial": {
+    "invoices": "Invoices",
+    "cashflow": "Weekly cash in / out"
+  },
+  "marketIntel": {
+    "demandScore": "Demand score",
+    "salesForecast": "Latest sales forecast"
+  },
+  "ai": {
+    "online": "Online"
+  },
+  "portals": {
+    "orders": "Orders",
+    "noOrders": "No orders found",
+    "inventory": "Inventory responsibility",
+    "attentionStock": "Alerts & stock",
+    "salesAnalytics": "Sales analytics",
+    "weeklyRevenue": "Weekly revenue — this period",
+    "topProducts": "Top products",
+    "transactions": "Transactions",
+    "myPayments": "Payment history",
+    "myProfile": "My profile",
+    "deliveryHistory": "Delivery history",
+    "completedDeliveries": "Completed deliveries",
+    "myEarnings": "My earnings",
+    "weeklyEarnings": "Weekly earnings",
+    "earningSlips": "Earning slips",
+    "filterOrders": "Filter orders"
+  }
+}

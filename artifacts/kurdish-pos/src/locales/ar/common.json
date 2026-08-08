@@ -26,9 +26,24 @@
     "aiAssistant": "مساعد LinQi — {{sector}}",
     "aiAssistantSubtitle": "مساعد ذكي مخصص لـ {{sector}}"
   },
+  "pageDescriptions": {
+    "dashboard": "نظرة عامة على عمليات عملك",
+    "marketplace": "منصة تجارة B2B",
+    "inventory": "إدارة المخزون والمنتجات",
+    "procurement": "طلبات الأسعار والمشتريات",
+    "suppliers": "دليل الموردين المعتمدين",
+    "marketIntel": "تحليل الأسعار والطلب",
+    "logistics": "التتبع والتوصيل",
+    "financial": "لوحة مالية",
+    "negotiation": "محادثة تفاوض B2B",
+    "aiAssistant": "مساعد ذكي لعملك",
+    "settings": "إدارة الملف، المتجر، الموافقات، والأمان"
+  },
   "emptyStates": {
-    "noSuppliers": "لم يُعثر على موردين",
-    "noSuppliersSubtitle": "لا يوجد موردين مسجلين لهذا القطاع بعد",
+    "noSuppliers": "لا يوجد بائعون مسجلون في النظام",
+    "noSuppliersSubtitle": "سيظهر البائعون الجدد هنا عند التسجيل",
+    "noSuppliersFilter": "لم يُعثر على بائعين",
+    "noSuppliersFilterSubtitle": "جرّب تعديل البحث أو الفلاتر",
     "noRfqs": "لا توجد طلبات أسعار نشطة",
     "noRfqsSubtitle": "أنشئ طلب سعر جديد أو انتظر الردود",
     "noAnalytics": "لا توجد بيانات تحليلية",
@@ -45,11 +60,23 @@
     "noNotifications": "لا توجد إشعارات",
     "loadError": "فشل تحميل البيانات",
     "searchSuppliers": "البحث بالاسم أو المنتج...",
+    "filterAllCategories": "جميع الفئات",
+    "filterAllCities": "جميع المدن",
+    "dealsCount": "{{count}} صفقة",
+    "contactSupplier": "تواصل",
     "verifiedCount": "موثق",
     "totalSuppliers": "إجمالي الموردين",
     "noSuppliersForRfq": "لا يوجد موردين للاختيار",
     "noCustomer": "عميل عام",
     "customerRole": "عميل"
+  },
+  "supplierProfile": {
+    "viewInfo": "معلومات",
+    "backToDirectory": "العودة إلى دليل البائعين",
+    "notFound": "لم يُعثر على البائع",
+    "products": "المنتجات",
+    "call": "اتصال",
+    "viewCatalog": "عرض السوق"
   },
   "language": {
     "select": "اللغة",
@@ -90,7 +117,8 @@
     "rewardsCenter": "مركز المكافآت",
     "b2bTerminal": "منصة B2B",
     "posSystem": "نظام نقطة البيع",
-    "tools": "الأدوات"
+    "tools": "الأدوات",
+    "settings": "الإعدادات"
   },
   "top": {
     "search": "البحث في اللوحة...",
@@ -174,7 +202,26 @@
       "request": "طلب",
       "listPrice": "سعر القائمة",
       "lowStock": "مخزون منخفض",
-      "allCategories": "الكل"
+      "allCategories": "الكل",
+      "categoriesLabel": "الفئات",
+      "sectorOnlyHint": "منتجات قطاع عملك فقط"
+    },
+    "requestModal": {
+      "title": "طلب سعر (RFQ)",
+      "subtitle": "راجع التفاصيل وأرسل طلبك",
+      "subtitleSupplier": "طلب لـ {{supplier}}",
+      "product": "اسم المنتج",
+      "productPlaceholder": "اسم المنتج",
+      "quantity": "الكمية",
+      "unit": "الوحدة",
+      "unitPlaceholder": "كرتون، كيس…",
+      "deadline": "الموعد النهائي",
+      "listPriceHint": "سعر القائمة في السوق:",
+      "suppliers": "الموردين",
+      "submit": "إرسال الطلب",
+      "successTitle": "تم إرسال الطلب ✓",
+      "successBody": "تم إرسال طلبك إلى الموردين. تتبعه في قسم التوريد.",
+      "errorTitle": "فشل الإرسال"
     },
     "sellers": {
       "contact": "تواصل",
@@ -187,7 +234,8 @@
       "specialties": "التخصصات",
       "orders": "طلب",
       "rating": "التقييم",
-      "verifiedBadge": "موثق"
+      "verifiedBadge": "موثق",
+      "viewProcurement": "وحدة التوريد"
     },
     "analytics": {
       "title": "تحليلات المبيعات والطلبات",
@@ -225,25 +273,138 @@
     },
     "cats": {
       "all": "الكل",
-      "electronic": "إلكترونيات",
-      "stationery": "قرطاسية",
-      "babyCare": "رعاية الأطفال",
-      "cosmetics": "مستحضرات التجميل",
+      "medicine": "الأدوية",
+      "medicalSupplies": "المستلزمات الطبية",
+      "babyCare": "حليب ورعاية الأطفال",
+      "cosmetics": "التجميل والعناية",
       "homeLiving": "المنزل والمعيشة",
       "gaming": "ألعاب",
       "food": "الغذاء والمشروبات",
-      "medicine": "الأدوية",
       "clothing": "الملابس",
       "automotive": "السيارات",
       "agriculture": "الزراعة",
       "construction": "البناء",
       "sports": "الرياضة",
       "beauty": "الجمال",
-      "cleaning": "التنظيف والمنزل",
+      "cleaning": "التنظيف",
       "office": "المكتب",
       "technology": "التكنولوجيا",
       "printing": "الطباعة",
-      "books": "الكتب"
+      "books": "الكتب",
+      "mobile": "الهواتف المحمولة",
+      "accessories": "الإكسسوارات",
+      "software": "البرمجيات",
+      "electronic": "إلكترونيات",
+      "stationery": "قرطاسية",
+      "computer": "حواسيب",
+      "pcParts": "قطع الكمبيوتر",
+      "ticketsFlights": "تذاكر وطيران",
+      "hotelsBooking": "فنادق وحجز",
+      "visasTours": "تأشيرات ورحلات",
+      "travelInsurance": "تأمين",
+      "pensionTransport": "إقامة ونقل",
+      "officeSupplies": "مستلزمات مكتبية",
+      "officeFurniture": "مفروشات مكتبية",
+      "officeServices": "خدمات مكتبية",
+      "computerPrinting": "حاسوب وطباعة"
+    }
+  },
+  "financial": {
+    "currencySuffix": " د.ع",
+    "kpi": {
+      "totalRevenue": "إجمالي الإيرادات",
+      "debt": "الديون المستحقة",
+      "netProfit": "صافي الربح",
+      "transactions": "المعاملات",
+      "transactionCount": "{{count}} معاملة",
+      "debtorCount": "{{count}} عميل",
+      "total": "الإجمالي"
+    },
+    "chart": {
+      "performance": "الأداء المالي",
+      "invoices": "الفواتير",
+      "cashflow": "التدفق النقدي (أسبوعي)",
+      "revenue": "الإيرادات",
+      "net": "الصافي",
+      "in": "وارد",
+      "out": "صادر"
+    },
+    "status": {
+      "paid": "مدفوع",
+      "pending": "قيد الانتظار",
+      "overdue": "متأخر"
+    },
+    "week": "أ{{n}}"
+  },
+  "logistics": {
+    "steps": {
+      "received": "تم الاستلام",
+      "prepared": "تم التجهيز",
+      "shipped": "تم الشحن",
+      "delivered": "تم التسليم"
+    },
+    "stats": {
+      "activeShipments": "شحنات نشطة",
+      "totalDeliveries": "إجمالي التسليمات",
+      "pending": "قيد الانتظار",
+      "completed": "مكتمل",
+      "onRoute": "في الطريق",
+      "registered": "مسجل",
+      "active": "نشط",
+      "done": "منتهٍ"
+    },
+    "shipmentTracker": "تتبع الشحنات",
+    "deliveries": "التسليمات",
+    "urgent": "عاجل",
+    "onRoute": "في الطريق",
+    "arrived": "وصل",
+    "live": "مباشر",
+    "liveGps": "GPS مباشر",
+    "product": "المنتج",
+    "driver": "السائق",
+    "map": {
+      "title": "تتبع مباشر — {{id}}",
+      "loading": "جاري تحميل الخريطة…",
+      "pickup": "موقع الاستلام",
+      "dropoff": "موقع التسليم",
+      "driverLive": "السائق — مباشر"
+    },
+    "driverStatus": {
+      "delivering": "في الطريق",
+      "idle": "جاهز",
+      "returning": "عائد"
+    }
+  },
+  "marketIntel": {
+    "demandScore": "درجة الطلب",
+    "tabs": {
+      "price": "السعر",
+      "region": "المنطقة"
+    },
+    "chart": {
+      "sales": "المبيعات"
+    },
+    "prediction": {
+      "title": "أحدث توقعات المبيعات"
+    }
+  },
+  "aiChat": {
+    "online": "متصل",
+    "quickActionsTitle": "إجراءات سريعة — انقر للبدء",
+    "consoleTitle": "وحدة LinQi AI",
+    "typing": "يكتب…",
+    "refresh": "تحديث",
+    "currentLanguage": "اللغة الحالية:",
+    "placeholder": "اكتب سؤالك هنا…",
+    "inputHint": "Enter · إرسال | Shift+Enter · سطر جديد",
+    "welcome": "أهلاً! أنا مساعد LinQi الذكي. كيف يمكنني مساعدتك في إدارة أعمالك اليوم؟",
+    "quickActions": {
+      "sales": { "label": "دردشة المبيعات", "sub": "تحليل مبيعات هذا العام", "prompt": "أريد تحليلاً لمبيعات هذا العام" },
+      "strategy": { "label": "نصائح استراتيجية", "sub": "لتنمية أعمالك", "prompt": "أعطني نصائح استراتيجية لتقوية أعمالي" },
+      "report": { "label": "إنشاء تقرير", "sub": "تقرير احترافي", "prompt": "أنشئ تقرير العمل الشهري لشهر حزيران" },
+      "inventory": { "label": "تحليل المخزون", "sub": "المخزون والنقص", "prompt": "راجع مستويات مخزوني وقدم توصيات" },
+      "market": { "label": "توقعات السوق", "sub": "البحث والفرص", "prompt": "اعرض تحليل سوق B2B والفرص المتاحة" },
+      "personal": { "label": "تعلم مخصص", "sub": "بناءً على سجلك", "prompt": "بناءً على سجل أعمالي، ماذا توصي؟" }
     }
   }
 }

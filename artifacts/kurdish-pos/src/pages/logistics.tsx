@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import { useLiveTracking } from "@/hooks/useLiveTracking";
 import { useTranslation } from "react-i18next";
-import { useSectorLabel } from "@/hooks/useSectorScope";
+import { PageHeader } from "@/components/PageHeader";
 import { useDeliveries, type ApiDelivery } from "@/hooks/useB2bData";
+import { useLocaleDir } from "@/lib/use-locale-dir";
 
 // Lazy-load the map (Leaflet is heavy — only load when opened)
 const LiveTrackingMap = lazy(() =>
@@ -34,7 +35,7 @@ function getCoords(provinceId: string): [number, number] {
   return PROVINCE_COORDS[provinceId] ?? [36.1901, 44.0091];
 }
 
-const STEPS = ["وەرگیرا", "ئامادەکرا", "نێردرا", "گەیشت"];
+const STEP_KEYS = ["received", "prepared", "shipped", "delivered"] as const;
 
 type ShipmentView = {
   id: string;
@@ -67,10 +68,10 @@ function deliveryToShipment(d: ApiDelivery): ShipmentView {
   };
 }
 
-const statusMeta: Record<string, { label: string; color: string; Icon: React.ElementType }> = {
-  delivering: { label: "لەسەر ڕێگا", color: "#3B82F6", Icon: Truck        },
-  idle:       { label: "ئامادەیە",   color: "#10B981", Icon: CheckCircle2 },
-  returning:  { label: "گەڕانەوە",   color: "#F59E0B", Icon: Navigation   },
+const DRIVER_STATUS_KEYS: Record<string, string> = {
+  delivering: "logistics.driverStatus.delivering",
+  idle: "logistics.driverStatus.idle",
+  returning: "logistics.driverStatus.returning",
 };
 
 // ── Live status dot for driver rows ──────────────────────────────────────────
@@ -103,6 +104,7 @@ interface MapModalProps {
 }
 
 function MapModal({ shipment, driverName, onClose }: MapModalProps) {
+  const { t } = useTranslation("common");
   const shopLat = shipment.shopLat;
   const shopLng = shipment.shopLng;
   const custLat = shipment.customerLat;
@@ -151,7 +153,7 @@ function MapModal({ shipment, driverName, onClose }: MapModalProps) {
             </div>
             <div>
               <p style={{ color: "white", fontWeight: 800, fontSize: 13 }}>
-                ردەکردنی زیندوو — {shipment.id}
+                {t("logistics.map.title", { id: shipment.id })}
               </p>
               <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>
                 🛵 {driverName} &nbsp;·&nbsp; {shipment.client}
@@ -180,7 +182,7 @@ function MapModal({ shipment, driverName, onClose }: MapModalProps) {
               justifyContent: "center", color: "rgba(255,255,255,0.4)", fontSize: 13,
             }}>
               <Loader style={{ width: 18, height: 18, marginRight: 8, animation: "spin 1s linear infinite" }} />
-              بارکردنی نەخشە...
+              {t("logistics.map.loading")}
             </div>
           }>
             <LiveTrackingMap
@@ -202,9 +204,9 @@ function MapModal({ shipment, driverName, onClose }: MapModalProps) {
           display: "flex", gap: 18, flexWrap: "wrap",
         }}>
           {[
-            { icon: "🏪", label: "شوێنی وەرگرتن (Pickup)" },
-            { icon: "📍", label: "شوێنی گەیاندن (Dropoff)" },
-            { icon: "🛵", label: "شۆفێر — زیندوو" },
+            { icon: "🏪", label: t("logistics.map.pickup") },
+            { icon: "📍", label: t("logistics.map.dropoff") },
+            { icon: "🛵", label: t("logistics.map.driverLive") },
           ].map((item) => (
             <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 14 }}>{item.icon}</span>
@@ -220,17 +222,17 @@ function MapModal({ shipment, driverName, onClose }: MapModalProps) {
 // ── Main Logistics page ───────────────────────────────────────────────────────
 export default function Logistics() {
   const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
+  const { dir } = useLocaleDir("common");
   const { data: deliveries = [], isLoading } = useDeliveries();
   const shipments = deliveries.map(deliveryToShipment);
   const activeList = shipments.filter((s) => s.progress < s.total);
   const completedToday = deliveries.filter((d) => d.status === "completed").length;
 
   const STATS = [
-    { label: "بارگیریی چالاک", value: String(activeList.length), color: "#3B82F6", sub: "لەسەر ڕێگا" },
-    { label: "کۆی گەیاندن", value: String(deliveries.length), color: "#10B981", sub: "تۆمارکراو" },
-    { label: "چاوەڕوان", value: String(deliveries.filter((d) => d.status === "active").length), color: "#F59E0B", sub: "چالاک" },
-    { label: "گەیشتوو", value: String(completedToday), color: "#A855F7", sub: "تەواو" },
+    { label: t("logistics.stats.activeShipments"), value: String(activeList.length), color: "#3B82F6", sub: t("logistics.stats.onRoute") },
+    { label: t("logistics.stats.totalDeliveries"), value: String(deliveries.length), color: "#10B981", sub: t("logistics.stats.registered") },
+    { label: t("logistics.stats.pending"), value: String(deliveries.filter((d) => d.status === "active").length), color: "#F59E0B", sub: t("logistics.stats.active") },
+    { label: t("logistics.stats.completed"), value: String(completedToday), color: "#A855F7", sub: t("logistics.stats.done") },
   ];
 
   const [activeShip, setActiveShip] = useState<string | null>(null);
@@ -241,11 +243,17 @@ export default function Logistics() {
 
   const openMap = (s: ShipmentView) => {
     setMapShipment(s);
-    setMapDriverName("شۆفێر");
+    setMapDriverName(t("logistics.driver"));
+  };
+
+  const driverStatusMeta: Record<string, { color: string; Icon: React.ElementType }> = {
+    delivering: { color: "#3B82F6", Icon: Truck },
+    idle: { color: "#10B981", Icon: CheckCircle2 },
+    returning: { color: "#F59E0B", Icon: Navigation },
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div dir={dir} className="space-y-6 pb-8">
       {/* Map modal */}
       {mapShipment && (
         <MapModal
@@ -264,8 +272,11 @@ export default function Logistics() {
           <Truck className="w-5 h-5" style={{ color: "#F59E0B" }} />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-white">{t("pageTitles.logistics", { sector: sectorLabel })}</h1>
-          <p className="text-xs text-white/40">{t("pageTitles.logisticsSubtitle", { sector: sectorLabel })}</p>
+          <PageHeader
+            id="logistics"
+            titleClassName="text-2xl font-extrabold text-slate-900 dark:text-white"
+            subtitleClassName="text-xs text-slate-600 dark:text-white/40"
+          />
         </div>
       </div>
 
@@ -294,12 +305,12 @@ export default function Logistics() {
           style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
         >
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-extrabold text-white/80">پاساوی بارگیری</h2>
-            <span className="text-[10px] text-white/30 font-mono">Live</span>
+            <h2 className="text-sm font-extrabold text-white/80">{t("logistics.shipmentTracker")}</h2>
+            <span className="text-[10px] text-white/30 font-mono">{t("logistics.live")}</span>
           </div>
 
           {isLoading ? (
-            <div className="py-12 text-center text-white/30 text-sm">{t("common.loading", { defaultValue: "بارکردن…" })}</div>
+            <div className="py-12 text-center text-white/30 text-sm">{t("common.loading")}</div>
           ) : shipments.length === 0 ? (
             <div className="py-12 text-center text-white/30 text-sm">{t("emptyStates.noShipments")}</div>
           ) : (
@@ -331,7 +342,7 @@ export default function Logistics() {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-bold text-white">{ship.client}</p>
-                <p className="text-xs text-white/40">{ship.city} — {ship.items} بەرهەم</p>
+                <p className="text-xs text-white/40">{ship.city} — {ship.items} {t("logistics.product")}</p>
               </div>
               <div className="flex items-center gap-2">
                 {ship.urgent && (
@@ -339,7 +350,7 @@ export default function Logistics() {
                     className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg"
                     style={{ background: "rgba(239,68,68,0.15)", color: "#F87171" }}
                   >
-                    <AlertTriangle className="w-3 h-3" /> فووریە
+                    <AlertTriangle className="w-3 h-3" /> {t("logistics.urgent")}
                   </span>
                 )}
                 <button
@@ -352,14 +363,14 @@ export default function Logistics() {
                   }}
                 >
                   <Map className="w-3 h-3" />
-                  ردەکردنی زیندوو
+                  {t("logistics.liveGps")}
                 </button>
               </div>
             </div>
 
             {/* Progress Steps */}
             <div className="flex items-center gap-0">
-              {STEPS.map((step, i) => {
+              {STEP_KEYS.map((stepKey, i) => {
                 const done = i < ship.progress;
                 const active = i === ship.progress - 1;
                 return (
@@ -382,10 +393,10 @@ export default function Logistics() {
                         className="text-[9px] text-center font-semibold whitespace-nowrap"
                         style={{ color: done ? "#93C5FD" : "rgba(255,255,255,0.25)" }}
                       >
-                        {step}
+                        {t(`logistics.steps.${stepKey}`)}
                       </span>
                     </div>
-                    {i < STEPS.length - 1 && (
+                    {i < STEP_KEYS.length - 1 && (
                       <div
                         className="flex-1 h-0.5 mx-1 rounded-full"
                         style={{ background: i < ship.progress - 1 ? "#3B82F6" : "rgba(255,255,255,0.08)" }}
@@ -415,7 +426,7 @@ export default function Logistics() {
           className="lg:col-span-2 rounded-2xl p-5 space-y-3"
           style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
         >
-          <h2 className="text-sm font-extrabold text-white/80 mb-3">گەیاندنەکان</h2>
+          <h2 className="text-sm font-extrabold text-white/80 mb-3">{t("logistics.deliveries")}</h2>
           {shipments.length === 0 ? (
             <p className="text-xs text-white/30 py-8 text-center">{t("emptyStates.noShipments")}</p>
           ) : (
@@ -453,7 +464,7 @@ export default function Logistics() {
                       background: s.progress >= s.total ? "rgba(16,185,129,0.15)" : "rgba(59,130,246,0.15)",
                     }}
                   >
-                    {s.progress >= s.total ? "گەیشت" : "لەسەر ڕێگا"}
+                    {s.progress >= s.total ? t("logistics.arrived") : t("logistics.onRoute")}
                   </span>
                 </div>
               </motion.div>

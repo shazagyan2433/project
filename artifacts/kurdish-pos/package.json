@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.config.ts --host 0.0.0.0 --strictPort",
-    "dev:web": "vite --config vite.config.ts --host 0.0.0.0 --strictPort",
+    "dev": "vite --config vite.config.ts --host 0.0.0.0",
+    "dev:web": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -83,6 +83,7 @@
     "i18next": "^26.3.0",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
+    "pdfjs-dist": "^6.2.108",
     "react-i18next": "^17.0.8",
     "react-leaflet": "^5.0.0",
     "socket.io-client": "^4.8.3"

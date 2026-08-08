@@ -10,6 +10,7 @@ import {
   CheckCircle2, Clock, MapPin,
 } from "lucide-react";
 import i18n from "@/i18n";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useAuth } from "@/contexts/AuthContext";
 import BuyerDashboard from "./buyer-dashboard";
 import { RoleTabBar, type RoleTab } from "@/components/RoleTabBar";
@@ -42,22 +43,10 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; border: string }
   "ڕەتکرایەوە":{ bg:"rgba(239,68,68,0.10)",   color:"#f87171", border:"rgba(239,68,68,0.22)"  },
 };
 
-/* ── Demo data ─────────────────────────────────────────────────── */
-const BUYER_ORDERS = [
-  { id:"BUY-5521", supplier:"کۆمپانیای ئەڵبان",    items:48, amount:1_150_000, status:"جێبەجێکرا", date:"١٤ی تیرمەه" },
-  { id:"BUY-5520", supplier:"شیرکەتی دەشتاو",      items:12, amount:320_000,   status:"بەرێوەیە",  date:"١٣ی تیرمەه" },
-  { id:"BUY-5519", supplier:"بازرگانی ئەمین",       items:30, amount:870_000,   status:"چاوەڕوانە", date:"١٢ی تیرمەه" },
-  { id:"BUY-5518", supplier:"گرووپی ئاوینتا",       items:8,  amount:240_000,   status:"جێبەجێکرا", date:"١١ی تیرمەه" },
-  { id:"BUY-5517", supplier:"ئیمپۆرتی دانا",        items:20, amount:590_000,   status:"جێبەجێکرا", date:"١٠ی تیرمەه" },
-];
+/* ── Demo data (empty until API wired) ─────────────────────────── */
+const BUYER_ORDERS: Array<{ id: string; supplier: string; items: number; amount: number; status: string; date: string }> = [];
 
-const PAYMENTS = [
-  { id:"PAY-8821", amount:1_150_000, method:"نەقد",  status:"جێبەجێکرا", date:"١٤ی تیرمەه" },
-  { id:"PAY-8820", amount:320_000,   method:"کارت",  status:"چاوەڕوانە", date:"١٣ی تیرمەه" },
-  { id:"PAY-8819", amount:870_000,   method:"نەقد",  status:"چاوەڕوانە", date:"١٢ی تیرمەه" },
-  { id:"PAY-8818", amount:240_000,   method:"کارت",  status:"جێبەجێکرا", date:"١١ی تیرمەه" },
-  { id:"PAY-8817", amount:590_000,   method:"نەقد",  status:"جێبەجێکرا", date:"١٠ی تیرمەه" },
-];
+const PAYMENTS: Array<{ id: string; amount: number; method: string; status: string; date: string }> = [];
 
 /* ── Shared panel shell ─────────────────────────────────────────── */
 function PanelShell({ children }: { children: React.ReactNode }) {
@@ -77,6 +66,7 @@ function PanelShell({ children }: { children: React.ReactNode }) {
 /* ── ORDERS tab ─────────────────────────────────────────────────── */
 function OrdersPanel({ isLoading }: { isLoading: boolean }) {
   const [filter, setFilter] = useState("گشتی");
+  const { formatMoney } = useCurrency();
   const statuses = ["گشتی","جێبەجێکرا","بەرێوەیە","چاوەڕوانە"];
   const rows = filter === "گشتی" ? BUYER_ORDERS : BUYER_ORDERS.filter(o => o.status === filter);
 
@@ -86,10 +76,10 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {isLoading ? [0,1,2,3].map(i => <MetricSkeleton key={i} />) : [
-          { label:"کۆی داواکاری", value:"٢٩",    color:C.blue,   icon:ClipboardList },
-          { label:"کۆیی خەرجی",  value:"٣.١٧M", color:C.green,  icon:CreditCard    },
-          { label:"بەرێوەیە",    value:"٢",     color:C.orange, icon:Clock         },
-          { label:"جێبەجێکراو",  value:"٢٤",    color:C.purple, icon:CheckCircle2  },
+          { label:"کۆی داواکاری", value:"0",    color:C.blue,   icon:ClipboardList },
+          { label:"کۆیی خەرجی",  value:formatMoney(0), color:C.green,  icon:CreditCard    },
+          { label:"بەرێوەیە",    value:"0",     color:C.orange, icon:Clock         },
+          { label:"جێبەجێکراو",  value:"0",    color:C.purple, icon:CheckCircle2  },
         ].map(m => (
           <div key={m.label} style={GLASS} className="p-4">
             <m.icon className="w-4 h-4 mb-2" style={{ color:m.color }} aria-hidden="true" />
@@ -115,7 +105,12 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
       <div style={GLASS} className="overflow-hidden" aria-live="polite">
         {isLoading
           ? <div className="p-4"><TableRowSkeleton rows={5} /></div>
-          : rows.map((o, idx) => {
+          : rows.length === 0
+            ? <div className="flex flex-col items-center py-16 gap-3">
+                <ClipboardList className="w-10 h-10" style={{ color:"rgba(59,130,246,0.35)" }} />
+                <p className="text-white/40 text-sm font-semibold">هیچ داواکارییەک نییە</p>
+              </div>
+            : rows.map((o, idx) => {
               const ss = STATUS_STYLE[o.status] ?? STATUS_STYLE["چاوەڕوانە"];
               return (
                 <div key={o.id}
@@ -131,8 +126,7 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
                   </div>
                   <div className="text-end shrink-0 space-y-0.5">
                     <p className="text-[12px] font-extrabold tabular-nums" style={{ color:"#34d399" }}>
-                      {new Intl.NumberFormat("ku-IQ").format(o.amount)}
-                      <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                      {formatMoney(o.amount)}
                     </p>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold"
                       style={{ background:ss.bg, color:ss.color, border:`1px solid ${ss.border}` }}>
@@ -150,6 +144,7 @@ function OrdersPanel({ isLoading }: { isLoading: boolean }) {
 
 /* ── PAYMENTS tab ───────────────────────────────────────────────── */
 function PaymentsPanel({ isLoading }: { isLoading: boolean }) {
+  const { formatMoney } = useCurrency();
   const methodColor = (m: string) =>
     m === "کارت"
       ? { bg:"rgba(124,58,237,0.12)", color:"rgba(167,139,250,0.9)", border:"rgba(124,58,237,0.3)" }
@@ -161,9 +156,9 @@ function PaymentsPanel({ isLoading }: { isLoading: boolean }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         {isLoading ? [0,1,2].map(i => <MetricSkeleton key={i} />) : [
-          { label:"کۆیی پارەی دراو",    value:"٣.١٧M", color:C.green  },
-          { label:"کارتی کرێدیت",       value:"٢ مامەڵە",color:C.purple },
-          { label:"چاوەڕوانی تەسدیق",   value:"٢",     color:C.orange },
+          { label:"کۆیی پارەی دراو",    value:formatMoney(0), color:C.green  },
+          { label:"کارتی کرێدیت",       value:"0", color:C.purple },
+          { label:"چاوەڕوانی تەسدیق",   value:"0",     color:C.orange },
         ].map(m => (
           <div key={m.label} style={GLASS} className="p-4">
             <p className="text-2xl font-extrabold" style={{ color:m.color }}>{m.value}</p>
@@ -178,7 +173,12 @@ function PaymentsPanel({ isLoading }: { isLoading: boolean }) {
         </div>
         {isLoading
           ? <div className="p-4"><TableRowSkeleton rows={5} /></div>
-          : PAYMENTS.map((p, idx) => {
+          : PAYMENTS.length === 0
+            ? <div className="flex flex-col items-center py-16 gap-3">
+                <CreditCard className="w-10 h-10" style={{ color:"rgba(16,185,129,0.35)" }} />
+                <p className="text-white/40 text-sm font-semibold">هیچ مامەڵەیەک نییە</p>
+              </div>
+            : PAYMENTS.map((p, idx) => {
               const ss = STATUS_STYLE[p.status] ?? STATUS_STYLE["چاوەڕوانە"];
               const mc = methodColor(p.method);
               return (
@@ -195,8 +195,7 @@ function PaymentsPanel({ isLoading }: { isLoading: boolean }) {
                   </span>
                   <div className="text-end shrink-0 space-y-0.5">
                     <p className="text-[12px] font-extrabold tabular-nums" style={{ color:"#34d399" }}>
-                      {new Intl.NumberFormat("ku-IQ").format(p.amount)}
-                      <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                      {formatMoney(p.amount)}
                     </p>
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
                       style={{ background:ss.bg, color:ss.color, border:`1px solid ${ss.border}` }}>

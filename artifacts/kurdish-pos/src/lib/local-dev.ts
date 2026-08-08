@@ -1,4 +1,5 @@
 import type { AuthUser } from "@/contexts/AuthContext";
+import { resolveDisplayUserName } from "@/lib/user-display";
 
 const CACHED_USER_KEY = "pos_cached_user";
 
@@ -37,6 +38,9 @@ export function isLocalDev(): boolean {
 
 /** Persist and return a mock platform admin for local UI development. */
 export function ensureDevAdminSession(): AuthUser {
+  if (import.meta.env.PROD) {
+    throw new Error("Dev admin session is disabled in production");
+  }
   const raw = localStorage.getItem(CACHED_USER_KEY);
   if (raw) {
     try {
@@ -52,6 +56,9 @@ export function ensureDevAdminSession(): AuthUser {
 
 /** Persist and return a mock merchant for the main client application. */
 export function ensureMerchantAppSession(): AuthUser {
+  if (import.meta.env.PROD) {
+    throw new Error("Dev merchant session is disabled in production");
+  }
   const raw = localStorage.getItem(CACHED_USER_KEY);
   if (raw) {
     try {
@@ -74,7 +81,5 @@ export const ensureDevMerchantSession = ensureMerchantAppSession;
 
 /** Production-friendly label for profile UI (strips legacy "Dev …" mock names). */
 export function getDisplayUserName(user: AuthUser | null | undefined): string {
-  if (!user) return "";
-  const primary = user.storeName?.trim() || user.name?.trim() || user.username?.trim() || "";
-  return primary.replace(/^Dev\s+/i, "");
+  return resolveDisplayUserName(user);
 }

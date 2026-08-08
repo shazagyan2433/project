@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
+import { cn } from "@/lib/utils";
 
 // ─── Language definitions ─────────────────────────────────────────────────────
 
@@ -91,46 +92,22 @@ function Trigger({ lang, open, onClick, compact = false }: TriggerProps) {
       type="button"
       aria-haspopup="listbox"
       aria-expanded={open}
+      data-open={open ? "true" : "false"}
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-xl transition-all duration-150 select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-      style={{
-        padding:    compact ? "5px 8px" : "5px 10px",
-        background: open
-          ? "rgba(255,255,255,0.09)"
-          : "rgba(255,255,255,0.04)",
-        border:     open
-          ? "1px solid rgba(255,255,255,0.14)"
-          : "1px solid rgba(255,255,255,0.07)",
-        boxShadow:  open ? "0 0 0 3px rgba(59,130,246,0.10)" : "none",
-      }}
-      onMouseEnter={(e) => {
-        if (!open) {
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.12)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!open) {
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.07)";
-        }
-      }}
+      className={cn(
+        "linqi-lang-trigger flex items-center gap-1.5 rounded-xl transition-all duration-150 select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50",
+        compact ? "px-2 py-1.5" : "px-2.5 py-1.5",
+      )}
     >
       <Globe
-        className="shrink-0"
-        style={{
-          width:  14,
-          height: 14,
-          color:  open ? "#22d3ee" : "#f8fafc",
-          transition: "color 0.15s",
-        }}
+        className={cn("shrink-0 w-3.5 h-3.5 transition-colors", open && "text-cyan-500 dark:text-cyan-400")}
+        style={!open ? { color: "var(--shell-text-secondary)" } : undefined}
       />
       <span
-        className="font-extrabold leading-none text-white"
+        className="font-extrabold leading-none linqi-shell-heading"
         style={{
           fontFamily: "Vazirmatn, sans-serif",
           fontSize:   compact ? 11 : 11.5,
-          color:      open ? "#ffffff" : "#f1f5f9",
           letterSpacing: "0.01em",
         }}
       >
@@ -139,14 +116,10 @@ function Trigger({ lang, open, onClick, compact = false }: TriggerProps) {
       <motion.div
         animate={{ rotate: open ? 180 : 0 }}
         transition={{ duration: 0.18, ease: "easeInOut" }}
-        style={{ display: "flex", alignItems: "center" }}
+        className="flex items-center"
       >
         <ChevronDown
-          style={{
-            width:  11,
-            height: 11,
-            color: open ? "#22d3ee" : "#e2e8f0",
-          }}
+          className={cn("w-2.5 h-2.5 linqi-shell-muted", open && "text-cyan-500 dark:text-cyan-400")}
         />
       </motion.div>
     </button>
@@ -172,21 +145,11 @@ function LangOption({ lang, active, onSelect, index }: OptionProps) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.045, duration: 0.15 }}
       onClick={onSelect}
-      className="w-full flex items-center gap-3 px-3 py-2.5 outline-none transition-all duration-120 relative"
-      style={{
-        background:   active ? `${lang.accent}14` : "transparent",
-        borderBottom: index < LANGS.length - 1
-          ? "1px solid rgba(255,255,255,0.04)"
-          : "none",
-      }}
-      onMouseEnter={(e) => {
-        if (!active)
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.055)";
-      }}
-      onMouseLeave={(e) => {
-        if (!active)
-          (e.currentTarget as HTMLElement).style.background = "transparent";
-      }}
+      className={cn(
+        "w-full flex items-center gap-3 px-3 py-2.5 outline-none transition-all duration-120 relative linqi-dropdown-item",
+        index < LANGS.length - 1 && "border-b border-[var(--shell-border)]",
+      )}
+      style={{ background: active ? `${lang.accent}14` : "transparent" }}
     >
       {/* Active indicator bar */}
       {active && (
@@ -200,12 +163,10 @@ function LangOption({ lang, active, onSelect, index }: OptionProps) {
 
       {/* Flag badge */}
       <div
-        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-base"
+        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-base border"
         style={{
-          background: active ? `${lang.accent}20` : "rgba(255,255,255,0.06)",
-          border:     active
-            ? `1.5px solid ${lang.accent}40`
-            : "1.5px solid rgba(255,255,255,0.07)",
+          background: active ? `${lang.accent}20` : "var(--shell-hover)",
+          borderColor: active ? `${lang.accent}40` : "var(--shell-border)",
         }}
       >
         {lang.flag}
@@ -214,16 +175,16 @@ function LangOption({ lang, active, onSelect, index }: OptionProps) {
       {/* Name + sample */}
       <div className="flex-1 min-w-0 text-start">
         <p
-          className="text-[13px] font-extrabold leading-none mb-0.5"
-          style={{
-            fontFamily: "Vazirmatn, sans-serif",
-            color: active ? "#ffffff" : "#f1f5f9",
-          }}
+          className={cn(
+            "text-[13px] font-extrabold leading-none mb-0.5 linqi-shell-heading",
+            active && "opacity-100",
+          )}
+          style={{ fontFamily: "Vazirmatn, sans-serif" }}
         >
           {lang.native}
         </p>
         <p
-          className="text-[10px] leading-none text-slate-300"
+          className="text-[10px] leading-none linqi-shell-muted"
           style={{
             fontFamily: "Vazirmatn, sans-serif",
             direction: lang.dir === "RTL" ? "rtl" : "ltr",
@@ -276,6 +237,7 @@ interface DropdownProps {
 }
 
 function Dropdown({ currentCode, onSelect, align = "end" }: DropdownProps) {
+  const { t } = useTranslation("common");
   return (
     <motion.div
       initial={{ opacity: 0, y: 8, scale: 0.96 }}
@@ -284,31 +246,19 @@ function Dropdown({ currentCode, onSelect, align = "end" }: DropdownProps) {
       transition={{ duration: 0.15, ease: "easeOut" }}
       role="listbox"
       aria-label="Select language"
-      className={`absolute top-[calc(100%+8px)] ${align === "end" ? "end-0" : "start-0"} w-[230px] rounded-2xl overflow-hidden`}
-      style={{
-        background:           "rgba(10,14,22,0.96)",
-        backdropFilter:       "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        border:               "1px solid rgba(255,255,255,0.09)",
-        boxShadow: [
-          "0 20px 60px rgba(0,0,0,0.60)",
-          "0 4px 16px rgba(0,0,0,0.40)",
-          "inset 0 1px 0 rgba(255,255,255,0.06)",
-        ].join(", "),
-        zIndex: 200,
-      }}
+      className={cn(
+        "absolute top-[calc(100%+8px)] w-[230px] rounded-2xl overflow-hidden linqi-dropdown",
+        align === "end" ? "end-0" : "start-0",
+      )}
+      style={{ zIndex: 200 }}
     >
       {/* Header */}
-      <div
-        className="flex items-center gap-2 px-3 py-2.5"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <Globe style={{ width: 11, height: 11, color: "rgba(96,165,250,0.70)" }} />
+      <div className="flex items-center gap-2 px-3 py-2.5 linqi-dropdown-header">
+        <Globe className="w-2.5 h-2.5 text-blue-400" />
         <span
-          className="text-[9.5px] font-black uppercase tracking-[0.14em]"
-          style={{ color: "rgba(255,255,255,0.28)" }}
+          className="text-[9.5px] font-black uppercase tracking-[0.14em] linqi-shell-muted"
         >
-          Language / زمان / اللغة
+          {t("language.select", { ns: "common" })}
         </span>
       </div>
 
@@ -327,15 +277,11 @@ function Dropdown({ currentCode, onSelect, align = "end" }: DropdownProps) {
 
       {/* Footer */}
       <div
-        className="px-3 py-2"
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          background: "rgba(0,0,0,0.25)",
-        }}
+        className="px-3 py-2 linqi-dropdown-footer bg-[var(--shell-hover)]"
       >
         <p
-          className="text-[9px] text-center"
-          style={{ color: "rgba(255,255,255,0.16)", fontFamily: "Vazirmatn, sans-serif" }}
+          className="text-[9px] text-center linqi-shell-muted"
+          style={{ fontFamily: "Vazirmatn, sans-serif" }}
         >
           LinQi · Multilingual B2B Platform
         </p>
@@ -357,7 +303,7 @@ export function LanguageSwitcher({
   variant = "header",
   align   = "end",
 }: LanguageSwitcherProps) {
-  const { i18n: i18nHook } = useTranslation();
+  const { i18n: i18nHook, t } = useTranslation("common");
   const currentCode  = (i18nHook.language || "ku") as LangCode;
   const currentLang  = LANGS.find((l) => l.code === currentCode) ?? LANGS[0];
 
@@ -394,11 +340,11 @@ export function LanguageSwitcher({
     return (
       <div className="px-4 pt-3 pb-1">
         <div className="flex items-center gap-1.5 mb-2">
-          <Globe className="w-3 h-3 text-slate-200" />
+          <Globe className="w-3 h-3 linqi-sidebar-label" />
           <span
-            className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-slate-200"
+            className="text-[9px] font-extrabold uppercase tracking-[0.15em] linqi-sidebar-label"
           >
-            Language
+            {t("language.select")}
           </span>
         </div>
         <div className="flex gap-1">
@@ -409,35 +355,22 @@ export function LanguageSwitcher({
                 key={lang.code}
                 type="button"
                 onClick={() => handleSelect(lang.code)}
-                className="flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150 relative overflow-hidden"
+                className={cn(
+                  "flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150 relative overflow-hidden border",
+                  active
+                    ? "text-slate-900 dark:text-white"
+                    : "text-slate-900 dark:text-inherit linqi-shell-body border-[var(--shell-border)] hover:bg-slate-200/60 dark:hover:bg-[var(--shell-hover)] hover:text-slate-900 dark:hover:text-[var(--shell-text-primary)]",
+                )}
                 style={
                   active
                     ? {
                         background: `${lang.accent}20`,
-                        color: "#ffffff",
-                        border: `1px solid ${lang.accent}40`,
+                        borderColor: `${lang.accent}40`,
                         boxShadow: `0 0 12px ${lang.accent}20`,
                         fontFamily: "Vazirmatn, sans-serif",
                       }
-                    : {
-                        color: "#f1f5f9",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "transparent",
-                        fontFamily: "Vazirmatn, sans-serif",
-                      }
+                    : { fontFamily: "Vazirmatn, sans-serif" }
                 }
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    (e.currentTarget as HTMLElement).style.color = "#22d3ee";
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    (e.currentTarget as HTMLElement).style.color = "#f1f5f9";
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }
-                }}
               >
                 {active && (
                   <motion.div

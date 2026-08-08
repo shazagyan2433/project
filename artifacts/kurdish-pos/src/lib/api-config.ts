@@ -1,5 +1,8 @@
-/** Dev API port — must match root `pnpm dev` and Vite proxy target */
+/** Dev API port — must match api-server and Vite proxy target */
 export const DEV_API_PORT = 5001;
+
+/** Dev Vite port when running `pnpm dev` from the repo root */
+export const DEV_WEB_PORT = 5173;
 
 export const API_HEALTH_PATH = "/api/healthz";
 

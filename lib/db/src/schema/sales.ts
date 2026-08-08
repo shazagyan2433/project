@@ -8,11 +8,15 @@ export const salesTable = pgTable("sales", {
   customerId: integer("customer_id").references(() => customersTable.id),
   paymentType: text("payment_type").notNull(), // 'cash' | 'debt'
   paymentMethod: text("payment_method").notNull().default("cash"), // 'cash' | 'cash_on_delivery' | 'qr_payment'
+  orderStatus: text("order_status").notNull().default("completed"), // 'pending_delivery' | 'delivered' | 'completed'
+  paymentStatus: text("payment_status").notNull().default("paid"), // 'paid' | 'unpaid' | 'cash_pending' | 'paid_cod'
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).notNull(),
   paidAmount: decimal("paid_amount", { precision: 12, scale: 2 }).notNull().default("0"),
   discountAmount: decimal("discount_amount", { precision: 12, scale: 2 }),
   exchangeRate: decimal("exchange_rate", { precision: 10, scale: 4 }),
   commissionAmount: decimal("commission_amount", { precision: 10, scale: 2 }),
+  paidAt: timestamp("paid_at"),
+  collectedByDriverId: integer("collected_by_driver_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

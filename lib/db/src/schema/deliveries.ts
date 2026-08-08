@@ -5,10 +5,13 @@ import { z } from "zod/v4";
 export const deliveriesTable = pgTable("deliveries", {
   id: serial("id").primaryKey(),
   orderId: text("order_id").notNull().unique(),
+  saleId: integer("sale_id"),
   driverId: integer("driver_id"),
   status: text("status", { enum: ["active", "completed", "cancelled"] })
     .notNull()
     .default("active"),
+  totalAmount: decimal("total_amount", { precision: 12, scale: 2 }),
+  currency: text("currency").notNull().default("IQD"),
   // Pickup (shop) coordinates
   shopLat: decimal("shop_lat", { precision: 10, scale: 7 }).notNull(),
   shopLng: decimal("shop_lng", { precision: 10, scale: 7 }).notNull(),
@@ -23,6 +26,7 @@ export const deliveriesTable = pgTable("deliveries", {
   driverHeading: decimal("driver_heading", { precision: 6, scale: 2 }),
   driverSpeed: decimal("driver_speed", { precision: 8, scale: 2 }),
   locationUpdatedAt: timestamp("location_updated_at"),
+  codCollectedAt: timestamp("cod_collected_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

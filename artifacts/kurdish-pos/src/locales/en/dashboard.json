@@ -17,6 +17,20 @@
     "systemActive": "System Active",
     "linesActive": "Lines Active"
   },
+  "empty": {
+    "noStats": "No statistics available",
+    "noStatsSubtitle": "Your metrics will appear here after your first transaction",
+    "noActivity": "No activity recorded yet",
+    "noActivitySubtitle": "Your activity feed will show here once you complete your first sale",
+    "noChart": "No statistics available",
+    "noChartSubtitle": "Charts will populate after your first sale",
+    "noItems": "No products yet",
+    "noItemsSubtitle": "Top-selling products will appear here",
+    "noAlerts": "No alerts",
+    "noAlertsSubtitle": "Stock alerts will appear when inventory runs low",
+    "noRows": "No transactions yet",
+    "noRowsSubtitle": "Transactions will show here once you start selling"
+  },
   "table": {
     "total": "Total",
     "time": "Time",
@@ -44,122 +58,1134 @@
       "statusText": "Store Open",
       "title": "Dashboard",
       "titleHighlight": "Market",
-      "m0": { "label": "Total Sales Today",       "sub": "Growth vs. yesterday" },
-      "m1": { "label": "Active Customers Today",  "sub": "New & returning customers" },
-      "m2": { "label": "Inventory Alerts",        "sub": "Items need restocking" },
-      "m3": { "label": "Incoming Orders",         "sub": "Purchase & return requests" },
-      "activity": { "title": "Store Activity",    "sub": "Latest transactions today" },
-      "chart":    { "title": "Daily Sales Analysis", "sub": "Routine sales vs. monthly target", "line1": "Routine Sales", "line2": "Monthly Target" },
-      "top":      { "title": "Top-Selling Items", "sub": "Best-selling products this year" },
-      "alerts":   { "title": "Low Stock Alerts" },
-      "table":    { "title": "Recent Purchases", "sub": "Latest store transactions", "colParty": "Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+      "m0": {
+        "label": "Total Sales Today",
+        "sub": "Growth vs. yesterday"
+      },
+      "m1": {
+        "label": "Active Customers Today",
+        "sub": "New & returning customers"
+      },
+      "m2": {
+        "label": "Inventory Alerts",
+        "sub": "Items need restocking"
+      },
+      "m3": {
+        "label": "Incoming Orders",
+        "sub": "Purchase & return requests"
+      },
+      "activity": {
+        "title": "Store Activity",
+        "sub": "Latest transactions today"
+      },
+      "chart": {
+        "title": "Daily Sales Analysis",
+        "sub": "Routine sales vs. monthly target",
+        "line1": "Routine Sales",
+        "line2": "Monthly Target"
+      },
+      "top": {
+        "title": "Top-Selling Items",
+        "sub": "Best-selling products this year"
+      },
+      "alerts": {
+        "title": "Low Stock Alerts"
+      },
+      "table": {
+        "title": "Recent Purchases",
+        "sub": "Latest store transactions",
+        "colParty": "Customer",
+        "colCount": "Qty",
+        "colMethod": "Payment Method"
+      }
     },
     "pharma": {
       "statusText": "Clinic & Pharmacy Open",
       "title": "Management Terminal",
       "titleHighlight": "Medical & Pharma",
-      "m0": { "label": "Total Pharma Sales",        "sub": "Growth vs. last week" },
-      "m1": { "label": "Patients & Customers Today","sub": "New & returning patients" },
-      "m2": { "label": "Low Medicine Alerts",       "sub": "Items need restocking" },
-      "m3": { "label": "New Prescriptions",         "sub": "Medical scripts & requests" },
-      "activity": { "title": "Pharmacy Activity",   "sub": "Latest transactions today" },
-      "chart":    { "title": "Pharmacy Sales Analysis", "sub": "Daily revenue vs. target", "line1": "Medicine Sales", "line2": "Monthly Target" },
-      "top":      { "title": "Medicine & Medical Supply List", "sub": "Best-selling medicines this year" },
-      "alerts":   { "title": "Low Medicine Stock" },
-      "table":    { "title": "Patient Purchases", "sub": "Latest pharmacy sales", "colParty": "Patient / Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+      "m0": {
+        "label": "Total Pharma Sales",
+        "sub": "Growth vs. last week"
+      },
+      "m1": {
+        "label": "Patients & Customers Today",
+        "sub": "New & returning patients"
+      },
+      "m2": {
+        "label": "Low Medicine Alerts",
+        "sub": "Items need restocking"
+      },
+      "m3": {
+        "label": "New Prescriptions",
+        "sub": "Medical scripts & requests"
+      },
+      "activity": {
+        "title": "Pharmacy Activity",
+        "sub": "Latest transactions today"
+      },
+      "chart": {
+        "title": "Pharmacy Sales Analysis",
+        "sub": "Daily revenue vs. target",
+        "line1": "Medicine Sales",
+        "line2": "Monthly Target"
+      },
+      "top": {
+        "title": "Medicine & Medical Supply List",
+        "sub": "Best-selling medicines this year"
+      },
+      "alerts": {
+        "title": "Low Medicine Stock"
+      },
+      "table": {
+        "title": "Patient Purchases",
+        "sub": "Latest pharmacy sales",
+        "colParty": "Patient / Customer",
+        "colCount": "Qty",
+        "colMethod": "Payment Method"
+      }
     },
     "restaurant": {
       "statusText": "Restaurant Open",
       "title": "Dashboard",
       "titleHighlight": "Restaurant",
-      "m0": { "label": "Today's Revenue",           "sub": "Growth vs. yesterday" },
-      "m1": { "label": "Incoming Orders",           "sub": "Table & takeaway requests" },
-      "m2": { "label": "Tables Occupied Now",       "sub": "Occupied & available tables" },
-      "m3": { "label": "Top-Ordered Items",         "sub": "Today's menu" },
-      "activity": { "title": "Restaurant Activity", "sub": "Latest orders today" },
-      "chart":    { "title": "Restaurant Revenue Analysis", "sub": "Daily revenue vs. target", "line1": "Routine Revenue", "line2": "Monthly Target" },
-      "top":      { "title": "Best-Selling Dishes", "sub": "Top menu items this year" },
-      "alerts":   { "title": "Low Ingredient Stock" },
-      "table":    { "title": "Today's Orders", "sub": "Latest restaurant orders", "colParty": "Table / Customer", "colCount": "Dishes", "colMethod": "Payment Method" }
+      "m0": {
+        "label": "Today's Revenue",
+        "sub": "Growth vs. yesterday"
+      },
+      "m1": {
+        "label": "Incoming Orders",
+        "sub": "Table & takeaway requests"
+      },
+      "m2": {
+        "label": "Tables Occupied Now",
+        "sub": "Occupied & available tables"
+      },
+      "m3": {
+        "label": "Top-Ordered Items",
+        "sub": "Today's menu"
+      },
+      "activity": {
+        "title": "Restaurant Activity",
+        "sub": "Latest orders today"
+      },
+      "chart": {
+        "title": "Restaurant Revenue Analysis",
+        "sub": "Daily revenue vs. target",
+        "line1": "Routine Revenue",
+        "line2": "Monthly Target"
+      },
+      "top": {
+        "title": "Best-Selling Dishes",
+        "sub": "Top menu items this year"
+      },
+      "alerts": {
+        "title": "Low Ingredient Stock"
+      },
+      "table": {
+        "title": "Today's Orders",
+        "sub": "Latest restaurant orders",
+        "colParty": "Table / Customer",
+        "colCount": "Dishes",
+        "colMethod": "Payment Method"
+      }
     },
     "hotel": {
       "statusText": "Hotel Open",
       "title": "Dashboard",
       "titleHighlight": "Hotel",
-      "m0": { "label": "Booking Revenue Today",   "sub": "Growth vs. yesterday" },
-      "m1": { "label": "Rooms Occupied",           "sub": "Occupied & available rooms" },
-      "m2": { "label": "Active Guests Today",      "sub": "Check-ins & arrivals" },
-      "m3": { "label": "Requested Services",       "sub": "Laundry & dining requests" },
-      "activity": { "title": "Hotel Activity",    "sub": "Latest events today" },
-      "chart":    { "title": "Hotel Revenue Analysis", "sub": "Booking revenue vs. monthly target", "line1": "Booking Revenue", "line2": "Monthly Target" },
-      "top":      { "title": "Top-Booked Room Types", "sub": "Most requested room categories" },
-      "alerts":   { "title": "Current Room Issues" },
-      "table":    { "title": "Today's Bookings", "sub": "Check-ins & arrivals", "colParty": "Guest", "colCount": "Nights", "colMethod": "Payment Method" }
+      "m0": {
+        "label": "Booking Revenue Today",
+        "sub": "Growth vs. yesterday"
+      },
+      "m1": {
+        "label": "Rooms Occupied",
+        "sub": "Occupied & available rooms"
+      },
+      "m2": {
+        "label": "Active Guests Today",
+        "sub": "Check-ins & arrivals"
+      },
+      "m3": {
+        "label": "Requested Services",
+        "sub": "Laundry & dining requests"
+      },
+      "activity": {
+        "title": "Hotel Activity",
+        "sub": "Latest events today"
+      },
+      "chart": {
+        "title": "Hotel Revenue Analysis",
+        "sub": "Booking revenue vs. monthly target",
+        "line1": "Booking Revenue",
+        "line2": "Monthly Target"
+      },
+      "top": {
+        "title": "Top-Booked Room Types",
+        "sub": "Most requested room categories"
+      },
+      "alerts": {
+        "title": "Current Room Issues"
+      },
+      "table": {
+        "title": "Today's Bookings",
+        "sub": "Check-ins & arrivals",
+        "colParty": "Guest",
+        "colCount": "Nights",
+        "colMethod": "Payment Method"
+      }
     },
     "office": {
       "statusText": "Office Open",
       "title": "Dashboard",
       "titleHighlight": "Office / B2B",
-      "m0": { "label": "B2B Sales Today",          "sub": "Growth vs. last week" },
-      "m1": { "label": "Corporate Customers",      "sub": "Active companies & factories" },
-      "m2": { "label": "Pending Approvals",        "sub": "Product & market requests" },
-      "m3": { "label": "Outstanding Credit",       "sub": "Overdue receivables" },
-      "activity": { "title": "Business Activity", "sub": "Latest B2B transactions" },
-      "chart":    { "title": "B2B Sales Analysis", "sub": "Bulk sales vs. target", "line1": "B2B Sales", "line2": "Monthly Target" },
-      "top":      { "title": "Top-Selling Products", "sub": "Best-selling B2B products this year" },
-      "alerts":   { "title": "Low B2B Stock" },
-      "table":    { "title": "Today's Orders", "sub": "B2B & bulk requests", "colParty": "Company / Customer", "colCount": "Qty", "colMethod": "Payment Method" }
+      "m0": {
+        "label": "B2B Sales Today",
+        "sub": "Growth vs. last week"
+      },
+      "m1": {
+        "label": "Corporate Customers",
+        "sub": "Active companies & factories"
+      },
+      "m2": {
+        "label": "Pending Approvals",
+        "sub": "Product & market requests"
+      },
+      "m3": {
+        "label": "Outstanding Credit",
+        "sub": "Overdue receivables"
+      },
+      "activity": {
+        "title": "Business Activity",
+        "sub": "Latest B2B transactions"
+      },
+      "chart": {
+        "title": "B2B Sales Analysis",
+        "sub": "Bulk sales vs. target",
+        "line1": "B2B Sales",
+        "line2": "Monthly Target"
+      },
+      "top": {
+        "title": "Top-Selling Products",
+        "sub": "Best-selling B2B products this year"
+      },
+      "alerts": {
+        "title": "Low B2B Stock"
+      },
+      "table": {
+        "title": "Today's Orders",
+        "sub": "B2B & bulk requests",
+        "colParty": "Company / Customer",
+        "colCount": "Qty",
+        "colMethod": "Payment Method"
+      }
     },
     "delivery": {
       "statusText": "Delivery System Active",
       "title": "Dashboard",
       "titleHighlight": "Delivery",
-      "m0": { "label": "Completed Deliveries Today", "sub": "Deliveries completed" },
-      "m1": { "label": "Active Drivers",             "sub": "On-duty & available drivers" },
-      "m2": { "label": "Active Shipments",           "sub": "Deliveries in transit" },
-      "m3": { "label": "Success Rate",               "sub": "Successful deliveries this year" },
-      "activity": { "title": "Delivery Activity",   "sub": "Latest shipments & transfers" },
-      "chart":    { "title": "Daily Delivery Analysis", "sub": "Delivery count vs. target", "line1": "Completed Deliveries", "line2": "Daily Target" },
-      "top":      { "title": "Top Drivers", "sub": "By completed deliveries" },
-      "alerts":   { "title": "Route Issues" },
-      "table":    { "title": "Today's Deliveries", "sub": "Completed & in progress", "colParty": "Customer", "colCount": "Packages", "colMethod": "Type" }
+      "m0": {
+        "label": "Completed Deliveries Today",
+        "sub": "Deliveries completed"
+      },
+      "m1": {
+        "label": "Active Drivers",
+        "sub": "On-duty & available drivers"
+      },
+      "m2": {
+        "label": "Active Shipments",
+        "sub": "Deliveries in transit"
+      },
+      "m3": {
+        "label": "Success Rate",
+        "sub": "Successful deliveries this year"
+      },
+      "activity": {
+        "title": "Delivery Activity",
+        "sub": "Latest shipments & transfers"
+      },
+      "chart": {
+        "title": "Daily Delivery Analysis",
+        "sub": "Delivery count vs. target",
+        "line1": "Completed Deliveries",
+        "line2": "Daily Target"
+      },
+      "top": {
+        "title": "Top Drivers",
+        "sub": "By completed deliveries"
+      },
+      "alerts": {
+        "title": "Route Issues"
+      },
+      "table": {
+        "title": "Today's Deliveries",
+        "sub": "Completed & in progress",
+        "colParty": "Customer",
+        "colCount": "Packages",
+        "colMethod": "Type"
+      }
     }
   },
   "distributor": {
     "statusActive": "System Active",
     "title": "Distributor",
     "titleHighlight": "Dashboard",
-    "m0": { "label": "Distribution Volume YTD",    "sub": "Growth vs. prior period" },
-    "m1": { "label": "Active Agent Warehouses",    "sub": "Warehouses & distribution centers" },
-    "m2": { "label": "Pending Requests",           "sub": "Bulk & unit requests" },
-    "m3": { "label": "Shipments Today",            "sub": "Erbil · Sulaymaniyah · Duhok routes" },
-    "activity": { "title": "Distribution Activity", "sub": "Latest business transactions" },
-    "chart":    { "title": "Distribution Volume Analysis", "sub": "Distribution and shipment flow over time", "line1": "Distribution Volume", "line2": "Completed Deliveries" },
-    "agents":   { "title": "Top Agents", "sub": "By distribution volume", "warehousesLabel": "warehouses" },
-    "pipeline": { "title": "Fulfillment Pipeline", "sub": "Shipment route monitoring", "loadsLabel": "loads", "filledLabel": "filled" }
+    "m0": {
+      "label": "Distribution Volume YTD",
+      "sub": "Growth vs. prior period"
+    },
+    "m1": {
+      "label": "Active Agent Warehouses",
+      "sub": "Warehouses & distribution centers"
+    },
+    "m2": {
+      "label": "Pending Requests",
+      "sub": "Bulk & unit requests"
+    },
+    "m3": {
+      "label": "Shipments Today",
+      "sub": "Erbil · Sulaymaniyah · Duhok routes"
+    },
+    "activity": {
+      "title": "Distribution Activity",
+      "sub": "Latest business transactions"
+    },
+    "chart": {
+      "title": "Distribution Volume Analysis",
+      "sub": "Distribution and shipment flow over time",
+      "line1": "Distribution Volume",
+      "line2": "Completed Deliveries"
+    },
+    "agents": {
+      "title": "Top Agents",
+      "sub": "By distribution volume",
+      "warehousesLabel": "warehouses"
+    },
+    "pipeline": {
+      "title": "Fulfillment Pipeline",
+      "sub": "Shipment route monitoring",
+      "loadsLabel": "loads",
+      "filledLabel": "filled"
+    }
   },
   "factory": {
     "statusActive": "Lines Active",
     "title": "Factory",
     "titleHighlight": "Dashboard",
-    "m0": { "label": "Today's Production",         "sub": "Production units — today" },
-    "m1": { "label": "Production Lines",           "sub": "3 active · 1 on maintenance" },
-    "m2": { "label": "Raw Materials",              "sub": "Packaging & oil running low" },
-    "m3": { "label": "Bulk Orders",                "sub": "Large-scale production requests" },
-    "activity": { "title": "Factory Activity",    "sub": "Latest production events" },
-    "chart":    { "title": "Production Analysis", "sub": "Routine factory output vs. target", "line1": "Routine Production", "line2": "Monthly Target" },
-    "lines":    { "title": "Production Line Status", "sub": "Utilization & output metrics", "utilizationLabel": "Utilization", "unitsLabel": "units" },
-    "orders":   { "title": "Bulk Orders", "sub": "Large-scale orders from companies", "colCustomer": "Customer", "colProduct": "Product", "colQty": "Qty", "colDeadline": "Deadline", "colStatus": "Status" }
+    "m0": {
+      "label": "Today's Production",
+      "sub": "Production units — today"
+    },
+    "m1": {
+      "label": "Production Lines",
+      "sub": "3 active · 1 on maintenance"
+    },
+    "m2": {
+      "label": "Raw Materials",
+      "sub": "Packaging & oil running low"
+    },
+    "m3": {
+      "label": "Bulk Orders",
+      "sub": "Large-scale production requests"
+    },
+    "activity": {
+      "title": "Factory Activity",
+      "sub": "Latest production events"
+    },
+    "chart": {
+      "title": "Production Analysis",
+      "sub": "Routine factory output vs. target",
+      "line1": "Routine Production",
+      "line2": "Monthly Target"
+    },
+    "lines": {
+      "title": "Production Line Status",
+      "sub": "Utilization & output metrics",
+      "utilizationLabel": "Utilization",
+      "unitsLabel": "units"
+    },
+    "orders": {
+      "title": "Bulk Orders",
+      "sub": "Large-scale orders from companies",
+      "colCustomer": "Customer",
+      "colProduct": "Product",
+      "colQty": "Qty",
+      "colDeadline": "Deadline",
+      "colStatus": "Status"
+    }
   },
   "currency": {
-    "iqd":    "IQD",
+    "iqd": "IQD",
     "suffix": "",
     "prefix": "IQD ",
-    "usd":    "$"
+    "usd": "$"
   },
   "chart": {
-    "millionSuffix":  "M",
+    "millionSuffix": "M",
     "thousandSuffix": "K",
-    "deliveryUnit":   "Deliveries"
+    "deliveryUnit": "Deliveries"
+  },
+  "demo": {
+    "pharma": {
+      "metrics": {
+        "0": {
+          "badge": "+18%"
+        },
+        "1": {
+          "badge": "+11 today"
+        },
+        "2": {
+          "badge": "2 urgent"
+        },
+        "3": {
+          "badge": "6 new"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "RX_7741": {
+          "label": "Prescription sale",
+          "party": "Ahmed Karim",
+          "time": "9:14 PM"
+        },
+        "ALT_0091": {
+          "label": "Medicine expiry alert",
+          "party": "Amoxicillin",
+          "time": "8:57 PM"
+        },
+        "RX_7740": {
+          "label": "Chronic medicine sale",
+          "party": "Sara Mohammed",
+          "time": "8:45 PM"
+        },
+        "RET_0044": {
+          "label": "Damaged medicine return",
+          "party": "Karim Ali",
+          "time": "8:30 PM"
+        },
+        "STK_0109": {
+          "label": "New shipment received",
+          "party": "Licensed medical distributors",
+          "time": "7:48 PM"
+        },
+        "RX_7739": {
+          "label": "Medical supply sale",
+          "party": "Nazdar Amin",
+          "time": "7:20 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "Main medicine stock (Amoxicillin)",
+          "unit": "pack"
+        },
+        "1": {
+          "name": "Chronic tablets (Metformin)",
+          "unit": "tablet"
+        },
+        "2": {
+          "name": "Children syrup (Nurofen)",
+          "unit": "bottle"
+        },
+        "3": {
+          "name": "Special skin cream",
+          "unit": "tube"
+        },
+        "4": {
+          "name": "Blood pressure medicine (Lisinopril)",
+          "unit": "tablet"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "Fast-acting insulin",
+          "unit": "vial"
+        },
+        "1": {
+          "name": "Special antibiotic cream",
+          "unit": "tube"
+        },
+        "2": {
+          "name": "Amoxicillin 500mg",
+          "unit": "pack"
+        },
+        "3": {
+          "name": "IV serum 1000ml",
+          "unit": "carton"
+        }
+      },
+      "rows": {
+        "7736": {
+          "party": "Walk-in customer",
+          "time": "6:05"
+        },
+        "7737": {
+          "party": "Rezan Hussein",
+          "time": "6:30"
+        },
+        "7738": {
+          "party": "Hawzhin Bakr",
+          "time": "6:55"
+        },
+        "7739": {
+          "party": "Nazdar Amin",
+          "time": "7:20"
+        },
+        "7740": {
+          "party": "Sara Mohammed",
+          "time": "8:45"
+        },
+        "7741": {
+          "party": "Ahmed Karim",
+          "time": "9:14"
+        }
+      }
+    },
+    "restaurant": {
+      "metrics": {
+        "0": {
+          "badge": "+22%"
+        },
+        "1": {
+          "badge": "+14 today"
+        },
+        "2": {
+          "badge": "66%"
+        },
+        "3": {
+          "badge": "Updated"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "ORD_5521": {
+          "label": "New order table 7",
+          "party": "Table 7 · 4 guests",
+          "time": "9:14 PM"
+        },
+        "ORD_5520": {
+          "label": "Order completed",
+          "party": "Table 3 · 2 guests",
+          "time": "9:02 PM"
+        },
+        "ORD_5519": {
+          "label": "Takeaway order",
+          "party": "Ahmed Karim",
+          "time": "8:45 PM"
+        },
+        "RET_0077": {
+          "label": "Food return",
+          "party": "Table 11",
+          "time": "8:30 PM"
+        },
+        "ORD_5518": {
+          "label": "Takeaway sale",
+          "party": "Hawzhin Bakr",
+          "time": "8:15 PM"
+        },
+        "ORD_5517": {
+          "label": "Order completed",
+          "party": "Table 2 · 3 guests",
+          "time": "7:50 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "Special spicy kebab",
+          "unit": "plate"
+        },
+        "1": {
+          "name": "Kurdish mansaf",
+          "unit": "plate"
+        },
+        "2": {
+          "name": "Chicken & vegetable soup",
+          "unit": "bowl"
+        },
+        "3": {
+          "name": "Meat stew with onions",
+          "unit": "plate"
+        },
+        "4": {
+          "name": "Erbil biryani",
+          "unit": "plate"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "Spicy meat",
+          "unit": "kg"
+        },
+        "1": {
+          "name": "White beans",
+          "unit": "kg"
+        },
+        "2": {
+          "name": "Cooking oil",
+          "unit": "liter"
+        },
+        "3": {
+          "name": "Onions",
+          "unit": "kg"
+        }
+      },
+      "rows": {
+        "5515": {
+          "party": "Table 1 · 6 guests",
+          "time": "6:45"
+        },
+        "5516": {
+          "party": "Table 9 · 1 guest",
+          "time": "7:20"
+        },
+        "5517": {
+          "party": "Table 2 · 3 guests",
+          "time": "7:50"
+        },
+        "5518": {
+          "party": "Hawzhin Bakr",
+          "time": "8:15"
+        },
+        "5520": {
+          "party": "Table 3 · 2 guests",
+          "time": "9:02"
+        },
+        "5521": {
+          "party": "Table 7 · 4 guests",
+          "time": "9:14"
+        }
+      }
+    },
+    "hotel": {
+      "metrics": {
+        "0": {
+          "badge": "+15%"
+        },
+        "1": {
+          "badge": "70%"
+        },
+        "2": {
+          "badge": "+12 today"
+        },
+        "3": {
+          "badge": "4 urgent"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "RES_2241": {
+          "label": "New booking",
+          "party": "Ahmed Karim — Room 304",
+          "time": "9:14 PM"
+        },
+        "CHK_0091": {
+          "label": "Guest checkout",
+          "party": "Sara Mohammed — Room 212",
+          "time": "9:00 PM"
+        },
+        "SRV_0441": {
+          "label": "Room service request",
+          "party": "Room 401",
+          "time": "8:45 PM"
+        },
+        "RES_2240": {
+          "label": "Online booking",
+          "party": "Karim Ali — 3 nights",
+          "time": "8:30 PM"
+        },
+        "CLN_0055": {
+          "label": "Cleaning request",
+          "party": "Rooms 110 — 115",
+          "time": "7:48 PM"
+        },
+        "SRV_0440": {
+          "label": "Hotel restaurant sale",
+          "party": "Table 5 — 4 guests",
+          "time": "7:20 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "Deluxe double room",
+          "unit": "night"
+        },
+        "1": {
+          "name": "Standard single room",
+          "unit": "night"
+        },
+        "2": {
+          "name": "VIP executive suite",
+          "unit": "night"
+        },
+        "3": {
+          "name": "Family room",
+          "unit": "night"
+        },
+        "4": {
+          "name": "Panoramic deluxe room",
+          "unit": "night"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "Room 204 — broken tablet",
+          "unit": "issue"
+        },
+        "1": {
+          "name": "Room 311 — faulty lock",
+          "unit": "issue"
+        },
+        "2": {
+          "name": "Room 105 — no linens",
+          "unit": "blocked"
+        },
+        "3": {
+          "name": "Room 408 — heater not working",
+          "unit": "issue"
+        }
+      },
+      "rows": {
+        "2236": {
+          "party": "VIP Tour Group",
+          "time": "Yesterday"
+        },
+        "2237": {
+          "party": "Rezan Hussein",
+          "time": "Yesterday"
+        },
+        "2238": {
+          "party": "Hawzhin Bakr",
+          "time": "Yesterday"
+        },
+        "2239": {
+          "party": "Nazdar Amin",
+          "time": "7:00"
+        },
+        "2240": {
+          "party": "Karim Ali",
+          "time": "8:30"
+        },
+        "2241": {
+          "party": "Ahmed Karim",
+          "time": "9:14"
+        }
+      }
+    },
+    "office": {
+      "metrics": {
+        "0": {
+          "badge": "+10%"
+        },
+        "1": {
+          "badge": "+4 this year"
+        },
+        "2": {
+          "badge": "3 new"
+        },
+        "3": {
+          "badge": "8 companies"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "B2B_4421": {
+          "label": "Bulk order",
+          "party": "Alpha Company",
+          "time": "9:14 PM"
+        },
+        "RFQ_0881": {
+          "label": "New price quote request",
+          "party": "Beta Company",
+          "time": "8:57 PM"
+        },
+        "DLV_0221": {
+          "label": "Order delivery",
+          "party": "Gamma Group",
+          "time": "8:30 PM"
+        },
+        "B2B_4420": {
+          "label": "Debt payment",
+          "party": "Delta Trading",
+          "time": "8:15 PM"
+        },
+        "RFQ_0880": {
+          "label": "Large B2B request",
+          "party": "Karim Company",
+          "time": "7:48 PM"
+        },
+        "B2B_4419": {
+          "label": "Bulk sale",
+          "party": "Erbil Trading",
+          "time": "7:20 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "A4 printing paper (ream)",
+          "unit": "carton"
+        },
+        "1": {
+          "name": "Laser printer toner",
+          "unit": "unit"
+        },
+        "2": {
+          "name": "Professional stationery",
+          "unit": "stock"
+        },
+        "3": {
+          "name": "Custom filing (A4)",
+          "unit": "unit"
+        },
+        "4": {
+          "name": "Office printer (HP LaserJet)",
+          "unit": "unit"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "A4 paper 80gsm",
+          "unit": "ream"
+        },
+        "1": {
+          "name": "HP 85A toner",
+          "unit": "unit"
+        },
+        "2": {
+          "name": "Ring binders",
+          "unit": "unit"
+        },
+        "3": {
+          "name": "Custom staplers",
+          "unit": "unit"
+        }
+      },
+      "rows": {
+        "4416": {
+          "party": "Beta Company",
+          "time": "Yesterday"
+        },
+        "4417": {
+          "party": "Gamma Group",
+          "time": "6:10"
+        },
+        "4418": {
+          "party": "Karim Company",
+          "time": "6:40"
+        },
+        "4419": {
+          "party": "Erbil Trading",
+          "time": "7:20"
+        },
+        "4420": {
+          "party": "Delta Trading",
+          "time": "8:15"
+        },
+        "4421": {
+          "party": "Alpha Company",
+          "time": "9:14"
+        }
+      }
+    },
+    "delivery": {
+      "metrics": {
+        "0": {
+          "badge": "+18%"
+        },
+        "1": {
+          "badge": "2 available"
+        },
+        "2": {
+          "badge": "4 drivers"
+        },
+        "3": {
+          "badge": "+2%"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "DLV_8841": {
+          "label": "Delivery completed",
+          "party": "Ahmed Karim — Segment 2",
+          "time": "9:22 PM"
+        },
+        "DLV_8840": {
+          "label": "Delivery in transit",
+          "party": "Sara Mohammed — Segment 5",
+          "time": "9:10 PM"
+        },
+        "DLV_8839": {
+          "label": "New delivery request",
+          "party": "Karim Ali — Zone A",
+          "time": "8:57 PM"
+        },
+        "DLV_8838": {
+          "label": "Corporate delivery",
+          "party": "Alpha Company",
+          "time": "8:30 PM"
+        },
+        "DLV_8837": {
+          "label": "Shipment delay",
+          "party": "Driver 3 — Kirkuk",
+          "time": "7:45 PM"
+        },
+        "DLV_8836": {
+          "label": "Route completed",
+          "party": "Driver 1 — Sulaymaniyah",
+          "time": "7:20 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "Ahmed Hussein — Erbil",
+          "unit": "deliveries"
+        },
+        "1": {
+          "name": "Karim Ali — Sulaymaniyah",
+          "unit": "deliveries"
+        },
+        "2": {
+          "name": "Hawzhin Bakr — Duhok",
+          "unit": "deliveries"
+        },
+        "3": {
+          "name": "Rezan Mohammed — Kirkuk",
+          "unit": "deliveries"
+        },
+        "4": {
+          "name": "Sara Amin — Erbil",
+          "unit": "deliveries"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "Driver 3 — low battery",
+          "unit": "%"
+        },
+        "1": {
+          "name": "Duhok route — road issue",
+          "unit": "alert"
+        },
+        "2": {
+          "name": "Vehicle 2 — flat tire",
+          "unit": "issue"
+        },
+        "3": {
+          "name": "Vehicle 5 — service",
+          "unit": "days"
+        }
+      },
+      "rows": {
+        "8834": {
+          "party": "Gamma Group",
+          "time": "6:20"
+        },
+        "8835": {
+          "party": "Nazdar Amin",
+          "time": "6:50"
+        },
+        "8836": {
+          "party": "Sulaymaniyah route",
+          "time": "7:20"
+        },
+        "8838": {
+          "party": "Alpha Company",
+          "time": "8:30"
+        },
+        "8840": {
+          "party": "Sara Mohammed",
+          "time": "9:10"
+        },
+        "8841": {
+          "party": "Ahmed Karim",
+          "time": "9:22"
+        }
+      }
+    },
+    "market": {
+      "metrics": {
+        "0": {
+          "badge": "+39%"
+        },
+        "1": {
+          "badge": "+12 today"
+        },
+        "2": {
+          "badge": "2 urgent"
+        },
+        "3": {
+          "badge": "5 new"
+        }
+      },
+      "chartDates": {
+        "0": "May 1",
+        "1": "May 5",
+        "2": "May 10",
+        "3": "May 15",
+        "4": "May 20",
+        "5": "May 25",
+        "6": "Jun 1",
+        "7": "Jun 7",
+        "8": "Jun 14",
+        "9": "Jun 21",
+        "10": "Jun 27"
+      },
+      "activities": {
+        "POS_4421": {
+          "label": "Supermarket purchase",
+          "party": "Ahmed Karim",
+          "time": "9:14 PM"
+        },
+        "ALT_0032": {
+          "label": "Low stock alert",
+          "party": "Basmati rice",
+          "time": "8:57 PM"
+        },
+        "POS_4420": {
+          "label": "Cash sale",
+          "party": "Sara Mohammed",
+          "time": "8:45 PM"
+        },
+        "RET_0114": {
+          "label": "Return request",
+          "party": "Karim Ali",
+          "time": "8:30 PM"
+        },
+        "STK_0221": {
+          "label": "New stock loaded",
+          "party": "Main warehouse",
+          "time": "7:48 PM"
+        },
+        "POS_4419": {
+          "label": "Order purchase",
+          "party": "Nazdar Amin",
+          "time": "7:20 PM"
+        }
+      },
+      "topItems": {
+        "0": {
+          "name": "Pakistani rice 25kg",
+          "unit": "bag"
+        },
+        "1": {
+          "name": "White sugar 10kg",
+          "unit": "bag"
+        },
+        "2": {
+          "name": "Cooking oil 1L",
+          "unit": "bottle"
+        },
+        "3": {
+          "name": "Local water 1.5L",
+          "unit": "unit"
+        },
+        "4": {
+          "name": "Ready meal (canned)",
+          "unit": "carton"
+        }
+      },
+      "alerts": {
+        "0": {
+          "name": "Basmati rice 5kg",
+          "unit": "bag"
+        },
+        "1": {
+          "name": "UHT protein milk",
+          "unit": "unit"
+        },
+        "2": {
+          "name": "Kinderly chocolate",
+          "unit": "carton"
+        },
+        "3": {
+          "name": "Mayonnaise 1000ml",
+          "unit": "bottle"
+        }
+      },
+      "rows": {
+        "4416": {
+          "party": "Walk-in customer",
+          "time": "6:05"
+        },
+        "4417": {
+          "party": "Rezan Hussein",
+          "time": "6:30"
+        },
+        "4418": {
+          "party": "Hawzhin Bakr",
+          "time": "6:55"
+        },
+        "4419": {
+          "party": "Nazdar Amin",
+          "time": "7:20"
+        },
+        "4420": {
+          "party": "Sara Mohammed",
+          "time": "8:45"
+        },
+        "4421": {
+          "party": "Ahmed Karim",
+          "time": "9:14"
+        }
+      }
+    }
   }
 }

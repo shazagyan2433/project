@@ -3,6 +3,7 @@ import { db, businessRegistrationsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 import { requireAdmin } from "../middlewares/auth";
+import { assertValidRegistration, initialRegistrationStatus } from "../lib/registration-policy";
 
 const router: IRouter = Router();
 
@@ -35,11 +36,20 @@ function serializeRow(row: typeof businessRegistrationsTable.$inferSelect) {
 router.post("/verifications", async (req, res): Promise<void> => {
   try {
     const body = submitSchema.parse(req.body);
+
+    assertValidRegistration({
+      businessName: body.businessName,
+      mobile: body.mobile,
+      sectorKey: body.sectorKey,
+      sectorGroup: body.sectorGroup,
+    });
+
     const extra: Record<string, unknown> = { ...(body.extraData ?? {}) };
     if (body.username) extra.username = body.username;
     if (body.name) extra.name = body.name;
     if (body.password) extra.hasCredentials = true;
 
+    const regStatus = initialRegistrationStatus(body.sectorGroup, body.sectorKey);
     const [reg] = await db
       .insert(businessRegistrationsTable)
       .values({
@@ -52,16 +62,17 @@ router.post("/verifications", async (req, res): Promise<void> => {
         city: body.city,
         address: body.address,
         extraData: extra,
-        status: "approved",
-        reviewedAt: new Date(),
-        reviewedBy: "auto",
+        status: regStatus,
+        reviewedAt: regStatus === "approved" ? new Date() : null,
+        reviewedBy: regStatus === "approved" ? "auto" : null,
       })
       .returning();
 
     res.status(201).json(serializeRow(reg));
   } catch (err) {
     req.log.error({ err }, "Failed to submit verification");
-    res.status(400).json({ message: "داتاکان هەڵەن" });
+    const message = err instanceof Error ? err.message : "داتاکان هەڵەن";
+    res.status(400).json({ message });
   }
 });
 

@@ -7,11 +7,13 @@ import {
   CheckCircle2, AlertCircle, Info, ChevronLeft, ChevronRight,
   Plus, ChevronDown, Settings, Home,
 } from "lucide-react";
-import { getSectorNavFeatures, normalizeSectorKey, type NavFeatureKey } from "@/lib/industries";
+import { getSectorNavFeatures, type NavFeatureKey } from "@/lib/industries";
+import { useUserSectorKey } from "@/hooks/useSectorScope";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useOffline } from "@/hooks/useOffline";
 import { SidebarParticles } from "@/components/SidebarParticles";
@@ -20,19 +22,21 @@ import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { logoutToEntryScreen } from "@/lib/auth-session";
-import { getDisplayUserName } from "@/lib/local-dev";
 import { toast } from "@/hooks/use-toast";
-
-/* ── Notification data (loaded from API — empty until notifications endpoint exists) ── */
-const NOTIFS: Array<{
-  id: number;
-  icon: typeof FileText;
-  color: string;
-  dot: string;
-  title: string;
-  sub: string;
-  time: string;
-}> = [];
+import { useRouteBreadcrumb, useDocumentPageTitle } from "@/lib/page-headers";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import { resolveDisplayUserName, getUserRoleLabel } from "@/lib/user-display";
+import { useNotifications } from "@/hooks/useB2bData";
+import { useQueryClient } from "@tanstack/react-query";
+import { socket } from "@/lib/socket";
+import type { ApiNotification } from "@/lib/live-notifications";
+import {
+  formatNotificationText,
+  formatNotificationTime,
+  getNotificationVisual,
+  loadReadNotificationIds,
+  saveReadNotificationIds,
+} from "@/lib/live-notifications";
 
 /* ── Quick-action items ─────────────────────────────────────────── */
 const QUICK_ACTIONS: Array<{ labelKey: string; href: string; color: string; feature: NavFeatureKey }> = [
@@ -49,19 +53,76 @@ interface TopHeaderProps {
 }
 
 function TopHeader({ searchRef }: TopHeaderProps) {
-  const { t }                              = useTranslation();
+  const { t, i18n }                        = useTranslation();
+  const { t: tu, dir }                     = useLocaleDir("ui");
   const { user, isAdmin }                  = useAuth();
-  const displayName                        = getDisplayUserName(user);
+  const { currency, setCurrency, formatMoney } = useCurrency();
+  const { data: apiNotifs = [] }           = useNotifications();
+  const displayName                        = resolveDisplayUserName(user, t);
+  const roleLabel                          = getUserRoleLabel(user, t);
   const [location, navigate]               = useLocation();
   const [search,       setSearch]          = useState("");
   const [searchFocused, setSearchFocused]  = useState(false);
   const [notifOpen,    setNotifOpen]       = useState(false);
   const [profileOpen,  setProfileOpen]     = useState(false);
   const [quickOpen,    setQuickOpen]       = useState(false);
-  const [readIds,      setReadIds]         = useState<Set<number>>(new Set());
+  const [readIds,      setReadIds]         = useState<Set<string>>(loadReadNotificationIds);
   const notifRef   = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const quickRef   = useRef<HTMLDivElement>(null);
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    socket.connect();
+    socket.emit("admin:join");
+
+    const onAdminNotification = (payload: ApiNotification) => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      if (payload.type === "cod_collected") {
+        const { title, body } = formatNotificationText(payload, tu, formatMoney);
+        toast({ title, description: body });
+      }
+    };
+
+    socket.on("admin_notification", onAdminNotification);
+    return () => {
+      socket.off("admin_notification", onAdminNotification);
+    };
+  }, [isAdmin, qc, tu, formatMoney]);
+
+  const headerNotifs = useMemo(
+    () =>
+      apiNotifs.slice(0, 8).map((n) => {
+        const { title, body } = formatNotificationText(n, tu, formatMoney);
+        const { icon, color } = getNotificationVisual(n.type);
+        return {
+          id: n.id,
+          icon,
+          color,
+          dot: color,
+          title,
+          sub: body,
+          time: formatNotificationTime(n.createdAt, i18n.language),
+        };
+      }),
+    [apiNotifs, tu, formatMoney, i18n.language, currency],
+  );
+
+  const markNotifRead = useCallback((id: string) => {
+    setReadIds((prev) => {
+      const next = new Set(prev).add(id);
+      saveReadNotificationIds(next);
+      return next;
+    });
+  }, []);
+
+  const markAllNotifsRead = useCallback(() => {
+    const next = new Set(apiNotifs.map((n) => n.id));
+    setReadIds(next);
+    saveReadNotificationIds(next);
+  }, [apiNotifs]);
 
   const handleSignOut = useCallback(() => {
     toast({
@@ -95,69 +156,36 @@ function TopHeader({ searchRef }: TopHeaderProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [searchRef]);
 
-  /* ── Breadcrumbs ── */
-  const sectorLabel = (() => {
-    try {
-      const key = normalizeSectorKey(
-        user?.sectorKey ?? (typeof window !== "undefined" ? localStorage.getItem("linqi_sector") : null),
-      );
-      if (!key) return "";
-      return t(`onboard.sector_${key}`, { ns: "auth", defaultValue: key });
-    } catch {
-      return "";
-    }
-  })();
+  /* ── Breadcrumbs — nav labels (match sidebar); no sector suffix ── */
+  const breadcrumb = useRouteBreadcrumb(location);
 
-  const breadcrumb = useMemo(() => {
-    const map: Record<string, { label: string; parent?: string }> = {
-      "/":                         { label: sectorLabel ? t("pageTitles.dashboard", { sector: sectorLabel }) : t("nav.dashboard") },
-      "/marketplace":              { label: sectorLabel ? t("pageTitles.marketplace", { sector: sectorLabel }) : t("nav.marketplace"),        parent: t("nav.b2bTerminal") },
-      "/ai-assistant":             { label: sectorLabel ? t("pageTitles.aiAssistant", { sector: sectorLabel }) : t("nav.linqiAssistant"),     parent: t("nav.b2bTerminal") },
-      "/inventory":                { label: sectorLabel ? t("pageTitles.inventory", { sector: sectorLabel }) : t("nav.inventory"),          parent: t("nav.b2bTerminal") },
-      "/logistics":                { label: sectorLabel ? t("pageTitles.logistics", { sector: sectorLabel }) : t("nav.logistics"),          parent: t("nav.b2bTerminal") },
-      "/negotiation":              { label: sectorLabel ? t("pageTitles.negotiation", { sector: sectorLabel }) : t("nav.negotiation"),        parent: t("nav.b2bTerminal") },
-      "/financial":                { label: sectorLabel ? t("pageTitles.financial", { sector: sectorLabel }) : t("nav.financial"),          parent: t("nav.b2bTerminal") },
-      "/market-intel":             { label: sectorLabel ? t("pageTitles.marketIntel", { sector: sectorLabel }) : t("nav.marketIntel"),        parent: t("nav.b2bTerminal") },
-      "/supplier-directory":       { label: sectorLabel ? t("pageTitles.suppliers", { sector: sectorLabel }) : t("nav.supplierDirectory"),  parent: t("nav.b2bTerminal") },
-      "/procurement":              { label: sectorLabel ? t("pageTitles.procurement", { sector: sectorLabel }) : t("nav.procurement"),        parent: t("nav.b2bTerminal") },
-      "/notifications":            { label: t("nav.notificationCenter"), parent: t("nav.tools") },
-      "/rewards":                  { label: t("nav.rewardsCenter"),      parent: t("nav.tools") },
-      "/dashboard":                { label: sectorLabel ? t("pageTitles.dashboard", { sector: sectorLabel }) : t("nav.dashboard") },
-      "/products":                 { label: t("nav.products",  { defaultValue: "Products"  }) },
-      "/customers":                { label: t("nav.customers", { defaultValue: "Customers" }) },
-      "/pos":                      { label: t("nav.pos",       { defaultValue: "POS"       }) },
-      "/sales":                    { label: t("nav.sales",     { defaultValue: "Sales"     }) },
-      "/debts":                    { label: t("nav.debts",     { defaultValue: "Debts"     }) },
-      "/reports":                  { label: t("nav.reports",   { defaultValue: "Reports"   }) },
-      "/history":                  { label: t("nav.history",   { defaultValue: "History"   }) },
-      "/settings":                 { label: t("top.settings", { defaultValue: "ڕێکخستنەکان" }) },
-    };
-    return map[location] ?? { label: location.replace("/", "") };
-  }, [t, location, sectorLabel]);
+  const unread = headerNotifs.filter((n) => !readIds.has(n.id)).length;
 
-  const unread = NOTIFS.filter(n => !readIds.has(n.id)).length;
-
-  const sectorKey = normalizeSectorKey(
-    user?.sectorKey ?? (typeof window !== "undefined" ? localStorage.getItem("linqi_sector") : null),
-  );
+  const sectorKey = useUserSectorKey();
   const navFeatures = getSectorNavFeatures(isAdmin ? null : sectorKey);
   const showQuickNav = (feat: NavFeatureKey) => !navFeatures || navFeatures.includes(feat);
   const quickActions = QUICK_ACTIONS.filter(a => showQuickNav(a.feature));
 
   /* ── Shared dropdown style ── */
+  const dropdownPanelClass = cn(
+    "absolute end-0 rounded-2xl overflow-hidden linqi-dropdown z-[999]",
+    "bg-white dark:bg-slate-900",
+    "border border-slate-200/80 dark:border-slate-700/80",
+    "shadow-xl backdrop-blur-md",
+    "isolate",
+  );
+
   const dropdownStyle: React.CSSProperties = {
-    backdropFilter:       "blur(24px)",
-    WebkitBackdropFilter: "blur(24px)",
-    zIndex: 100,
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
   };
 
   return (
     <div
-      className="h-16 shrink-0 hidden lg:flex items-center w-full px-5 gap-3 linqi-top-header"
-      style={{ zIndex: 5 }}
+      className="relative z-50 h-16 shrink-0 hidden lg:flex items-center w-full px-5 gap-3 linqi-top-header"
     >
-      {/* ── Breadcrumb ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-1.5 shrink-0 min-w-0 max-w-[220px]">
+      {/* ── Breadcrumb / page title ─────────────────────────────── */}
+      <div className="flex items-center gap-1.5 shrink-0 min-w-0 max-w-[min(100%,320px)]">
         <button
           onClick={() => navigate("/")}
           className="w-6 h-6 flex items-center justify-center rounded-lg shrink-0 transition-colors hover:bg-[var(--shell-hover)] linqi-breadcrumb-muted"
@@ -167,13 +195,16 @@ function TopHeader({ searchRef }: TopHeaderProps) {
         </button>
         {breadcrumb.parent && (
           <>
-            <span className="text-[11px] font-semibold truncate linqi-breadcrumb-muted">
+            <span className="hidden xl:inline text-[11px] font-semibold truncate max-w-[120px] linqi-breadcrumb-muted">
               {breadcrumb.parent}
             </span>
-            <ChevronRight className="w-3 h-3 shrink-0 linqi-breadcrumb-muted" />
+            <ChevronRight className="hidden xl:inline w-3 h-3 shrink-0 linqi-breadcrumb-muted" />
           </>
         )}
-        <span className="text-[12px] font-extrabold truncate linqi-breadcrumb-text" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
+        <span
+          className="text-[14px] font-extrabold leading-tight linqi-breadcrumb-text truncate"
+          style={{ fontFamily: "Vazirmatn,sans-serif" }}
+        >
           {breadcrumb.label}
         </span>
       </div>
@@ -181,8 +212,10 @@ function TopHeader({ searchRef }: TopHeaderProps) {
       {/* ── Search ─────────────────────────────────────────────── */}
       <div className="flex-1 max-w-xs relative">
         <Search
-          className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-colors"
-          style={{ color: searchFocused ? "rgba(96,165,250,0.7)" : "rgba(255,255,255,0.20)" }}
+          className={cn(
+            "absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-colors",
+            searchFocused ? "linqi-search-icon-focused" : "linqi-search-icon",
+          )}
         />
         <input
           ref={searchRef}
@@ -192,34 +225,22 @@ function TopHeader({ searchRef }: TopHeaderProps) {
           placeholder={t("top.search")}
           className="w-full ps-9 pe-14 py-2 rounded-xl text-[12px] outline-none transition-all duration-200 linqi-shell-input"
           style={{ fontFamily: "Vazirmatn,sans-serif" }}
-          onFocus={e => {
-            setSearchFocused(true);
-            e.currentTarget.style.border      = "1px solid rgba(59,130,246,0.45)";
-            e.currentTarget.style.background   = "rgba(255,255,255,0.065)";
-            e.currentTarget.style.boxShadow    = "0 0 0 3px rgba(59,130,246,0.10)";
-          }}
-          onBlur={e => {
-            setSearchFocused(false);
-            e.currentTarget.style.border     = "1px solid rgba(255,255,255,0.07)";
-            e.currentTarget.style.background  = "rgba(255,255,255,0.040)";
-            e.currentTarget.style.boxShadow   = "none";
-          }}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
         />
         {/* ⌘K badge */}
         {!searchFocused && !search && (
           <div
-            className="absolute end-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-md px-1.5 py-0.5 select-none pointer-events-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}
+            className="absolute end-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-md px-1.5 py-0.5 select-none pointer-events-none linqi-icon-btn"
           >
-            <span className="text-[9px] font-bold" style={{ color: "rgba(255,255,255,0.28)", fontFamily: "ui-monospace,monospace" }}>⌘K</span>
+            <span className="text-[9px] font-bold linqi-shell-muted" style={{ fontFamily: "ui-monospace,monospace" }}>⌘K</span>
           </div>
         )}
         {search && (
           <button
             type="button"
             onClick={() => { setSearch(""); searchRef.current?.focus(); }}
-            className="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full transition-colors"
-            style={{ color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.10)" }}
+            className="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full transition-colors linqi-shell-muted hover:text-[var(--shell-text-primary)] bg-[var(--shell-hover)]"
           >
             <X className="w-2.5 h-2.5" />
           </button>
@@ -227,10 +248,10 @@ function TopHeader({ searchRef }: TopHeaderProps) {
       </div>
 
       {/* ── Right actions ──────────────────────────────────────── */}
-      <div className="flex items-center gap-2 shrink-0 ms-auto">
+      <div className="flex items-center gap-2 shrink-0 ms-auto relative z-50">
 
         {/* Quick action (+) */}
-        <div ref={quickRef} className="relative">
+        <div ref={quickRef} className="relative z-[999]">
           <button
             onClick={() => { setQuickOpen(v => !v); setNotifOpen(false); setProfileOpen(false); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-extrabold transition-all duration-150"
@@ -254,10 +275,11 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.97 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-[calc(100%+8px)] end-0 w-52 rounded-2xl overflow-hidden linqi-dropdown"
+                className={cn(dropdownPanelClass, "top-[calc(100%+8px)] w-52")}
+                style={dropdownStyle}
               >
-                <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em]" style={{ color: "rgba(255,255,255,0.30)", fontFamily: "Vazirmatn,sans-serif" }}>
+                <div className="px-4 py-2.5 linqi-dropdown-header">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] linqi-shell-muted" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                     {t("top.quickAction")}
                   </p>
                 </div>
@@ -266,15 +288,12 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                     <button
                       key={href}
                       onClick={() => { navigate(href); setQuickOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start"
-                      style={{ background: "transparent" }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start linqi-dropdown-item linqi-shell-body"
                     >
                       <div className="w-5 h-5 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
                         <Plus className="w-3 h-3" style={{ color }} />
                       </div>
-                      <span className="text-[12px] font-bold" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "Vazirmatn,sans-serif" }}>
+                      <span className="text-[12px] font-bold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                         {t(labelKey)}
                       </span>
                     </button>
@@ -286,23 +305,46 @@ function TopHeader({ searchRef }: TopHeaderProps) {
         </div>
 
         {/* Divider */}
-        <div className="h-5 w-px shrink-0" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="h-5 w-px shrink-0 linqi-shell-divider" />
 
         {/* Language switcher */}
         <LanguageSwitcher variant="header" align="end" />
 
+        {/* Global currency toggle — IQD ↔ USD */}
+        <div
+          className="flex items-center rounded-xl p-0.5 border border-[var(--shell-border)] bg-[var(--shell-hover)]"
+          role="group"
+          aria-label="Currency"
+        >
+          {(["IQD", "USD"] as const).map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCurrency(c)}
+              className={cn(
+                "px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold transition-all",
+                currency === c
+                  ? "bg-[var(--terminal-accent)] text-white shadow-sm"
+                  : "text-[var(--shell-text-secondary)] hover:text-[var(--shell-text-primary)]",
+              )}
+            >
+              {c === "IQD" ? "د.ع" : "$"}
+            </button>
+          ))}
+        </div>
+
         <ThemeModeToggle variant="header" />
 
         {/* Notification bell */}
-        <div ref={notifRef} className="relative">
+        <div ref={notifRef} className="relative z-[999]">
           <button
             onClick={() => { setNotifOpen(v => !v); setQuickOpen(false); setProfileOpen(false); }}
-            className="relative w-9 h-9 flex items-center justify-center rounded-full transition-all duration-150"
-            style={{ background: notifOpen ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.30)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = notifOpen ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.05)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)"; }}
+            className={cn(
+              "relative w-9 h-9 flex items-center justify-center rounded-full transition-all duration-150 linqi-header-icon-btn",
+              notifOpen && "border-[color-mix(in_srgb,var(--terminal-accent)_35%,var(--shell-border))]",
+            )}
           >
-            <Bell className="w-[15px] h-[15px]" style={{ color: "rgba(255,255,255,0.55)" }} />
+            <Bell className="w-[15px] h-[15px]" />
             {unread > 0 && (
               <span className="absolute top-1 end-1 min-w-[15px] h-[15px] flex items-center justify-center rounded-full text-[8px] font-extrabold text-white px-0.5"
                 style={{ background: "#ef4444", boxShadow: "0 0 8px rgba(239,68,68,0.75)" }}>
@@ -318,51 +360,52 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.97 }}
                 transition={{ duration: 0.15 }}
-                dir="rtl"
-                className="absolute top-[calc(100%+10px)] end-0 w-[340px] rounded-2xl overflow-hidden linqi-dropdown"
+                dir={dir}
+                className={cn(dropdownPanelClass, "top-[calc(100%+10px)] w-[340px]")}
                 style={dropdownStyle}
               >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="flex items-center justify-between px-4 py-3 linqi-dropdown-header">
                   <div className="flex items-center gap-2">
                     <Bell className="w-3.5 h-3.5" style={{ color: "#60a5fa" }} />
-                    <span className="text-[12px] font-extrabold text-white" style={{ fontFamily: "Vazirmatn,sans-serif" }}>ئاگادارکردنەوەکان</span>
+                    <span className="text-[12px] font-extrabold linqi-shell-heading" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{tu("notifications.title")}</span>
                     {unread > 0 && (
                       <span className="text-[9px] font-extrabold px-1.5 py-px rounded-full"
                         style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
-                        {unread} نوێ
+                        {tu("notifications.newCount", { count: unread })}
                       </span>
                     )}
                   </div>
                   <button
-                    onClick={() => setReadIds(new Set(NOTIFS.map(n => n.id)))}
+                    onClick={markAllNotifsRead}
                     className="text-[10px] font-bold transition-colors"
                     style={{ color: "rgba(96,165,250,0.7)", fontFamily: "Vazirmatn,sans-serif" }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#60a5fa"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(96,165,250,0.7)"}
                   >
-                    هەموو بخوێنەوە
+                    {tu("notifications.markAllRead")}
                   </button>
                 </div>
 
                 {/* List */}
                 <div className="overflow-y-auto" style={{ maxHeight: "300px", scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.12) transparent" }}>
-                  {NOTIFS.length === 0 ? (
-                    <div className="px-4 py-10 text-center text-[11px] text-white/30" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
-                      {t("emptyStates.noNotifications", { ns: "common", defaultValue: "هیچ ئاگادارکردنەوەیەک نییە" })}
+                  {headerNotifs.length === 0 ? (
+                    <div className="px-4 py-10 text-center text-[11px] linqi-shell-muted" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
+                      {tu("notifications.empty")}
                     </div>
                   ) : (
-                  NOTIFS.map((n, idx) => {
+                  headerNotifs.map((n, idx) => {
                     const Icon = n.icon;
                     const isRead = readIds.has(n.id);
                     return (
                       <motion.button key={n.id}
                         initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.04 }}
-                        onClick={() => setReadIds(prev => new Set([...prev, n.id]))}
-                        className="w-full flex items-start gap-3 px-4 py-3 text-start transition-all duration-150"
-                        style={{ borderBottom: idx < NOTIFS.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", background: isRead ? "transparent" : "rgba(59,130,246,0.03)" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = isRead ? "transparent" : "rgba(59,130,246,0.03)"}
+                        onClick={() => markNotifRead(n.id)}
+                        className={cn(
+                          "w-full flex items-start gap-3 px-4 py-3 text-start transition-all duration-150 linqi-dropdown-item",
+                          !isRead && "bg-[color-mix(in_srgb,var(--terminal-accent)_3%,transparent)]",
+                        )}
+                        style={{ borderBottom: idx < headerNotifs.length - 1 ? "1px solid var(--shell-border)" : "none" }}
                       >
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
                           style={{ background: `${n.color}15`, border: `1.5px solid ${n.color}28` }}>
@@ -370,14 +413,17 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <p className="text-[11px] font-extrabold leading-snug truncate"
-                              style={{ color: isRead ? "rgba(255,255,255,0.50)" : "rgba(255,255,255,0.88)", fontFamily: "Vazirmatn,sans-serif" }}>
+                            <p className={cn(
+                              "text-[11px] font-extrabold leading-snug truncate linqi-shell-heading",
+                              isRead && "opacity-60",
+                            )}
+                              style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                               {n.title}
                             </p>
                             {!isRead && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: n.dot, boxShadow: `0 0 5px ${n.dot}` }} />}
                           </div>
-                          <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.32)", fontFamily: "Vazirmatn,sans-serif" }}>{n.sub}</p>
-                          <p className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.20)", fontFamily: "Vazirmatn,sans-serif" }}>{n.time} پێش ئێستا</p>
+                          <p className="text-[10px] mt-0.5 leading-relaxed linqi-shell-muted" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{n.sub}</p>
+                          <p className="text-[9px] mt-0.5 linqi-shell-muted opacity-70" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{tu("notifications.timeAgo", { time: n.time })}</p>
                         </div>
                       </motion.button>
                     );
@@ -386,12 +432,13 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-4 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <button className="w-full text-center text-[10.5px] font-bold py-1.5 rounded-xl transition-all"
-                    style={{ color: "rgba(96,165,250,0.60)", fontFamily: "Vazirmatn,sans-serif" }}
-                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = "#60a5fa"; el.style.background = "rgba(59,130,246,0.07)"; }}
-                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = "rgba(96,165,250,0.60)"; el.style.background = "transparent"; }}>
-                    هەموو ئاگادارکردنەوەکان ببینە
+                <div className="px-4 py-2 linqi-dropdown-footer">
+                  <button
+                    type="button"
+                    onClick={() => { setNotifOpen(false); navigate("/notifications"); }}
+                    className="w-full text-center text-[10.5px] font-bold py-1.5 rounded-xl transition-all text-blue-500 hover:bg-blue-500/10 dark:text-blue-400"
+                    style={{ fontFamily: "Vazirmatn,sans-serif" }}>
+                    {tu("notifications.viewAll")}
                   </button>
                 </div>
               </motion.div>
@@ -400,19 +447,17 @@ function TopHeader({ searchRef }: TopHeaderProps) {
         </div>
 
         {/* Divider */}
-        <div className="h-5 w-px shrink-0" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="h-5 w-px shrink-0 linqi-shell-divider" />
 
         {/* Profile badge + dropdown */}
-        <div ref={profileRef} className="relative">
+        <div ref={profileRef} className="relative z-[999]">
           <button
             onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setQuickOpen(false); }}
-            className="flex items-center gap-2 ps-1 pe-2 py-1 rounded-full transition-all duration-150"
-            style={{
-              background: profileOpen ? "rgba(255,255,255,0.08)" : "transparent",
-              border: "1px solid " + (profileOpen ? "rgba(255,255,255,0.12)" : "transparent"),
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.10)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = profileOpen ? "rgba(255,255,255,0.08)" : "transparent"; (e.currentTarget as HTMLElement).style.borderColor = profileOpen ? "rgba(255,255,255,0.12)" : "transparent"; }}
+            className={cn(
+              "flex items-center gap-2 ps-1 pe-2 py-1 rounded-full transition-all duration-150",
+              "hover:bg-[var(--shell-hover)]",
+              profileOpen && "bg-[var(--shell-hover)] border border-[var(--shell-border)]",
+            )}
           >
             {/* Avatar */}
             <div className="relative shrink-0">
@@ -425,12 +470,10 @@ function TopHeader({ searchRef }: TopHeaderProps) {
             </div>
             {/* Name + chevron (xl+) */}
             <div className="hidden xl:flex items-center gap-1.5">
-              <span className="text-[12px] font-extrabold max-w-[110px] truncate"
-                style={{ color: "#f1f5f9", fontFamily: "Vazirmatn,sans-serif" }}>
+              <span className="text-[12px] font-extrabold max-w-[110px] truncate linqi-shell-heading" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                 {displayName}
               </span>
-              <ChevronDown className={cn("w-3 h-3 transition-transform duration-200 shrink-0", profileOpen && "rotate-180")}
-                style={{ color: "rgba(255,255,255,0.30)" }} />
+              <ChevronDown className={cn("w-3 h-3 transition-transform duration-200 shrink-0 linqi-shell-muted", profileOpen && "rotate-180")} />
             </div>
           </button>
 
@@ -442,11 +485,11 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.97 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-[calc(100%+10px)] end-0 w-60 rounded-2xl overflow-hidden linqi-dropdown"
+                className={cn(dropdownPanelClass, "top-[calc(100%+10px)] w-60")}
                 style={dropdownStyle}
               >
                 {/* User info */}
-                <div className="px-4 pt-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="px-4 pt-4 pb-3 linqi-dropdown-header">
                   <div className="flex items-center gap-3">
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 rounded-full"
@@ -457,14 +500,14 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[12.5px] font-extrabold truncate leading-snug" style={{ color: "#f1f5f9", fontFamily: "Vazirmatn,sans-serif" }}>
+                      <p className="text-[12.5px] font-extrabold truncate leading-snug linqi-shell-heading" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                         {displayName}
                       </p>
                       <p className="text-[10px] font-bold mt-0.5 flex items-center gap-1"
                         style={{ color: "var(--terminal-accent)", fontFamily: "Vazirmatn,sans-serif" }}>
                         {user?.role === "admin" ? (
-                          <><Shield className="w-2.5 h-2.5" />{t("role.admin")}</>
-                        ) : t("role.staff")}
+                          <><Shield className="w-2.5 h-2.5" />{roleLabel}</>
+                        ) : roleLabel}
                       </p>
                     </div>
                   </div>
@@ -474,15 +517,12 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                 <div className="py-1">
                   <button
                     onClick={() => { navigate("/settings"); setProfileOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start"
-                    style={{ background: "transparent", color: "rgba(255,255,255,0.60)" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.60)"; }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start linqi-dropdown-item linqi-shell-body"
                   >
                     <Settings className="w-4 h-4 shrink-0" />
                     <span className="text-[12px] font-bold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("top.settings")}</span>
                   </button>
-                  <div className="mx-4 my-1" style={{ height: "1px", background: "rgba(255,255,255,0.05)" }} />
+                  <div className="mx-4 my-1 h-px linqi-shell-divider" />
                   <button
                     type="button"
                     onClick={(e) => {
@@ -490,10 +530,7 @@ function TopHeader({ searchRef }: TopHeaderProps) {
                       e.stopPropagation();
                       handleSignOut();
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start active:scale-[0.98] active:opacity-90"
-                    style={{ background: "transparent", color: "rgba(248,113,113,0.70)" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)"; (e.currentTarget as HTMLElement).style.color = "#f87171"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.70)"; }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-start linqi-dropdown-item text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 active:scale-[0.98] active:opacity-90"
                   >
                     <LogOut className="w-4 h-4 shrink-0" />
                     <span className="text-[12px] font-bold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("nav.logout")}</span>
@@ -516,13 +553,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, isAdmin } = useAuth();
-  const displayName = getDisplayUserName(user);
+  /* Subscribe so all routed pages re-render when USD/IQD toggle changes */
+  useCurrency();
+  const { t }                     = useTranslation();
+  const displayName = resolveDisplayUserName(user, t);
+  const roleLabel = getUserRoleLabel(user, t);
+  const pageTitle = useRouteBreadcrumb(location).label;
+  useDocumentPageTitle(location);
   const { canInstall, install }   = usePWAInstall();
   const isOffline                 = useOffline();
   const desktopSidebarRef         = useRef<HTMLElement>(null);
   const mobileSidebarRef          = useRef<HTMLElement>(null);
   const searchRef                 = useRef<HTMLInputElement>(null);
-  const { t }                     = useTranslation();
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = useCallback(() => {
@@ -537,9 +579,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [signingOut, t]);
 
   /* ── Sector-based nav filtering ── */
-  const sectorKey = normalizeSectorKey(
-    user?.sectorKey ?? (typeof window !== "undefined" ? localStorage.getItem("linqi_sector") : null),
-  );
+  const sectorKey = useUserSectorKey();
   const navFeatures = getSectorNavFeatures(isAdmin ? null : sectorKey);
   const showNav = (feat: NavFeatureKey) => !navFeatures || navFeatures.includes(feat);
   const hasB2bNav = !navFeatures || navFeatures.length > 0;
@@ -599,17 +639,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
             className={cn(
               "linqi-nav-icon shrink-0 transition-colors",
               collapsed ? "w-5 h-5" : "w-[18px] h-[18px]",
-              isActive ? "text-white" : "text-white/60 group-hover:text-white dark:group-hover:text-white",
+              isActive
+                ? "text-white"
+                : "text-slate-900 dark:text-white/80 group-hover:text-slate-900 dark:group-hover:text-white",
             )}
-            style={!isActive ? { color: "var(--terminal-accent)", filter: "drop-shadow(0 0 4px color-mix(in srgb, var(--terminal-accent) 50%, transparent))" } : undefined}
+            style={
+              !isActive
+                ? {
+                    color: "var(--terminal-accent)",
+                    filter: "drop-shadow(0 0 4px color-mix(in srgb, var(--terminal-accent) 50%, transparent))",
+                  }
+                : undefined
+            }
           />
           {!collapsed && (
             <span
               className={cn(
-                "truncate transition-colors text-[13px] font-bold leading-none",
-                isActive ? "text-white" : "text-white/80 group-hover:text-white",
+                "linqi-nav-label truncate transition-colors text-[13px] font-bold leading-none",
+                isActive
+                  ? "text-white"
+                  : "text-slate-900 dark:text-white/80 group-hover:text-slate-900 dark:group-hover:text-white",
               )}
-              style={{ fontFamily: "'Vazirmatn', sans-serif", textShadow: isActive ? "0 1px 8px rgba(0,0,0,0.4)" : undefined }}
+              style={{
+                fontFamily: "'Vazirmatn', sans-serif",
+                textShadow: isActive ? "0 1px 8px rgba(0,0,0,0.4)" : undefined,
+              }}
             >
               {t(labelKey)}
             </span>
@@ -623,12 +677,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const SectionHeader = ({ icon: Icon, labelKey }: { icon: React.ElementType; labelKey: string }) =>
     collapsed ? (
       <div className="px-3 py-2.5">
-        <div className="h-px rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} />
+        <div className="h-px rounded-full linqi-shell-divider" />
       </div>
     ) : (
       <div className="px-4 pt-4 pb-1">
         <p className="text-[9.5px] linqi-section-label font-extrabold uppercase tracking-[0.18em] flex items-center gap-1.5">
-          <Icon className="w-2.5 h-2.5 shrink-0" style={{ color: "rgba(77,158,255,0.45)" }} />
+          <Icon className="w-2.5 h-2.5 shrink-0 text-slate-600 dark:text-[rgba(77,158,255,0.45)]" />
           {t(labelKey)}
         </p>
       </div>
@@ -642,14 +696,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Logo + collapse toggle */}
         <div
           className={cn(
-            "flex items-center border-b border-white/[0.07] shrink-0",
+            "flex items-center border-b linqi-shell-border-b shrink-0",
             isCollapsed ? "justify-center px-2 py-4" : "gap-3 px-5 py-[18px]"
           )}
         >
           {/* Icon */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-primary blur-lg opacity-40 rounded-xl" />
-            <div className="relative p-2 bg-white/10 rounded-xl border border-primary/25 backdrop-blur-sm">
+            <div className="relative p-2 rounded-xl border border-primary/25 backdrop-blur-sm bg-slate-100/80 dark:bg-slate-800/80 dark:border-slate-700/60">
               <Zap className="w-[18px] h-[18px] text-primary" />
             </div>
           </div>
@@ -673,8 +727,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               title={t(collapsed ? "nav.expand" : "nav.collapse")}
               className={cn(
                 "shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-150",
-                "text-white/25 hover:text-white/60 hover:bg-white/10",
-                isCollapsed && "mt-0"
+                "text-slate-700 hover:text-slate-900 hover:bg-slate-200/60",
+                "dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800",
+                isCollapsed && "mt-0",
               )}
             >
               <CollapseIcon className="w-3.5 h-3.5" />
@@ -751,10 +806,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   handleSignOut();
                 }}
                 title={t("nav.logout")}
-                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 active:opacity-80"
-                style={{ color: signingOut ? "#F87171" : "rgba(255,255,255,0.30)", background: signingOut ? "rgba(239,68,68,0.18)" : "transparent" }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = "#F87171"; b.style.background = "rgba(239,68,68,0.12)"; }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = "rgba(255,255,255,0.30)"; b.style.background = "transparent"; }}
+                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 active:opacity-80 text-slate-700 hover:text-rose-600 hover:bg-rose-500/10 dark:text-white/30"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -762,17 +814,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           ) : (
             /* Expanded: full user card */
             <div
-              className="rounded-2xl p-3.5 transition-all duration-300 cursor-default"
-              style={{
-                background:           "rgba(255,255,255,0.045)",
-                backdropFilter:       "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-                border:               "1px solid rgba(255,255,255,0.10)",
-                borderTopColor:       "var(--terminal-accent)",
-                boxShadow:            "0 4px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07)",
-              }}
-              onMouseEnter={e => { const d = e.currentTarget as HTMLDivElement; d.style.transform = "scale(1.02) translateY(-1px)"; d.style.boxShadow = "0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.10)"; }}
-              onMouseLeave={e => { const d = e.currentTarget as HTMLDivElement; d.style.transform = "scale(1) translateY(0)"; d.style.boxShadow = "0 4px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07)"; }}
+              className="linqi-user-card rounded-2xl p-3.5 transition-all duration-300 cursor-default"
+              style={{ borderTopColor: "var(--terminal-accent)" }}
             >
               <div className="flex items-center gap-3 mb-2.5">
                 <div className="relative shrink-0">
@@ -783,12 +826,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] truncate font-extrabold text-white leading-snug" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{displayName}</p>
+                  <p className="text-[13px] truncate font-extrabold linqi-brand-title leading-snug" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{displayName}</p>
                   <p className="text-[10px] flex items-center gap-1 mt-0.5 font-extrabold"
                     style={{ color: "var(--terminal-accent)", fontFamily: "Vazirmatn,sans-serif" }}>
                     {user?.role === "admin" ? (
-                      <><Shield className="w-3 h-3 shrink-0" style={{ filter: "drop-shadow(0 0 4px var(--terminal-accent))" }} />{t("role.admin")}</>
-                    ) : t("role.staff")}
+                      <><Shield className="w-3 h-3 shrink-0" style={{ filter: "drop-shadow(0 0 4px var(--terminal-accent))" }} />{roleLabel}</>
+                    ) : roleLabel}
                   </p>
                 </div>
               </div>
@@ -801,16 +844,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   handleSignOut();
                 }}
                 disabled={signingOut}
-                className="w-full flex items-center justify-center gap-2 py-1.5 rounded-xl font-extrabold text-[11px] transition-all duration-200 active:scale-[0.97] active:opacity-85 disabled:opacity-70"
-                style={{
-                  color: signingOut ? "#F87171" : "rgba(255,255,255,0.38)",
-                  background: signingOut ? "rgba(239,68,68,0.14)" : "transparent",
-                  border: signingOut ? "1px solid rgba(239,68,68,0.25)" : "1px solid transparent",
-                  letterSpacing: "0.03em",
-                  fontFamily: "Vazirmatn,sans-serif",
-                }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = "#F87171"; b.style.background = "rgba(239,68,68,0.10)"; b.style.border = "1px solid rgba(239,68,68,0.20)"; }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = "rgba(255,255,255,0.38)"; b.style.background = "transparent"; b.style.border = "1px solid transparent"; }}
+                className="w-full flex items-center justify-center gap-2 py-1.5 rounded-xl font-extrabold text-[11px] transition-all duration-200 active:scale-[0.97] active:opacity-85 disabled:opacity-70 text-slate-700 hover:text-rose-600 hover:bg-rose-500/10 dark:text-white/40"
               >
                 <LogOut className="w-3.5 h-3.5" /> {t("nav.logout")}
               </button>
@@ -832,8 +866,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         style={{
           width:           collapsed ? "72px" : "256px",
           transition:      "width 300ms cubic-bezier(0.4,0,0.2,1)",
-          backdropFilter:  "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
           minWidth:        collapsed ? "72px" : "256px",
         }}
       >
@@ -847,17 +879,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div
         className="lg:hidden fixed top-0 inset-x-0 h-14 z-30 flex items-center justify-between gap-3 px-4 linqi-mobile-header"
       >
-        {/* Logo */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="p-1.5 bg-white/10 rounded-lg border border-primary/20 shrink-0">
+        {/* Mobile page title */}
+        <div className="flex items-center gap-2 shrink-0 min-w-0 max-w-[38%]">
+          <div className="p-1.5 rounded-lg border border-primary/20 shrink-0 bg-slate-100/80 dark:bg-slate-800/80 dark:border-slate-700/60">
             <Zap className="w-[18px] h-[18px] text-primary" />
           </div>
-          <span className="font-extrabold linqi-brand-title text-[15px]">LinQi</span>
+          <div className="min-w-0">
+            <span
+              className="block font-extrabold linqi-breadcrumb-text text-[14px] leading-tight truncate"
+              style={{ fontFamily: "Vazirmatn,sans-serif" }}
+            >
+              {pageTitle}
+            </span>
+            <span className="block text-[9px] linqi-brand-sub font-semibold tracking-widest uppercase truncate">LinQi</span>
+          </div>
         </div>
 
         {/* Mobile search (compact) */}
         <div className="flex-1 relative min-w-0">
-          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: "rgba(255,255,255,0.25)" }} />
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none linqi-search-icon" />
           <input
             type="text"
             placeholder={t("top.search")}
@@ -869,7 +909,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Hamburger */}
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className="shrink-0 p-2 -me-1 text-white/60 hover:text-primary transition-colors rounded-lg hover:bg-white/10"
+          className="shrink-0 p-2 -me-1 text-slate-700 hover:text-primary transition-colors rounded-lg hover:bg-slate-200/60 dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -888,15 +928,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
               ref={mobileSidebarRef}
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.30 }}
-              className="fixed top-0 bottom-0 end-0 w-[280px] flex flex-col z-50 shadow-2xl overflow-hidden linqi-sidebar"
-              style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+              className="fixed top-0 bottom-0 end-0 w-[280px] flex flex-col z-50 overflow-hidden linqi-sidebar border-slate-800"
             >
               <SidebarParticles sidebarRef={mobileSidebarRef} />
               <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden" style={{ zIndex: 10 }}>
                 {/* Close btn */}
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="absolute top-4 start-4 z-10 p-1.5 text-white/40 hover:text-white bg-white/8 rounded-full transition-colors"
+                  className="absolute top-4 start-4 z-10 p-1.5 linqi-shell-muted hover:text-[var(--shell-text-primary)] bg-[var(--shell-hover)] rounded-full transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -908,7 +947,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
 
       {/* ── Main content ─────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden pt-14 lg:pt-0">
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 h-screen pt-14 lg:pt-0">
 
         {/* Offline banner */}
         <AnimatePresence>
@@ -926,8 +965,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
         </AnimatePresence>
 
-        {/* Desktop top header */}
-        <TopHeader searchRef={searchRef} />
+        {/* Desktop top header — z-50 so menus float above page content */}
+        <div className="relative z-50 shrink-0">
+          <TopHeader searchRef={searchRef} />
+        </div>
 
         {/* Page content */}
         <div
@@ -939,7 +980,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22 }}
-            className="max-w-[1440px] mx-auto min-h-full"
+            className="max-w-[1440px] mx-auto min-h-full linqi-page"
           >
             {children}
           </motion.div>

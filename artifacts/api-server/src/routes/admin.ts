@@ -16,6 +16,7 @@ import { requireAdmin } from "../middlewares/auth";
 import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import { DEFAULT_ADMIN_CATEGORIES, DEFAULT_ADMIN_SECTORS } from "../lib/admin-catalog-defaults";
+import { cleanupTestRegistrations } from "../lib/cleanup-test-registrations";
 
 const router: IRouter = Router();
 
@@ -490,6 +491,17 @@ router.put("/admin/catalog", requireAdmin, async (req, res): Promise<void> => {
   } catch (err) {
     req.log.error({ err }, "Failed to save admin catalog");
     res.status(400).json({ message: "داتاکان هەڵەن" });
+  }
+});
+
+/* ─── POST /admin/cleanup-test-registrations — purge junk dev accounts ─── */
+router.post("/admin/cleanup-test-registrations", requireAdmin, async (_req, res): Promise<void> => {
+  try {
+    const cleaned = await cleanupTestRegistrations();
+    res.json({ ok: true, cleaned });
+  } catch (err) {
+    _req.log.error({ err }, "Manual test registration cleanup failed");
+    res.status(500).json({ message: "هەڵەیەک ڕوویدا" });
   }
 });
 

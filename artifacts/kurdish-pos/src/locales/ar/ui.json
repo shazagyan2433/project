@@ -1,0 +1,284 @@
+{
+  "notFound": {
+    "title": "404 — الصفحة غير موجودة",
+    "description": "الصفحة المطلوبة غير موجودة أو تم نقلها.",
+    "backHome": "العودة إلى لوحة التحكم"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "subtitle": "مركز الإشعارات",
+    "markAllRead": "تعيين الكل كمقروء",
+    "newCount": "{{count}} جديد",
+    "viewAll": "عرض جميع الإشعارات",
+    "timeAgo": "منذ {{time}}",
+    "empty": "لا توجد إشعارات جديدة",
+    "filters": {
+      "all": "الكل",
+      "sale": "المبيعات",
+      "rfq": "طلب عرض",
+      "stock": "المخزون",
+      "delivery": "التسليم",
+      "reward": "المكافآت",
+      "system": "النظام"
+    },
+    "items": {},
+    "live": {
+      "sale": {
+        "title": "بيع جديد",
+        "body": "طلب #{{id}} — {{customer}} — {{amount}}"
+      },
+      "rfq": {
+        "title": "طلب عرض جديد",
+        "body": "{{code}} — {{product}} ({{qty}} {{unit}})"
+      },
+      "rfqResponse": {
+        "title": "رد على طلب عرض",
+        "body": "{{code}} — {{product}} — {{price}}"
+      },
+      "stock": {
+        "title": "تنبيه مخزون",
+        "body": "{{product}}: متبقي {{stock}} {{unit}} فقط"
+      },
+      "delivery": {
+        "title": "تسليم قيد التنفيذ",
+        "body": "{{orderId}} — {{customer}} من {{shop}}"
+      },
+      "deliveryDone": {
+        "title": "اكتمل التسليم",
+        "body": "{{orderId}} — {{customer}}"
+      },
+      "codCollected": {
+        "title": "تم استلام الدفع عند التسليم",
+        "body": "الطلب #{{orderId}} تم تسليمه — تم استلام {{amount}} من السائق"
+      },
+      "system": {
+        "title": "النظام",
+        "body": "نشاط النظام"
+      }
+    }
+  },
+  "rewards": {
+    "subtitle": "ولاء ومكافآت B2B",
+    "currentTierLabel": "المستوى الحالي",
+    "pointsToNext": "{{count}} نقطة إلى {{tier}}",
+    "pointsMin": "{{min}}+ نقطة",
+    "spinWheel": "عجلة الحظ",
+    "spinning": "جاري الدوران…",
+    "spinBtn": "أدر ✦",
+    "spinWon": "ربحت +{{count}} نقطة!",
+    "spinPrizeWon": "ربحت: {{prize}}",
+    "spinCooldown": "عد غداً للدوران مجدداً",
+    "spinPrizes": {
+      "points50": "+٥٠ نقطة",
+      "discount5": "خصم ٥٪",
+      "points100": "+١٠٠ نقطة",
+      "points200": "+٢٠٠ نقطة",
+      "specialGift": "هدية خاصة",
+      "spinAgain": "أدر مجدداً"
+    },
+    "weeklyChallenge": "تحديات هذا الأسبوع",
+    "leaderboard": "جدول النقاط",
+    "emptyLeaderboard": "لا توجد تصنيفات بعد",
+    "noChallenges": "لا توجد تحديات نشطة",
+    "points": "نقطة",
+    "tierStandard": "عادي",
+    "tierSilver": "المستوى الفضي",
+    "tierGold": "المستوى الذهبي",
+    "tierDiamond": "المستوى الماسي",
+    "challengeProgress": "{{done}}/{{total}} مكتمل",
+    "perks": {
+      "marketAccess": "الوصول للسوق",
+      "tierAlerts": "تنبيهات المستوى",
+      "discount5": "خصم 5٪",
+      "rfqPriority": "أولوية طلبات الأسعار",
+      "discount12": "خصم 12٪",
+      "deliverySupport": "دعم التوصيل",
+      "support247": "دعم 24/7",
+      "discount20": "خصم 20٪",
+      "dedicatedManager": "مدير مخصص",
+      "earlyAccess": "وصول مبكر"
+    },
+    "challenges": {
+      "orders": "10 طلبات هذا الأسبوع",
+      "suppliers": "إضافة 3 موردين جدد",
+      "deliveryStars": "5 نجوم توصيل",
+      "salesMilestone": "هدف مبيعات 1M دينار"
+    }
+  },
+  "bulkImport": {
+    "title": "استيراد منتجات بالجملة",
+    "subtitle": "PDF، فاتورة، أو قائمة مورد — راجع قبل الحفظ",
+    "selectFile": "اختر ملف",
+    "dropHint": "أسقط PDF أو قائمة هنا",
+    "dropDetail": "فاتورة، قائمة مورد، كتالوج — يُستخرج النص وتُحلل المنتجات",
+    "noDbWrite": "لا يُكتب شيء حتى التأكيد. عدّل جميع الصفوف أولاً.",
+    "readyRows": "{{count}} صف جاهز",
+    "invalidRows": "{{count}} صف يحتاج تعديل",
+    "confirmSave": "تأكيد وحفظ ({{count}})",
+    "saving": "جاري الحفظ…",
+    "addBlankRow": "إضافة صف فارغ",
+    "close": "إغلاق",
+    "fileFailed": "فشل الاستيراد",
+    "fileNotRecognized": "ملف غير معروف",
+    "retryFile": "جرّب ملف آخر",
+    "parsing": "جاري تحليل الملف…",
+    "networkHint": "تأكد من تشغيل خادم API (pnpm dev) وأن اتصال الشبكة متاح.",
+    "pages": "{{count}} صفحة",
+    "steps": {
+      "receive": "استلام الملف",
+      "extract": "استخراج النص",
+      "analyze": "تحليل المنتجات",
+      "ready": "جاهز للمعاينة"
+    },
+    "columns": {
+      "name": "اسم المنتج",
+      "category": "الفئة",
+      "cost": "سعر الشراء",
+      "price": "سعر البيع",
+      "stock": "الكمية",
+      "unit": "الوحدة",
+      "barcode": "الباركود",
+      "supplier": "المورد"
+    },
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "priceRequired": "سعر البيع > 0",
+      "stockInvalid": "كمية مخزون غير صالحة",
+      "unitRequired": "الوحدة مطلوبة",
+      "costInvalid": "سعر شراء غير صالح"
+    }
+  },
+  "inventory": {
+    "allCategories": "جميع الفئات",
+    "bulkImport": "استيراد بالجملة",
+    "addProduct": "إضافة منتج",
+    "productImage": "صورة المنتج",
+    "imageHint": "PNG · JPG · WEBP — حد أقصى 2MB",
+    "name": "اسم المنتج",
+    "category": "الفئة",
+    "uncategorized": "— بدون فئة",
+    "costPrice": "سعر الشراء",
+    "salePrice": "سعر البيع",
+    "stock": "كمية المخزون",
+    "unit": "الوحدة",
+    "barcode": "الباركود",
+    "supplier": "المورد",
+    "saveProduct": "حفظ المنتج",
+    "deleteConfirm": "حذف هذا المنتج؟",
+    "importSuccess": "تمت إضافة {{count}} منتج بنجاح",
+    "lowStock": "مخزون منخفض",
+    "inStock": "متوفر",
+    "outOfStock": "نفد المخزون",
+    "editProduct": "تعديل المنتج",
+    "refresh": "تحديث",
+    "namePlaceholder": "مثال: سكر أبيض 1كغ",
+    "categorySection": "الفئة",
+    "imageProcessing": "جاري المعالجة…",
+    "changeImage": "تغيير الصورة",
+    "selectImage": "اختر صورة",
+    "usdConverter": "محول الدولار — 1$ = {{rate}} IQD",
+    "saveUpdated": "تم تحديث المنتج",
+    "saveCreated": "تمت إضافة المنتج ✓",
+    "kpiTotal": "إجمالي المنتجات",
+    "kpiTotalSub": "SKU مسجلة",
+    "kpiOut": "نفد المخزون",
+    "kpiOutSub": "يحتاج تزويد",
+    "kpiLow": "مخزون منخفض",
+    "kpiLowSub": "أقل من حد التنبيه",
+    "kpiOk": "سليم",
+    "kpiOkSub": "{{pct}}% متوفر",
+    "searchPlaceholder": "بحث في المنتجات…",
+    "defaultUnit": "قطعة",
+    "filterAll": "الكل",
+    "filterOk": "جيد",
+    "filterLow": "منخفض",
+    "filterOut": "نفد",
+    "colImage": "صورة",
+    "colName": "اسم المنتج",
+    "colCategory": "الفئة",
+    "colBarcode": "الباركود",
+    "colCost": "سعر التكلفة",
+    "colSale": "سعر البيع",
+    "colStock": "الكمية / الوحدة",
+    "colStatus": "الحالة",
+    "colActions": "إجراءات",
+    "emptyFiltered": "لا توجد منتجات تطابق هذا الفلتر",
+    "emptyNone": "لم تتم إضافة منتجات بعد",
+    "addFirst": "+ إضافة أول منتج",
+    "barcodeSku": "الباركود / SKU",
+    "barcodePlaceholder": "مثال: 6009876543210",
+    "supplierName": "اسم المورد",
+    "supplierPlaceholder": "اسم البائع",
+    "save": "حفظ",
+    "close": "إغلاق",
+    "nameRequired": "اسم المنتج مطلوب",
+    "priceRequired": "السعر مطلوب",
+    "imageUploadFailed": "تعذر رفع الصورة",
+    "deleteNamedConfirm": "حذف \"{{name}}\"؟",
+    "deleted": "تم حذف المنتج",
+    "units": {
+      "piece": "قطعة",
+      "kg": "كغ",
+      "liter": "لتر",
+      "carton": "كرتون",
+      "box": "صندوق",
+      "pack": "عبوة",
+      "dozen": "درزن",
+      "bag": "كيس",
+      "meter": "متر",
+      "gram": "غرام"
+    }
+  },
+  "procurement": {
+    "suppliers": "الموردين",
+    "created": "تاريخ الإنشاء",
+    "newRfq": "طلب عرض جديد",
+    "totalRfqs": "إجمالي الطلبات",
+    "pending": "قيد الانتظار",
+    "responded": "تم الرد",
+    "approved": "موافق عليه",
+    "statusPending": "قيد الانتظار",
+    "statusResponded": "تم الرد",
+    "statusApproved": "موافق عليه",
+    "statusDeclined": "مرفوض",
+    "supplierCount": "{{count}} مورد",
+    "deadlineLabel": "الموعد النهائي: {{date}}",
+    "decline": "رفض",
+    "approve": "موافقة",
+    "cancel": "إلغاء",
+    "manage": "إدارة"
+  },
+  "logistics": {
+    "manifest": "بيان الشحن",
+    "deliveries": "التسليمات"
+  },
+  "financial": {
+    "invoices": "الفواتير",
+    "cashflow": "التدفق النقدي الأسبوعي"
+  },
+  "marketIntel": {
+    "demandScore": "درجة الطلب",
+    "salesForecast": "أحدث توقعات المبيعات"
+  },
+  "ai": {
+    "online": "متصل"
+  },
+  "portals": {
+    "orders": "الطلبات",
+    "noOrders": "لا توجد طلبات",
+    "inventory": "مسؤولية المخزون",
+    "attentionStock": "تنبيهات ومخزون",
+    "salesAnalytics": "تحليلات المبيعات",
+    "weeklyRevenue": "إيرادات الأسبوع — هذه الفترة",
+    "topProducts": "أفضل المنتجات",
+    "transactions": "المعاملات",
+    "myPayments": "سجل الدفع",
+    "myProfile": "ملفي",
+    "deliveryHistory": "سجل التسليم",
+    "completedDeliveries": "التسليمات المكتملة",
+    "myEarnings": "أرباحي",
+    "weeklyEarnings": "أرباح الأسبوع",
+    "earningSlips": "إيصالات الأرباح",
+    "filterOrders": "تصفية الطلبات"
+  }
+}

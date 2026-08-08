@@ -14,12 +14,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import {
   User, Building2, Globe, ShieldCheck,
   Eye, EyeOff, Check, Loader2, Camera,
   AlertCircle,
 } from "lucide-react";
 import { ThemeModeToggle } from "@/components/ThemeModeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { PageHeader } from "@/components/PageHeader";
 import {
   formatStoreAddress,
   isValidCoords,
@@ -28,6 +32,8 @@ import {
 } from "@/lib/store-location";
 import { mergeCachedUser } from "@/lib/api-fallback";
 import { StoreLocationPicker } from "@/components/StoreLocationPicker";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import { C } from "./dashboard-tokens";
 
 /* ─────────────────────────────────────────────────────────────────────
    AUTH HELPER — reuse the same localStorage key as AuthContext
@@ -45,34 +51,9 @@ async function patchApi(path: string, body: object) {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { message?: string }).message ?? "هەڵەیەک ڕوویدا");
+  if (!res.ok) throw new Error((data as { message?: string }).message ?? i18n.t("common.error"));
   return data;
 }
-
-/* ─────────────────────────────────────────────────────────────────────
-   SHARED STYLES
-───────────────────────────────────────────────────────────────────── */
-const inputStyle: React.CSSProperties = {
-  background:   "rgba(255,255,255,0.045)",
-  border:       "1px solid rgba(255,255,255,0.10)",
-  color:        "rgba(255,255,255,0.88)",
-  fontFamily:   "Vazirmatn, sans-serif",
-  borderRadius: 10,
-  padding:      "10px 14px",
-  width:        "100%",
-  outline:      "none",
-  fontSize:     13,
-  transition:   "border-color 0.15s, box-shadow 0.15s",
-};
-
-const cardStyle: React.CSSProperties = {
-  background:           "rgba(255,255,255,0.025)",
-  backdropFilter:       "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border:               "1px solid rgba(255,255,255,0.07)",
-  boxShadow:            "0 8px 48px rgba(0,0,0,0.40)",
-  borderRadius:         20,
-};
 
 /* ─────────────────────────────────────────────────────────────────────
    FIELD  (module-level — never nest inside another component)
@@ -90,21 +71,13 @@ interface FieldProps {
 }
 
 function Field({ label, value, onChange, type = "text", placeholder = "", readOnly = false, error, suffix, rows }: FieldProps) {
-  const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (readOnly) return;
-    e.currentTarget.style.borderColor = "rgba(59,130,246,0.55)";
-    e.currentTarget.style.boxShadow   = "0 0 0 3px rgba(59,130,246,0.10)";
-  };
-  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    e.currentTarget.style.borderColor = error ? "rgba(239,68,68,0.55)" : "rgba(255,255,255,0.10)";
-    e.currentTarget.style.boxShadow   = "none";
-  };
+  const inputClass = "linqi-settings-input" + (error ? " !border-rose-500/55" : "");
 
   return (
     <div className="flex flex-col gap-1.5">
       <label
-        className="text-[11px] font-bold uppercase tracking-[0.08em]"
-        style={{ color: "rgba(255,255,255,0.38)", fontFamily: "Vazirmatn, sans-serif" }}
+        className="text-[11px] font-bold uppercase tracking-[0.08em] linqi-page-muted"
+        style={{ fontFamily: "Vazirmatn, sans-serif" }}
       >
         {label}
       </label>
@@ -116,14 +89,12 @@ function Field({ label, value, onChange, type = "text", placeholder = "", readOn
             readOnly={readOnly}
             rows={rows}
             placeholder={placeholder}
+            className={inputClass}
             style={{
-              ...inputStyle,
               resize:    "vertical",
               minHeight: 80,
-              ...(error ? { borderColor: "rgba(239,68,68,0.55)" } : {}),
+              ...(readOnly ? { opacity: 0.55, cursor: "not-allowed" } : {}),
             }}
-            onFocus={onFocus}
-            onBlur={onBlur}
           />
         ) : (
           <input
@@ -132,14 +103,11 @@ function Field({ label, value, onChange, type = "text", placeholder = "", readOn
             onChange={e => onChange?.(e.target.value)}
             readOnly={readOnly}
             placeholder={placeholder}
+            className={inputClass}
             style={{
-              ...inputStyle,
               ...(readOnly   ? { opacity: 0.55, cursor: "not-allowed" } : {}),
               ...(suffix     ? { paddingInlineEnd: 44 } : {}),
-              ...(error      ? { borderColor: "rgba(239,68,68,0.55)" } : {}),
             }}
-            onFocus={onFocus}
-            onBlur={onBlur}
           />
         )}
         {suffix && (
@@ -185,7 +153,7 @@ function PwdField({ label, value, onChange, show, onToggle, error }: PwdFieldPro
         <button
           type="button"
           onClick={onToggle}
-          style={{ color: "rgba(255,255,255,0.40)", background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}
+          style={{ color: "var(--shell-text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}
         >
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
@@ -197,7 +165,7 @@ function PwdField({ label, value, onChange, show, onToggle, error }: PwdFieldPro
 /* ─────────────────────────────────────────────────────────────────────
    SAVE BUTTON  (module-level)
 ───────────────────────────────────────────────────────────────────── */
-function SaveButton({ loading, label }: { loading: boolean; label: string }) {
+function SaveButton({ loading, label, loadingLabel }: { loading: boolean; label: string; loadingLabel: string }) {
   return (
     <button
       type="submit"
@@ -215,7 +183,7 @@ function SaveButton({ loading, label }: { loading: boolean; label: string }) {
       }}
     >
       {loading
-        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />چاوەڕوان بە...</>
+        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />{loadingLabel}</>
         : label}
     </button>
   );
@@ -226,9 +194,9 @@ function SaveButton({ loading, label }: { loading: boolean; label: string }) {
 ───────────────────────────────────────────────────────────────────── */
 function SectionHead({ title, sub }: { title: string; sub?: string }) {
   return (
-    <div className="pb-4 mb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-      <h2 className="text-[15px] font-black text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{title}</h2>
-      {sub && <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "Vazirmatn, sans-serif" }}>{sub}</p>}
+    <div className="pb-4 mb-2 linqi-page-divider border-b">
+      <h2 className="text-[15px] font-black linqi-page-heading" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{title}</h2>
+      {sub && <p className="text-[12px] mt-0.5 linqi-page-muted" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{sub}</p>}
     </div>
   );
 }
@@ -239,6 +207,7 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
 function ProfileTab() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     name:      user?.name      ?? "",
@@ -259,8 +228,8 @@ function ProfileTab() {
 
   function validate() {
     const e: Partial<typeof form> = {};
-    if (!form.name.trim())     e.name     = "ناو پێویستە";
-    if (!form.username.trim()) e.username = "ناوی بەکارهێنەر پێویستە";
+    if (!form.name.trim())     e.name     = t("settings.profile.nameRequired");
+    if (!form.username.trim()) e.username = t("settings.profile.usernameRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -272,10 +241,10 @@ function ProfileTab() {
     try {
       await patchApi("/api/auth/me", form);
       refreshUser();
-      toast({ title: "✅ زانیارییەکان بە سەرکەوتوویی پاشەکەوت کران" });
+      toast({ title: "✅ " + t("settings.profile.savedToast") });
     } catch (err: unknown) {
       toast({
-        title:   "❌ " + (err instanceof Error ? err.message : "هەڵەیەک ڕوویدا"),
+        title:   "❌ " + (err instanceof Error ? err.message : t("common.error")),
         variant: "destructive",
       });
     } finally {
@@ -285,7 +254,7 @@ function ProfileTab() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <SectionHead title="ڕێکخستنی پرۆفایل" sub="ناو، ئیمەیڵ، و زانیاری کەسی" />
+      <SectionHead title={t("settings.profile.title")} sub={t("settings.profile.subtitle")} />
 
       {/* Avatar preview */}
       <div className="flex items-center gap-4">
@@ -310,10 +279,10 @@ function ProfileTab() {
           </div>
         </div>
         <div>
-          <p className="text-[13px] font-bold text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+          <p className="text-[13px] font-bold linqi-page-heading" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
             {form.name || "—"}
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "Vazirmatn, sans-serif" }}>
+          <p className="text-[11px] mt-0.5 linqi-page-muted" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
             @{form.username || "—"}
           </p>
         </div>
@@ -321,28 +290,28 @@ function ProfileTab() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field
-          label="ناوی تەواو"
+          label={t("settings.profile.name")}
           value={form.name}
           onChange={setField("name")}
-          placeholder="ناوی تەواوت بنووسە"
+          placeholder={t("settings.profile.namePlaceholder")}
           error={errors.name}
         />
         <Field
-          label="ناوی بەکارهێنەر"
+          label={t("settings.profile.username")}
           value={form.username}
           onChange={setField("username")}
-          placeholder="username"
+          placeholder={t("settings.profile.usernamePlaceholder")}
           error={errors.username}
         />
         <Field
-          label="ئیمەیڵ"
+          label={t("settings.profile.email")}
           value={form.email}
           onChange={setField("email")}
           type="email"
           placeholder="you@example.com"
         />
         <Field
-          label="ژمارەی مۆبایل"
+          label={t("settings.profile.phone")}
           value={form.phone}
           onChange={setField("phone")}
           type="tel"
@@ -350,14 +319,14 @@ function ProfileTab() {
         />
       </div>
       <Field
-        label="بەستەری وێنەی پرۆفایل (URL)"
+        label={t("settings.profile.avatarUrl")}
         value={form.avatarUrl}
         onChange={setField("avatarUrl")}
         placeholder="https://example.com/avatar.jpg"
       />
 
       <div className="flex justify-end pt-2">
-        <SaveButton loading={saving} label="پاشەکەوتکردنی پرۆفایل" />
+        <SaveButton loading={saving} label={t("settings.profile.save")} loadingLabel={t("settings.saveLoading")} />
       </div>
     </form>
   );
@@ -369,6 +338,7 @@ function ProfileTab() {
 function CompanyTab() {
   const { user, refreshUser, loginWithToken, token } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const initialCoords = resolveStoreCoords(user ?? undefined);
 
@@ -410,7 +380,7 @@ function CompanyTab() {
       } else {
         refreshUser();
       }
-      toast({ title: "✅ زانیارییەکان بە سەرکەوتوویی پاشەکەوت کران" });
+      toast({ title: "✅ " + t("settings.company.savedToast") });
     } catch (err: unknown) {
       if (user?.id) {
         saveStoreLocationLocal(user.id, storeLat, storeLng, storeAddress);
@@ -420,7 +390,7 @@ function CompanyTab() {
         loginWithToken(token, merged);
       }
       toast({
-        title: "✅ لە ناوخۆیی پاشەکەوت کرا (API بەردەست نییە)",
+        title: "✅ " + t("settings.company.savedLocal"),
         description: err instanceof Error ? err.message : undefined,
       });
     } finally {
@@ -430,17 +400,17 @@ function CompanyTab() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <SectionHead title="ڕێکخستنی دووکان / کۆمپانیا" sub="ناو، ناونیشان، شوێنی GPS، و ژمارەی تۆمارکردن" />
+      <SectionHead title={t("settings.company.title")} sub={t("settings.company.subtitle")} />
 
       <Field
-        label="ناوی دووکان / کۆمپانیا"
+        label={t("settings.company.storeName")}
         value={form.storeName}
         onChange={setField("storeName")}
-        placeholder="ناوی دووکانەکەت بنووسە"
+        placeholder={t("settings.company.storeNamePlaceholder")}
       />
       {user?.sectorKey && (
         <Field
-          label="بواری کار"
+          label={t("settings.company.sector")}
           value={user.sectorKey}
           readOnly
         />
@@ -451,10 +421,10 @@ function CompanyTab() {
           className="text-[11px] font-bold uppercase tracking-[0.08em]"
           style={{ color: "rgba(255,255,255,0.38)", fontFamily: "Vazirmatn, sans-serif" }}
         >
-          شوێنی دووکان لەسەر نەخشە
+          {t("settings.company.mapLabel")}
         </label>
         <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-          کلیک بکە یان مارکەرەکە ڕاکێشە بۆ دیاریکردنی شوێنی ڕاستەقینەی دووکانەکەت
+          {t("settings.company.mapHint")}
         </p>
         <StoreLocationPicker
           lat={storeLat}
@@ -473,21 +443,21 @@ function CompanyTab() {
       </div>
 
       <Field
-        label="ناونیشانی دووکان"
+        label={t("settings.company.storeAddress")}
         value={form.storeAddress}
         onChange={setField("storeAddress")}
-        placeholder="ناونیشانی تەواوی دووکانەکەت"
+        placeholder={t("settings.company.addressPlaceholder")}
         rows={3}
       />
       <Field
-        label="ژمارەی تۆمارکردنی باج"
+        label={t("settings.company.taxNumber")}
         value={form.taxNumber}
         onChange={setField("taxNumber")}
         placeholder="TRN-XXXXXXXX"
       />
 
       <div className="flex justify-end pt-2">
-        <SaveButton loading={saving} label="پاشەکەوتکردنی زانیاری دووکان" />
+        <SaveButton loading={saving} label={t("settings.company.save")} loadingLabel={t("settings.saveLoading")} />
       </div>
     </form>
   );
@@ -498,17 +468,18 @@ function CompanyTab() {
 ═══════════════════════════════════════════════════════════════════ */
 function PreferencesTab() {
   const { colors, applyPreset, presets } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col gap-8">
-      <SectionHead title="پەسەندکراوەکان" sub="زمان و ڕووکاری ئەپ" />
+      <SectionHead title={t("settings.preferences.title")} sub={t("settings.preferences.subtitle")} />
 
       {/* Light / Dark mode */}
       <section className="flex flex-col gap-3">
         <div>
-          <p className="text-[13px] font-bold text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>دۆخی ڕووکار</p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Vazirmatn, sans-serif" }}>
-            لە دۆخی ڕووناک و تاریک هەڵبژێرە.
+          <p className="text-[13px] font-bold linqi-page-heading" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{t("settings.preferences.themeMode")}</p>
+          <p className="text-[11px] mt-0.5 linqi-page-muted" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+            {t("settings.preferences.themeModeDesc")}
           </p>
         </div>
         <ThemeModeToggle variant="sidebar" className="max-w-xs" />
@@ -517,9 +488,9 @@ function PreferencesTab() {
       {/* Language */}
       <section className="flex flex-col gap-3">
         <div>
-          <p className="text-[13px] font-bold text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>زمان</p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Vazirmatn, sans-serif" }}>
-            زمانی پیشاندانی ئەپەکە هەڵبژێرە. دەستکاری دەرەکیش دەگۆڕێت.
+          <p className="text-[13px] font-bold linqi-page-heading" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{t("settings.preferences.language")}</p>
+          <p className="text-[11px] mt-0.5 linqi-page-muted" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+            {t("settings.preferences.languageDesc")}
           </p>
         </div>
         <div className="flex">
@@ -530,9 +501,9 @@ function PreferencesTab() {
       {/* Theme */}
       <section className="flex flex-col gap-3">
         <div>
-          <p className="text-[13px] font-bold text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>ڕووکاری ئەپ</p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Vazirmatn, sans-serif" }}>
-            ڕەنگ و ستایلی ئەپەکە هەڵبژێرە. دەستکاری ئۆتۆماتیکی پاشەکەوت دەکرێت.
+          <p className="text-[13px] font-bold linqi-page-heading" style={{ fontFamily: "Vazirmatn, sans-serif" }}>{t("settings.preferences.theme")}</p>
+          <p className="text-[11px] mt-0.5 linqi-page-muted" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+            {t("settings.preferences.themeDesc")}
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -545,8 +516,8 @@ function PreferencesTab() {
                 onClick={() => applyPreset(preset.name)}
                 className="flex flex-col items-center gap-2.5 p-3 rounded-2xl transition-all duration-150"
                 style={{
-                  background: active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                  border:     active ? `1.5px solid ${preset.colors.accent}` : "1.5px solid rgba(255,255,255,0.08)",
+                  background: active ? C.glassHover : C.glass,
+                  border:     active ? `1.5px solid ${preset.colors.accent}` : `1.5px solid ${C.border}`,
                   boxShadow:  active ? `0 0 18px ${preset.colors.accent}30` : "none",
                 }}
               >
@@ -560,7 +531,7 @@ function PreferencesTab() {
                 <span
                   className="text-[10.5px] font-bold text-center leading-snug"
                   style={{
-                    color:      active ? preset.colors.accent : "rgba(255,255,255,0.50)",
+                    color:      active ? preset.colors.accent : C.muted,
                     fontFamily: "Vazirmatn, sans-serif",
                   }}
                 >
@@ -588,6 +559,7 @@ function PreferencesTab() {
 ═══════════════════════════════════════════════════════════════════ */
 function SecurityTab() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [form, setForm]     = useState({ current: "", next: "", confirm: "" });
   const [show, setShow]     = useState({ current: false, next: false, confirm: false });
@@ -607,9 +579,9 @@ function SecurityTab() {
 
   function validate() {
     const e: typeof errors = {};
-    if (!form.current)            e.current = "وشەی نهێنی ئێستا پێویستە";
-    if (form.next.length < 6)     e.next    = "لانیکەم ٦ پیت پێویستە";
-    if (form.next !== form.confirm) e.confirm = "وشەی نهێنیەکان یەکسان نین";
+    if (!form.current)            e.current = t("settings.security.currentRequired");
+    if (form.next.length < 6)     e.next    = t("settings.security.minLength");
+    if (form.next !== form.confirm) e.confirm = t("settings.security.mismatch");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -623,11 +595,11 @@ function SecurityTab() {
         currentPassword: form.current,
         newPassword:     form.next,
       });
-      toast({ title: "✅ وشەی نهێنی بە سەرکەوتوویی گۆڕدرا" });
+      toast({ title: "✅ " + t("settings.security.changed") });
       setForm({ current: "", next: "", confirm: "" });
     } catch (err: unknown) {
       toast({
-        title:   "❌ " + (err instanceof Error ? err.message : "هەڵەیەک ڕوویدا"),
+        title:   "❌ " + (err instanceof Error ? err.message : t("common.error")),
         variant: "destructive",
       });
     } finally {
@@ -637,7 +609,7 @@ function SecurityTab() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <SectionHead title="ئاسایش" sub="گۆڕینی وشەی نهێنی" />
+      <SectionHead title={t("settings.security.title")} sub={t("settings.security.subtitle")} />
 
       {/* Info banner */}
       <div
@@ -645,8 +617,8 @@ function SecurityTab() {
         style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.18)" }}
       >
         <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#60a5fa" }} />
-        <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontFamily: "Vazirmatn, sans-serif" }}>
-          بۆ گۆڕینی وشەی نهێنی، پێویستە وشەی نهێنی ئێستاکەت بزانیت. وشەی نهێنی نوێ دەبێت لانیکەم ٦ پیت بێت.
+        <p className="text-[12px] leading-relaxed linqi-page-subtitle" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+          {t("settings.security.infoBanner")}
         </p>
       </div>
 
@@ -655,7 +627,7 @@ function SecurityTab() {
         Passing show/toggle as props keeps it stable across re-renders.
       */}
       <PwdField
-        label="وشەی نهێنی ئێستا"
+        label={t("settings.security.currentPassword")}
         value={form.current}
         onChange={setField("current")}
         show={show.current}
@@ -663,7 +635,7 @@ function SecurityTab() {
         error={errors.current}
       />
       <PwdField
-        label="وشەی نهێنی نوێ"
+        label={t("settings.security.newPassword")}
         value={form.next}
         onChange={setField("next")}
         show={show.next}
@@ -671,7 +643,7 @@ function SecurityTab() {
         error={errors.next}
       />
       <PwdField
-        label="دووپاتکردنەوەی وشەی نهێنی نوێ"
+        label={t("settings.security.confirmPassword")}
         value={form.confirm}
         onChange={setField("confirm")}
         show={show.confirm}
@@ -680,7 +652,7 @@ function SecurityTab() {
       />
 
       <div className="flex justify-end pt-2">
-        <SaveButton loading={saving} label="گۆڕینی وشەی نهێنی" />
+        <SaveButton loading={saving} label={t("settings.security.change")} loadingLabel={t("settings.saveLoading")} />
       </div>
     </form>
   );
@@ -690,10 +662,10 @@ function SecurityTab() {
    TABS CONFIG
 ═══════════════════════════════════════════════════════════════════ */
 const TABS = [
-  { id: "profile",     Icon: User,        label: "پرۆفایل"        },
-  { id: "company",     Icon: Building2,   label: "دووکان"         },
-  { id: "preferences", Icon: Globe,       label: "پەسەندکراوەکان" },
-  { id: "security",    Icon: ShieldCheck, label: "ئاسایش"         },
+  { id: "profile",     Icon: User,        labelKey: "settings.tabs.profile" },
+  { id: "company",     Icon: Building2,   labelKey: "settings.tabs.company" },
+  { id: "preferences", Icon: Globe,       labelKey: "settings.tabs.preferences" },
+  { id: "security",    Icon: ShieldCheck, labelKey: "settings.tabs.security" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -703,9 +675,12 @@ type TabId = typeof TABS[number]["id"];
 ═══════════════════════════════════════════════════════════════════ */
 export default function Settings() {
   const [active, setActive] = useState<TabId>("profile");
+  const { t } = useTranslation();
+  const { dir } = useLocaleDir();
 
   return (
     <div
+      dir={dir}
       className="min-h-full w-full"
       style={{
         background: "linear-gradient(135deg, var(--terminal-bg,#0b0f17) 0%, color-mix(in srgb, var(--terminal-bg,#0b0f17) 85%, var(--terminal-accent,#1A6AFF)) 100%)",
@@ -716,20 +691,18 @@ export default function Settings() {
 
         {/* Page header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-black text-white" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
-            ڕێکخستنەکان
-          </h1>
-          <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Vazirmatn, sans-serif" }}>
-            بەڕێوەبردنی پرۆفایل، دووکان، پەسەندکراوەکان، و ئاسایش
-          </p>
+          <PageHeader
+            id="settings"
+            titleClassName="text-2xl font-black text-slate-900 dark:text-slate-100 linqi-page-title"
+            subtitleClassName="text-[13px] mt-1 linqi-page-muted"
+          />
         </div>
 
         {/* Tab bar */}
         <div
-          className="flex gap-1 p-1 mb-6 rounded-2xl"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+          className="flex gap-1 p-1 mb-6 rounded-2xl linqi-page-card"
         >
-          {TABS.map(({ id, Icon, label }) => {
+          {TABS.map(({ id, Icon, labelKey }) => {
             const isActive = active === id;
             return (
               <button
@@ -738,16 +711,16 @@ export default function Settings() {
                 onClick={() => setActive(id)}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-2 rounded-xl transition-all duration-150 text-[11.5px] font-bold"
                 style={{
-                  background: isActive ? "rgba(255,255,255,0.09)" : "transparent",
-                  color:      isActive ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.38)",
-                  border:     isActive ? "1px solid rgba(255,255,255,0.12)" : "1px solid transparent",
-                  boxShadow:  isActive ? "0 2px 12px rgba(0,0,0,0.30)" : "none",
+                  background: isActive ? C.glassHover : "transparent",
+                  color:      isActive ? "var(--shell-text-primary)" : C.muted,
+                  border:     isActive ? `1px solid ${C.border}` : "1px solid transparent",
+                  boxShadow:  isActive ? "var(--shell-shadow)" : "none",
                   fontFamily: "Vazirmatn, sans-serif",
                   cursor:     "pointer",
                 }}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">{label}</span>
+                <span className="hidden sm:inline">{t(labelKey)}</span>
               </button>
             );
           })}
@@ -762,7 +735,7 @@ export default function Settings() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.16 }}
           >
-            <div style={cardStyle} className="p-6 sm:p-8">
+            <div className="linqi-settings-card p-6 sm:p-8">
               {active === "profile"     && <ProfileTab />}
               {active === "company"     && <CompanyTab />}
               {active === "preferences" && <PreferencesTab />}

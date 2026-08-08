@@ -1,16 +1,16 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { formatMoneyIqd } from "./currency-format";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Format IQD base amounts using the global USD/IQD display toggle. */
 export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("ku-IQ", {
-    style: "currency",
-    currency: "IQD",
-    maximumFractionDigits: 0,
-  }).format(amount).replace("IQD", "د.ع");
+  const lang =
+    (typeof document !== "undefined" && document.documentElement.lang?.slice(0, 2)) || "ku";
+  return formatMoneyIqd(amount, { lang });
 }
 
 export function formatDate(dateStr: string) {

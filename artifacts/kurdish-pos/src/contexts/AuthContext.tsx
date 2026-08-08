@@ -44,6 +44,8 @@ export interface AuthUser {
   nationalId?: string;
   province?: string;
   sectorKey?: string;
+  /** Alias some clients may send — resolved the same as sectorKey */
+  businessSector?: string;
   canViewProfit: boolean;
   canDeleteData: boolean;
   canEditStock: boolean;
@@ -156,14 +158,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!r.ok) throw new Error("invalid token");
         return r.json();
       })
-      .then((u) => {
+      .then((u: AuthUser) => {
         const coords = parseStoreCoords(u.storeAddress);
         if (!u.storeLat && coords) {
           u.storeLat = coords.lat;
           u.storeLng = coords.lng;
         }
-        setUser(u);
-        localStorage.setItem(CACHED_USER_KEY, JSON.stringify(u));
+        const storedSector =
+          typeof window !== "undefined"
+            ? localStorage.getItem("linqi_sector")?.trim() || undefined
+            : undefined;
+        const merged: AuthUser = {
+          ...u,
+          sectorKey: u.sectorKey || u.businessSector || storedSector,
+        };
+        if (merged.sectorKey) {
+          try {
+            localStorage.setItem("linqi_sector", merged.sectorKey);
+          } catch {
+            /* ignore */
+          }
+        }
+        setUser(merged);
+        localStorage.setItem(CACHED_USER_KEY, JSON.stringify(merged));
       })
       .catch(() => {
         if (isLoginEntryPath(getCurrentAppPath())) {
@@ -203,6 +220,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (adminCached ? localStorage.getItem(AUTH_TOKEN_KEY) : null);
 
     if (adminCached && adminToken) {
+      if (import.meta.env.PROD && isBypassAuthToken(adminToken)) {
+        clearAuthStorage();
+        clearMerchantBypass();
+        setToken(null);
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
       setUser(adminCached);
       setToken(adminToken);
       if (!isBypassAuthToken(adminToken)) {
@@ -214,6 +239,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (token && isBypassAuthToken(token)) {
+      if (import.meta.env.PROD) {
+        clearAuthStorage();
+        clearMerchantBypass();
+        setToken(null);
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
       if (adminCached) {
         setUser(adminCached);
         setToken(localStorage.getItem(AUTH_TOKEN_KEY));
@@ -263,15 +296,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applySession = useCallback((tok: string, u: AuthUser) => {
+    const storedSector =
+      typeof window !== "undefined"
+        ? localStorage.getItem("linqi_sector")?.trim() || undefined
+        : undefined;
+    const merged: AuthUser = {
+      ...u,
+      sectorKey: u.sectorKey || u.businessSector || storedSector,
+    };
+    if (merged.sectorKey) {
+      try {
+        localStorage.setItem("linqi_sector", merged.sectorKey);
+      } catch {
+        /* ignore */
+      }
+    }
     localStorage.setItem(AUTH_TOKEN_KEY, tok);
-    localStorage.setItem(CACHED_USER_KEY, JSON.stringify(u));
-    if (u.role === "admin") {
+    localStorage.setItem(CACHED_USER_KEY, JSON.stringify(merged));
+    if (merged.role === "admin") {
       localStorage.setItem(ADMIN_TOKEN_KEY, tok);
       clearMerchantBypass();
     }
     clearSessionFlags();
     setToken(tok);
-    setUser(u);
+    setUser(merged);
   }, []);
 
   const loginWithToken = useCallback((tok: string, u: AuthUser) => {
@@ -338,6 +386,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     localStorage.setItem(CACHED_USER_KEY, JSON.stringify(newUser));
     setUser(newUser);
+    if (data.role === "driver") {
+      try {
+        const res = await fetch("/api/auth/portal/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            portalUserId: newUser.id,
+            role: "driver",
+            name: newUser.name,
+          }),
+        });
+        if (res.ok) {
+          const body = await res.json() as { token?: string };
+          if (body.token) {
+            localStorage.setItem(AUTH_TOKEN_KEY, body.token);
+            setToken(body.token);
+          }
+        }
+      } catch {
+        /* driver can retry session on dashboard mount */
+      }
+    }
   }, []);
 
   const logout = useCallback(() => {

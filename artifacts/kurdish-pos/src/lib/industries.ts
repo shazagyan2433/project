@@ -7,12 +7,20 @@ export type CatKey =
   | "electronic" | "stationery" | "babyCare"   | "cosmetics"    | "homeLiving"
   | "gaming"     | "food"       | "medicine"   | "clothing"     | "automotive"
   | "agriculture"| "construction"| "sports"    | "beauty"       | "cleaning"
-  | "office"     | "technology" | "printing"   | "books";
+  | "office"     | "technology" | "printing"   | "books"
+  | "medicalSupplies" | "mobile" | "accessories" | "software"
+  | "computer" | "pcParts"
+  | "ticketsFlights" | "hotelsBooking" | "visasTours" | "travelInsurance" | "pensionTransport"
+  | "officeSupplies" | "officeFurniture" | "officeServices" | "computerPrinting";
 
 export const ALL_CAT_KEYS: CatKey[] = [
   "electronic", "stationery", "babyCare", "cosmetics", "homeLiving", "gaming",
   "food", "medicine", "clothing", "automotive", "agriculture", "construction",
   "sports", "beauty", "cleaning", "office", "technology", "printing", "books",
+  "medicalSupplies", "mobile", "accessories", "software",
+  "computer", "pcParts",
+  "ticketsFlights", "hotelsBooking", "visasTours", "travelInsurance", "pensionTransport",
+  "officeSupplies", "officeFurniture", "officeServices", "computerPrinting",
 ];
 
 /** All onboarding sector keys (37) — must match `register.tsx` SECTORS. */
@@ -50,35 +58,35 @@ export const SECTOR_CATEGORY_MAP: Record<OnboardingSectorKey, CatKey[]> = {
   gym_fitness:   ["sports", "clothing", "cleaning"],
   laundry:       ["cleaning"],
 
-  /* ── Healthcare ─────────────────────────────────────────────────── */
-  pharmacy:      ["medicine"],
-  hospital:      ["medicine", "babyCare", "cleaning", "office", "technology"],
-  clinic:        ["medicine", "cleaning", "office"],
-  healthcare:    ["medicine", "babyCare", "cleaning"],
+  /* ── Healthcare — medical inventory only (no tech / office leak) ── */
+  pharmacy:      ["medicine", "medicalSupplies", "babyCare", "cleaning"],
+  hospital:      ["medicine", "medicalSupplies", "babyCare", "cleaning", "cosmetics"],
+  clinic:        ["medicine", "medicalSupplies", "cleaning", "cosmetics"],
+  healthcare:    ["medicine", "medicalSupplies", "babyCare", "cleaning", "cosmetics"],
 
   /* ── Logistics ─────────────────────────────────────────────────── */
   delivery:      ["cleaning", "automotive", "office"],
   logistics:     ["cleaning", "automotive", "office", "stationery"],
 
   /* ── Technology & electronics ─────────────────────────────────── */
-  technology:    ["technology", "electronic", "office", "stationery"],
-  electronics:   ["electronic", "gaming", "technology"],
-  telecom:       ["electronic", "technology"],
-  media:         ["electronic", "printing", "stationery", "office"],
+  technology:    ["technology", "electronic", "mobile", "computer", "pcParts", "accessories", "software", "office", "stationery"],
+  electronics:   ["mobile", "computer", "pcParts", "accessories"],
+  telecom:       ["mobile", "accessories", "electronic", "technology"],
+  media:         ["electronic", "printing", "stationery", "office", "software"],
 
   /* ── Industrial & trades ──────────────────────────────────────── */
   agriculture:   ["agriculture"],
   construction:  ["construction"],
   automotive:    ["automotive"],
   energy:        ["construction", "technology", "automotive"],
-  printing:      ["printing", "stationery", "office"],
+  printing:      ["printing", "computerPrinting", "officeSupplies", "stationery"],
   real_estate:   ["construction", "office"],
 
   /* ── Professional & services ──────────────────────────────────── */
-  office:        ["stationery", "office", "printing", "books", "electronic"],
-  education:     ["books", "stationery", "office", "electronic"],
-  legal:         ["stationery", "books", "office"],
-  travel_agency: ["books", "stationery", "office", "electronic"],
+  office:        ["officeSupplies", "officeFurniture", "officeServices", "computerPrinting"],
+  education:     ["books", "stationery", "officeSupplies", "computerPrinting"],
+  legal:         ["stationery", "books", "officeSupplies", "officeServices"],
+  travel_agency: ["ticketsFlights", "hotelsBooking", "visasTours", "travelInsurance", "pensionTransport"],
   nursery:       ["agriculture", "homeLiving", "cleaning"],
 
   /* ── General (still scoped — not full catalog) ────────────────── */
@@ -189,7 +197,14 @@ export const SECTOR_KEY_ALIASES: Record<string, string> = {
   shop:          "retail_shop",
   salon:         "beauty_salon",
   pharma:        "pharmacy",
+  دەرمانسازی:    "pharmacy",
   hospital_clinic: "clinic",
+  travel:        "travel_agency",
+  tourism:       "travel_agency",
+  گەشتوگوزار:    "travel_agency",
+  "گەشتوگوزار و گەشتکردن": "travel_agency",
+  نووسینگە:      "office",
+  office_services: "office",
 };
 
 /** Maps buyer-catalog, API, and legacy category ids to canonical CatKey. */
@@ -203,6 +218,11 @@ export const CATEGORY_ALIASES: Record<string, CatKey> = {
   food: "food", خۆراکی: "food", خواردن: "food", groceries: "food",
   dairy: "food", beverages: "food", grains: "food", بەهارات: "food",
   medicine: "medicine", دەرمان: "medicine", دەرمانی: "medicine", health: "medicine", pharma: "medicine",
+  medicalSupplies: "medicalSupplies", medical: "medicalSupplies", پێداویستی_پزیشکی: "medicalSupplies",
+  "پێداویستی پزیشکی": "medicalSupplies", medical_equipment: "medicalSupplies",
+  mobile: "mobile", مۆبایل: "mobile", phones: "mobile", smartphone: "mobile",
+  accessories: "accessories", ئێکسسوارات: "accessories", accessory: "accessories",
+  software: "software", سۆفتوێر: "software", apps: "software",
   clothing: "clothing", جل: "clothing", fashion: "clothing",
   automotive: "automotive", ئۆتۆمۆبیل: "automotive",
   agriculture: "agriculture", کشتوکاڵ: "agriculture", زراعة: "agriculture",
@@ -214,6 +234,21 @@ export const CATEGORY_ALIASES: Record<string, CatKey> = {
   technology: "technology", تەکنەلۆجی: "technology", tech: "technology",
   printing: "printing", چاپ: "printing",
   books: "books", کتێب: "books",
+  computer: "computer", کۆمپیوتەر: "computer", computers: "computer", pc: "computer",
+  pcParts: "pcParts", pc_parts: "pcParts", "pc-parts": "pcParts", "پارچەکانی PC": "pcParts",
+  ticketsFlights: "ticketsFlights", flights: "ticketsFlights", tickets: "ticketsFlights",
+  "تکت و فڕۆکەوانی": "ticketsFlights",
+  hotelsBooking: "hotelsBooking", hotels: "hotelsBooking", booking: "hotelsBooking",
+  "هۆتێل و حجز": "hotelsBooking",
+  visasTours: "visasTours", visas: "visasTours", tours: "visasTours",
+  "ڤیزە و گەشتەکان": "visasTours",
+  travelInsurance: "travelInsurance", insurance: "travelInsurance", تەئمین: "travelInsurance",
+  pensionTransport: "pensionTransport", transport: "pensionTransport", pension: "pensionTransport",
+  "پێنسیۆن و ترانسپۆرت": "pensionTransport",
+  officeSupplies: "officeSupplies", "کەلوپەلی ئۆفیس": "officeSupplies", office_supplies: "officeSupplies",
+  officeFurniture: "officeFurniture", سافڵایز: "officeFurniture", soft_furnishing: "officeFurniture",
+  officeServices: "officeServices", "خزمەتگوزاری نووسینگە": "officeServices", office_services: "officeServices",
+  computerPrinting: "computerPrinting", "کۆمپیوتەر و چاپ": "computerPrinting", computer_printing: "computerPrinting",
   general: "food",
 };
 
@@ -228,11 +263,17 @@ export const SUPPLIER_CATEGORY_MAP: Record<string, CatKey | "logistics_service">
 };
 
 export const CATEGORY_LABELS_KU: Record<CatKey, string> = {
-  food: "خۆراکی", cleaning: "پاکیژەکاری", medicine: "دەرمان", electronic: "ئەلکترۆنی",
-  clothing: "جل و بەرگ", cosmetics: "جوانکاری", homeLiving: "ماڵداری", babyCare: "منداڵ",
+  food: "خۆراکی", cleaning: "پاککەرەوە", medicine: "دەرمان", electronic: "ئەلکترۆنی",
+  clothing: "جل و بەرگ", cosmetics: "جوانکاری", homeLiving: "ماڵداری", babyCare: "شیر و منداڵ",
   stationery: "نووسینگە", agriculture: "کشتوکاڵ", automotive: "ئۆتۆمۆبیل",
   construction: "بیناسازی", sports: "وەرزش", beauty: "ژینگە", office: "ئۆفیس",
   technology: "تەکنەلۆجی", gaming: "یاری", books: "کتێب", printing: "چاپ",
+  medicalSupplies: "پێداویستی پزیشکی", mobile: "مۆبایل", accessories: "ئێکسسوارات", software: "سۆفتوێر",
+  computer: "کۆمپیوتەر", pcParts: "پارچەکانی PC",
+  ticketsFlights: "تکت و فڕۆکەوانی", hotelsBooking: "هۆتێل و حجز",
+  visasTours: "ڤیزە و گەشتەکان", travelInsurance: "تەئمین", pensionTransport: "پێنسیۆن و ترانسپۆرت",
+  officeSupplies: "کەلوپەلی ئۆفیس", officeFurniture: "سافڵایز",
+  officeServices: "خزمەتگوزاری نووسینگە", computerPrinting: "کۆمپیوتەر و چاپ",
 };
 
 /** null sectorKey → full nav access (admin / unscoped). */
@@ -258,6 +299,11 @@ export function resolveUserSectorKey(userSectorKey?: string | null): string | nu
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("linqi_sector");
       if (stored?.trim()) return stored.trim();
+      // Legacy / alternate keys some sessions may persist
+      const alt =
+        localStorage.getItem("linqi_business_sector") ||
+        localStorage.getItem("businessSector");
+      if (alt?.trim()) return alt.trim();
     }
   } catch {
     /* ignore */
@@ -281,19 +327,106 @@ export function normalizeSectorKey(sectorKey: string | null | undefined): Onboar
   return null;
 }
 
-/** Category chip keys for UI filters — only explicitly mapped sector categories. */
-export function getSectorCategoryChips(sectorKey: string | null | undefined): CatKey[] {
-  return getAllowedCategoriesForSector(sectorKey) ?? [];
+/** Categories that must never appear for healthcare / pharmacy merchants. */
+export const HEALTHCARE_EXCLUDED_CATS: readonly CatKey[] = [
+  "technology",
+  "electronic",
+  "mobile",
+  "accessories",
+  "software",
+  "gaming",
+  "office",
+  "stationery",
+  "printing",
+  "books",
+  "automotive",
+  "construction",
+  "agriculture",
+  "clothing",
+] as const;
+
+const HEALTHCARE_SECTORS = new Set<OnboardingSectorKey>([
+  "pharmacy",
+  "hospital",
+  "clinic",
+  "healthcare",
+]);
+
+/** Strict allowlist for inventory / marketplace category UI — never falls back to ALL_CAT_KEYS. */
+export function getStrictSectorCategories(sectorKey: string | null | undefined): CatKey[] {
+  const key = normalizeSectorKey(sectorKey);
+  if (!key) return [];
+  const mapped = SECTOR_CATEGORY_MAP[key];
+  if (!mapped?.length) return [];
+  let keys = mapped.filter((k): k is CatKey => (ALL_CAT_KEYS as string[]).includes(k));
+  if (HEALTHCARE_SECTORS.has(key)) {
+    keys = keys.filter(k => !HEALTHCARE_EXCLUDED_CATS.includes(k));
+  }
+  // Pharmacy: absolute purge of tech / non-medical leftovers
+  if (key === "pharmacy") {
+    keys = keys.filter(
+      k =>
+        k === "medicine" ||
+        k === "medicalSupplies" ||
+        k === "babyCare" ||
+        k === "cleaning",
+    );
+  }
+  // Electronics retail: only device / parts ecosystem
+  if (key === "electronics") {
+    keys = keys.filter(k =>
+      k === "mobile" || k === "computer" || k === "pcParts" || k === "accessories",
+    );
+  }
+  // Travel agency: only tourism service categories
+  if (key === "travel_agency") {
+    keys = keys.filter(k =>
+      k === "ticketsFlights" ||
+      k === "hotelsBooking" ||
+      k === "visasTours" ||
+      k === "travelInsurance" ||
+      k === "pensionTransport",
+    );
+  }
+  // Office / services: only office ecosystem categories
+  if (key === "office") {
+    keys = keys.filter(k =>
+      k === "officeSupplies" ||
+      k === "officeFurniture" ||
+      k === "officeServices" ||
+      k === "computerPrinting",
+    );
+  }
+  return keys;
 }
 
-/** True when a seller row matches the user's sector via any specialty category. */
-export function isSellerAllowedForSector(
-  specialties: CatKey[],
-  sectorKey: string | null | undefined,
-): boolean {
+/** First allowed category for a sector — never falls back to cross-sector defaults. */
+export function getDefaultSectorCategory(sectorKey: string | null | undefined): CatKey | null {
+  const chips = getStrictSectorCategories(sectorKey);
+  return chips[0] ?? null;
+}
+
+/** Category chip keys for UI filters — only explicitly mapped sector categories. */
+export function getSectorCategoryChips(sectorKey: string | null | undefined): CatKey[] {
+  return getStrictSectorCategories(sectorKey);
+}
+
+/** Allowed marketplace categories for a sector; null when sector is unknown / unset. */
+export function getAllowedCategoriesForSector(sectorKey: string | null | undefined): CatKey[] | null {
   const key = normalizeSectorKey(sectorKey);
-  if (!key) return false;
-  return specialties.some(sp => isProductAllowedForSector(sp, key));
+  if (!key) return null;
+  return getStrictSectorCategories(key);
+}
+
+/** Category dropdown options scoped to the user's sector — no static fallback list. */
+export function getSectorCategoryOptions(
+  sectorKey: string | null | undefined,
+  labelFn?: (key: CatKey) => string,
+): Array<{ key: CatKey; label: string }> {
+  return getStrictSectorCategories(sectorKey).map(k => ({
+    key: k,
+    label: labelFn?.(k) ?? CATEGORY_LABELS_KU[k] ?? k,
+  }));
 }
 
 /** Map arbitrary category strings (API, localStorage, i18n) to CatKey. */
@@ -310,13 +443,6 @@ export function normalizeCategoryKey(raw: string | null | undefined): CatKey | n
   return null;
 }
 
-/** Allowed marketplace categories for a sector; null when sector is unknown / unset. */
-export function getAllowedCategoriesForSector(sectorKey: string | null | undefined): CatKey[] | null {
-  const key = normalizeSectorKey(sectorKey);
-  if (!key) return null;
-  return SECTOR_CATEGORY_MAP[key];
-}
-
 /** Strict sector gate for product/catalog rows.
  *  Known sector with no matching categories → deny (empty list).
  *  Unknown / unset sectorKey → deny for merchant safety (no cross-sector mock fill).
@@ -328,8 +454,8 @@ export function isProductAllowedForSector(
 ): boolean {
   const key = normalizeSectorKey(sectorKey);
   if (!key) return false;
-  const allowed = SECTOR_CATEGORY_MAP[key];
-  if (!allowed || allowed.length === 0) return false;
+  const allowed = getStrictSectorCategories(key);
+  if (!allowed.length) return false;
   return allowed.includes(cat);
 }
 
@@ -366,11 +492,14 @@ export function filterProductsBySector<T extends { category?: string | null }>(
   return filterBySectorCategory(products, key, p => p.category ?? null);
 }
 
-/** Category dropdown options scoped to the user's sector. */
-export function getSectorCategoryOptions(sectorKey: string | null | undefined): Array<{ key: CatKey; label: string }> {
+/** True when a seller row matches the user's sector via any specialty category. */
+export function isSellerAllowedForSector(
+  specialties: CatKey[],
+  sectorKey: string | null | undefined,
+): boolean {
   const key = normalizeSectorKey(sectorKey);
-  if (!key) return [];
-  return SECTOR_CATEGORY_MAP[key].map(k => ({ key: k, label: CATEGORY_LABELS_KU[k] ?? k }));
+  if (!key) return false;
+  return specialties.some(sp => isProductAllowedForSector(sp, key));
 }
 
 /** Supplier-directory row gate (includes logistics-only suppliers). */

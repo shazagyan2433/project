@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOffline } from "@/hooks/useOffline";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { useTranslation } from "react-i18next";
+import { PAGE_MODAL, PAGE_MODAL_FOOTER, PAGE_MODAL_HEADER, PAGE_BTN_GHOST, PAGE_BTN_SUCCESS } from "@/lib/page-theme";
+import { cn } from "@/lib/utils";
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -292,11 +294,12 @@ export default function Products() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-slate-100 shrink-0">
-              <h2 className="text-xl font-bold">{editingId ? t("products.editProduct") : t("products.addProductTitle")}</h2>
+          <div className={cn("w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col", PAGE_MODAL)}>
+            <div className={cn(PAGE_MODAL_HEADER, "items-center")}>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{editingId ? t("products.editProduct") : t("products.addProductTitle")}</h2>
             </div>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-4 overflow-y-auto">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-semibold mb-2 text-slate-700">{t("products.productImage")}</label>
@@ -399,12 +402,13 @@ export default function Products() {
                 <label className="block text-sm font-semibold mb-1.5 text-slate-700">{t("products.unitLabel")}</label>
                 <input {...form.register("unit")} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
               </div>
-              <div className="pt-4 flex gap-3">
-                <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || imageProcessing} className="flex-1 bg-primary hover:bg-primary/90 text-white py-2.5 rounded-xl font-bold transition-all disabled:opacity-50">
-                  {editingId ? t("products.save") : t("products.add")}
-                </button>
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all">
+            </div>
+              <div className={cn(PAGE_MODAL_FOOTER, "justify-end")}>
+                <button type="button" onClick={() => setIsModalOpen(false)} className={PAGE_BTN_GHOST}>
                   {t("common.close")}
+                </button>
+                <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || imageProcessing} className={cn(PAGE_BTN_SUCCESS, "px-6")}>
+                  {editingId ? t("products.save") : t("products.add")}
                 </button>
               </div>
             </form>

@@ -7,7 +7,9 @@ import { Layout } from "@/components/layout";
 import { AdminLayout } from "@/components/AdminLayout";
 import { AdminRouteGuard } from "@/components/AdminRouteGuard";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { SectorProvider } from "@/contexts/SectorContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import {
   isMerchantMode,
   isMerchantBypass,
@@ -53,6 +55,7 @@ import Negotiation from "@/pages/negotiation";
 import Financial from "@/pages/financial";
 import MarketIntel from "@/pages/market-intel";
 import SupplierDirectory from "@/pages/supplier-directory";
+import SupplierProfilePage from "@/pages/supplier-profile";
 import Procurement from "@/pages/procurement";
 import NotificationCenter from "@/pages/notifications";
 import RewardsCenter from "@/pages/rewards";
@@ -222,6 +225,9 @@ function MerchantRouter() {
         <Route path="/supplier-directory">
           <SectorRouteGuard feature="supplier-directory"><SupplierDirectory /></SectorRouteGuard>
         </Route>
+        <Route path="/marketplace/seller/:id">
+          <SectorRouteGuard feature="supplier-directory"><SupplierProfilePage /></SectorRouteGuard>
+        </Route>
         <Route path="/procurement">
           <SectorRouteGuard feature="procurement"><Procurement /></SectorRouteGuard>
         </Route>
@@ -293,18 +299,22 @@ function Router() {
 function App() {
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <DirectionSync />
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <ConditionalAdminShortcut />
-              <Router />
-            </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <CurrencyProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SectorProvider>
+            <TooltipProvider>
+              <DirectionSync />
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <ConditionalAdminShortcut />
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+            </SectorProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </CurrencyProvider>
     </ThemeProvider>
   );
 }

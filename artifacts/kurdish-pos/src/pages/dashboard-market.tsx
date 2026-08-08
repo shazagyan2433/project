@@ -14,9 +14,13 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGetDashboard } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { useUserSectorKey } from "@/hooks/useSectorScope";
 import { normalizeSectorKey, filterSectorTaggedItems, type CatKey } from "@/lib/industries";
-import { useSectorLabel } from "@/hooks/useSectorScope";
-import { BG, C, glassCard, STATUS_STYLE } from "./dashboard-tokens";
+import { usePageHeader } from "@/lib/page-headers";
+import { BG, C, STATUS_STYLE, dashboardSectionCard } from "./dashboard-tokens";
+import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
+import { PremiumMetricCard } from "@/components/dashboard/PremiumMetricCard";
 
 /* ══════════════════════════════════════════════════════════════════
    TYPES
@@ -100,12 +104,12 @@ const PHARMA: SectorData = {
     { labelKey: "sectors.pharma.m3.label", subKey: "sectors.pharma.m3.sub", value: "٢٧",            badge: "٦ تازە",   up: null,  icon: ClipboardList, accent: C.purple  },
   ],
   activity: [
-    { id: "RX-7741",  label: "فرۆشی نوسخەی پزیشک",           party: "ئەحمەد کەریم",   amount: 185_000, status: "جێبەجێکرا", time: "٩:١٤ پ.ن", Icon: Pill         },
-    { id: "ALT-0091", label: "ئاگادارکردنی بەسەرچوونی دەرمان", party: "ئامۆکسیسیلین", amount: 0,       status: "چاوەڕوانە", time: "٨:٥٧ پ.ن", Icon: AlertTriangle},
-    { id: "RX-7740",  label: "فرۆشی دەرمانی کرۆنیک",          party: "سارا محەمەد",   amount: 320_000, status: "جێبەجێکرا", time: "٨:٤٥ پ.ن", Icon: Pill         },
-    { id: "RET-0044", label: "گەرانەوەی دەرمانی خراپ",         party: "کاریم عەلی",    amount: 45_000,  status: "بەرێوەیە",  time: "٨:٣٠ پ.ن", Icon: ReceiptText  },
-    { id: "STK-0109", label: "وەرگرتنی بارگەی تازە",           party: "بریکارە پزیشکییە ڕێپێدراوەکان", amount: 0, status: "جێبەجێکرا", time: "٧:٤٨ پ.ن", Icon: PackageCheck},
-    { id: "RX-7739",  label: "فرۆشی پێداویستی پزیشکی",         party: "نازدار ئەمین",  amount: 240_000, status: "جێبەجێکرا", time: "٧:٢٠ پ.ن", Icon: Stethoscope  },
+    { id: "RX-7741",  label: "فرۆشی نوسخەی پزیشک",           party: "ئەحمەد کەریم",   amount: 185_000, status: "completed", time: "٩:١٤ پ.ن", Icon: Pill         },
+    { id: "ALT-0091", label: "ئاگادارکردنی بەسەرچوونی دەرمان", party: "ئامۆکسیسیلین", amount: 0,       status: "pending", time: "٨:٥٧ پ.ن", Icon: AlertTriangle},
+    { id: "RX-7740",  label: "فرۆشی دەرمانی کرۆنیک",          party: "سارا محەمەد",   amount: 320_000, status: "completed", time: "٨:٤٥ پ.ن", Icon: Pill         },
+    { id: "RET-0044", label: "گەرانەوەی دەرمانی خراپ",         party: "کاریم عەلی",    amount: 45_000,  status: "inProgress",  time: "٨:٣٠ پ.ن", Icon: ReceiptText  },
+    { id: "STK-0109", label: "وەرگرتنی بارگەی تازە",           party: "بریکارە پزیشکییە ڕێپێدراوەکان", amount: 0, status: "completed", time: "٧:٤٨ پ.ن", Icon: PackageCheck},
+    { id: "RX-7739",  label: "فرۆشی پێداویستی پزیشکی",         party: "نازدار ئەمین",  amount: 240_000, status: "completed", time: "٧:٢٠ پ.ن", Icon: Stethoscope  },
   ],
   chartUnitType: "money" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [480_000,720_000,610_000,890_000,770_000,1_050_000,930_000,1_180_000,1_020_000,1_380_000,1_540_000][i], line2: [600_000,600_000,650_000,650_000,750_000,750_000,900_000,900_000,1_000_000,1_000_000,1_100_000][i] })),
@@ -123,12 +127,12 @@ const PHARMA: SectorData = {
     { name: "سیروم IV 1000ml",           qty: 9,  unit: "کارتۆن", urgent: false },
   ],
   rows: [
-    { id: 7741, party: "ئەحمەد کەریم", count: 4, total: 185_000, method: "نەقد", time: "٩:١٤" },
-    { id: 7740, party: "سارا محەمەد",  count: 7, total: 320_000, method: "نەقد", time: "٨:٤٥" },
-    { id: 7739, party: "نازدار ئەمین", count: 5, total: 240_000, method: "بیمە", time: "٧:٢٠" },
-    { id: 7738, party: "هاوژین بەکر",  count: 3, total: 175_000, method: "نەقد", time: "٦:٥٥" },
-    { id: 7737, party: "ڕێزان حسێن",  count: 2, total: 98_000,  method: "نەقد", time: "٦:٣٠" },
-    { id: 7736, party: "کڕیاری گشتی", count: 6, total: 210_000, method: "کارت", time: "٦:٠٥" },
+    { id: 7741, party: "ئەحمەد کەریم", count: 4, total: 185_000, method: "cash", time: "٩:١٤" },
+    { id: 7740, party: "سارا محەمەد",  count: 7, total: 320_000, method: "cash", time: "٨:٤٥" },
+    { id: 7739, party: "نازدار ئەمین", count: 5, total: 240_000, method: "insurance", time: "٧:٢٠" },
+    { id: 7738, party: "هاوژین بەکر",  count: 3, total: 175_000, method: "cash", time: "٦:٥٥" },
+    { id: 7737, party: "ڕێزان حسێن",  count: 2, total: 98_000,  method: "cash", time: "٦:٣٠" },
+    { id: 7736, party: "کڕیاری گشتی", count: 6, total: 210_000, method: "card", time: "٦:٠٥" },
   ],
 };
 
@@ -143,12 +147,12 @@ const RESTAURANT: SectorData = {
     { labelKey: "sectors.restaurant.m3.label", subKey: "sectors.restaurant.m3.sub", value: "٤",              badge: "تازەکرا",   up: null,  icon: FileText,      accent: C.green   },
   ],
   activity: [
-    { id: "ORD-5521", label: "داواکاری نوێی میز ٧",   party: "میز ٧ · ٤ کەس",  amount: 185_000, status: "بەرێوەیە",  time: "٩:١٤ پ.ن", Icon: UtensilsCrossed },
-    { id: "ORD-5520", label: "تەواوبوونی سیفارش",     party: "میز ٣ · ٢ کەس",  amount: 320_000, status: "جێبەجێکرا", time: "٩:٠٢ پ.ن", Icon: PackageCheck    },
-    { id: "ORD-5519", label: "داواکاری بیردەری",       party: "ئەحمەد کەریم",   amount: 0,       status: "چاوەڕوانە", time: "٨:٤٥ پ.ن", Icon: ClipboardList   },
-    { id: "RET-0077", label: "گەرانەوەی خوراک",        party: "میز ١١",          amount: 45_000,  status: "بەرێوەیە",  time: "٨:٣٠ پ.ن", Icon: ReceiptText     },
-    { id: "ORD-5518", label: "فرۆشی تەیبۆت",          party: "هاوژین بەکر",    amount: 240_000, status: "جێبەجێکرا", time: "٨:١٥ پ.ن", Icon: ShoppingBag     },
-    { id: "ORD-5517", label: "تەواوبوونی سیفارش",     party: "میز ٢ · ٣ کەس",  amount: 410_000, status: "جێبەجێکرا", time: "٧:٥٠ پ.ن", Icon: PackageCheck    },
+    { id: "ORD-5521", label: "داواکاری نوێی میز ٧",   party: "میز ٧ · ٤ کەس",  amount: 185_000, status: "inProgress",  time: "٩:١٤ پ.ن", Icon: UtensilsCrossed },
+    { id: "ORD-5520", label: "تەواوبوونی سیفارش",     party: "میز ٣ · ٢ کەس",  amount: 320_000, status: "completed", time: "٩:٠٢ پ.ن", Icon: PackageCheck    },
+    { id: "ORD-5519", label: "داواکاری بیردەری",       party: "ئەحمەد کەریم",   amount: 0,       status: "pending", time: "٨:٤٥ پ.ن", Icon: ClipboardList   },
+    { id: "RET-0077", label: "گەرانەوەی خوراک",        party: "میز ١١",          amount: 45_000,  status: "inProgress",  time: "٨:٣٠ پ.ن", Icon: ReceiptText     },
+    { id: "ORD-5518", label: "فرۆشی تەیبۆت",          party: "هاوژین بەکر",    amount: 240_000, status: "completed", time: "٨:١٥ پ.ن", Icon: ShoppingBag     },
+    { id: "ORD-5517", label: "تەواوبوونی سیفارش",     party: "میز ٢ · ٣ کەس",  amount: 410_000, status: "completed", time: "٧:٥٠ پ.ن", Icon: PackageCheck    },
   ],
   chartUnitType: "money" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [820_000,1_240_000,950_000,1_580_000,1_310_000,1_920_000,1_700_000,2_180_000,1_880_000,2_490_000,3_240_000][i], line2: [1_000_000,1_000_000,1_200_000,1_200_000,1_400_000,1_400_000,1_600_000,1_600_000,1_800_000,1_800_000,2_000_000][i] })),
@@ -166,12 +170,12 @@ const RESTAURANT: SectorData = {
     { name: "دووگمە",         qty: 8, unit: "کیلۆ", urgent: false },
   ],
   rows: [
-    { id: 5521, party: "میز ٧ · ٤ کەس", count: 4, total: 185_000, method: "چاوەڕوانە", time: "٩:١٤" },
-    { id: 5520, party: "میز ٣ · ٢ کەس", count: 3, total: 320_000, method: "نەقد",       time: "٩:٠٢" },
-    { id: 5518, party: "هاوژین بەکر",    count: 2, total: 240_000, method: "نەقد",       time: "٨:١٥" },
-    { id: 5517, party: "میز ٢ · ٣ کەس", count: 5, total: 410_000, method: "کارت",       time: "٧:٥٠" },
-    { id: 5516, party: "میز ٩ · ١ کەس", count: 2, total: 98_000,  method: "نەقد",       time: "٧:٢٠" },
-    { id: 5515, party: "میز ١ · ٦ کەس", count: 6, total: 580_000, method: "نەقد",       time: "٦:٤٥" },
+    { id: 5521, party: "میز ٧ · ٤ کەس", count: 4, total: 185_000, method: "pending", time: "٩:١٤" },
+    { id: 5520, party: "میز ٣ · ٢ کەس", count: 3, total: 320_000, method: "cash",       time: "٩:٠٢" },
+    { id: 5518, party: "هاوژین بەکر",    count: 2, total: 240_000, method: "cash",       time: "٨:١٥" },
+    { id: 5517, party: "میز ٢ · ٣ کەس", count: 5, total: 410_000, method: "card",       time: "٧:٥٠" },
+    { id: 5516, party: "میز ٩ · ١ کەس", count: 2, total: 98_000,  method: "cash",       time: "٧:٢٠" },
+    { id: 5515, party: "میز ١ · ٦ کەس", count: 6, total: 580_000, method: "cash",       time: "٦:٤٥" },
   ],
 };
 
@@ -186,12 +190,12 @@ const HOTEL: SectorData = {
     { labelKey: "sectors.hotel.m3.label", subKey: "sectors.hotel.m3.sub", value: "١٤",             badge: "٤ فووری",   up: null,  icon: Bell,       accent: C.orange },
   ],
   activity: [
-    { id: "RES-2241", label: "جێگیربوونی نوێ",         party: "ئەحمەد کەریم — ژوری ٣٠٤", amount: 850_000,   status: "جێبەجێکرا", time: "٩:١٤ پ.ن", Icon: BedDouble    },
-    { id: "CHK-0091", label: "چوونەدەرەوەی مێوان",      party: "سارا محەمەد — ژوری ٢١٢",  amount: 0,         status: "جێبەجێکرا", time: "٩:٠٠ پ.ن", Icon: Navigation   },
-    { id: "SRV-0441", label: "داواکاری خزمەتی ژووری",  party: "ژوری ٤٠١",                amount: 145_000,   status: "بەرێوەیە",  time: "٨:٤٥ پ.ن", Icon: Bell         },
-    { id: "RES-2240", label: "جێگیربوونی ئۆنلاین",      party: "کاریم عەلی — ٣ شەو",     amount: 1_200_000, status: "چاوەڕوانە", time: "٨:٣٠ پ.ن", Icon: ClipboardList },
-    { id: "CLN-0055", label: "داواکاری پاکیزەکردن",     party: "ژوری ١١٠ — ١١٥",         amount: 0,         status: "جێبەجێکرا", time: "٧:٤٨ پ.ن", Icon: PackageCheck  },
-    { id: "SRV-0440", label: "فرۆشی ڕستۆران هۆتێل",    party: "میز ٥ — ٤ مێوان",        amount: 380_000,   status: "جێبەجێکرا", time: "٧:٢٠ پ.ن", Icon: UtensilsCrossed },
+    { id: "RES-2241", label: "جێگیربوونی نوێ",         party: "ئەحمەد کەریم — ژوری ٣٠٤", amount: 850_000,   status: "completed", time: "٩:١٤ پ.ن", Icon: BedDouble    },
+    { id: "CHK-0091", label: "چوونەدەرەوەی مێوان",      party: "سارا محەمەد — ژوری ٢١٢",  amount: 0,         status: "completed", time: "٩:٠٠ پ.ن", Icon: Navigation   },
+    { id: "SRV-0441", label: "داواکاری خزمەتی ژووری",  party: "ژوری ٤٠١",                amount: 145_000,   status: "inProgress",  time: "٨:٤٥ پ.ن", Icon: Bell         },
+    { id: "RES-2240", label: "جێگیربوونی ئۆنلاین",      party: "کاریم عەلی — ٣ شەو",     amount: 1_200_000, status: "pending", time: "٨:٣٠ پ.ن", Icon: ClipboardList },
+    { id: "CLN-0055", label: "داواکاری پاکیزەکردن",     party: "ژوری ١١٠ — ١١٥",         amount: 0,         status: "completed", time: "٧:٤٨ پ.ن", Icon: PackageCheck  },
+    { id: "SRV-0440", label: "فرۆشی ڕستۆران هۆتێل",    party: "میز ٥ — ٤ مێوان",        amount: 380_000,   status: "completed", time: "٧:٢٠ پ.ن", Icon: UtensilsCrossed },
   ],
   chartUnitType: "money" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [3_200_000,4_800_000,4_100_000,5_700_000,5_100_000,6_400_000,5_800_000,7_200_000,6_500_000,7_900_000,6_800_000][i], line2: [4_000_000,4_000_000,4_500_000,4_500_000,5_000_000,5_000_000,6_000_000,6_000_000,7_000_000,7_000_000,7_500_000][i] })),
@@ -209,12 +213,12 @@ const HOTEL: SectorData = {
     { name: "ژووری ٤٠٨ — گەرمکەر کار نابات",qty: 1, unit: "کێشە", urgent: false },
   ],
   rows: [
-    { id: 2241, party: "ئەحمەد کەریم", count: 3, total: 850_000,   method: "کارت",    time: "٩:١٤" },
-    { id: 2240, party: "کاریم عەلی",   count: 3, total: 1_200_000, method: "ئۆنلاین", time: "٨:٣٠" },
-    { id: 2239, party: "نازدار ئەمین", count: 2, total: 680_000,   method: "نەقد",    time: "٧:٠٠" },
-    { id: 2238, party: "هاوژین بەکر",  count: 5, total: 2_100_000, method: "کارت",    time: "دوێنێ" },
-    { id: 2237, party: "ڕێزان حسێن",  count: 1, total: 350_000,   method: "نەقد",    time: "دوێنێ" },
-    { id: 2236, party: "VIP تور گروپ",count: 7, total: 4_200_000, method: "کارت",    time: "دوێنێ" },
+    { id: 2241, party: "ئەحمەد کەریم", count: 3, total: 850_000,   method: "card",    time: "٩:١٤" },
+    { id: 2240, party: "کاریم عەلی",   count: 3, total: 1_200_000, method: "online", time: "٨:٣٠" },
+    { id: 2239, party: "نازدار ئەمین", count: 2, total: 680_000,   method: "cash",    time: "٧:٠٠" },
+    { id: 2238, party: "هاوژین بەکر",  count: 5, total: 2_100_000, method: "card",    time: "دوێنێ" },
+    { id: 2237, party: "ڕێزان حسێن",  count: 1, total: 350_000,   method: "cash",    time: "دوێنێ" },
+    { id: 2236, party: "VIP تور گروپ",count: 7, total: 4_200_000, method: "card",    time: "دوێنێ" },
   ],
 };
 
@@ -229,35 +233,35 @@ const OFFICE: SectorData = {
     { labelKey: "sectors.office.m3.label", subKey: "sectors.office.m3.sub", value: "٦٬٤٠٠٬٠٠٠ د.ع", badge: "٨ کۆمپانیا",up: false, icon: Bell,       accent: C.red    },
   ],
   activity: [
-    { id: "B2B-4421", label: "سیفارشی کۆمارەیی",  party: "شیرکەتی ئەڵفا",  amount: 2_400_000, status: "جێبەجێکرا", time: "٩:١٤ پ.ن", Icon: Briefcase    },
-    { id: "RFQ-0881", label: "داواکاری نرخی تازە", party: "کۆمپانیای بێتا",  amount: 0,         status: "چاوەڕوانە", time: "٨:٥٧ پ.ن", Icon: FileText     },
-    { id: "DLV-0221", label: "گەیاندنی سیفارش",    party: "گروپی گاما",      amount: 1_750_000, status: "جێبەجێکرا", time: "٨:٣٠ پ.ن", Icon: Truck        },
-    { id: "B2B-4420", label: "پارەدانی قەرز",       party: "دەلتا تریدینگ",  amount: 3_200_000, status: "جێبەجێکرا", time: "٨:١٥ پ.ن", Icon: ReceiptText  },
-    { id: "RFQ-0880", label: "داواکاری B2B گەورە",  party: "کریم کۆمپانی",   amount: 0,         status: "چاوەڕوانە", time: "٧:٤٨ پ.ن", Icon: ClipboardList},
-    { id: "B2B-4419", label: "فرۆشی کۆمارەیی",     party: "ئەربیل تریدینگ",  amount: 980_000,   status: "جێبەجێکرا", time: "٧:٢٠ پ.ن", Icon: Briefcase    },
+    { id: "B2B-4421", label: "سیفارشی کۆمارەیی",  party: "شیرکەتی ئەڵفا",  amount: 2_400_000, status: "completed", time: "٩:١٤ پ.ن", Icon: Briefcase    },
+    { id: "RFQ-0881", label: "داواکاری نرخی تازە", party: "کۆمپانیای بێتا",  amount: 0,         status: "pending", time: "٨:٥٧ پ.ن", Icon: FileText     },
+    { id: "DLV-0221", label: "گەیاندنی سیفارش",    party: "گروپی گاما",      amount: 1_750_000, status: "completed", time: "٨:٣٠ پ.ن", Icon: Truck        },
+    { id: "B2B-4420", label: "پارەدانی قەرز",       party: "دەلتا تریدینگ",  amount: 3_200_000, status: "completed", time: "٨:١٥ پ.ن", Icon: ReceiptText  },
+    { id: "RFQ-0880", label: "داواکاری B2B گەورە",  party: "کریم کۆمپانی",   amount: 0,         status: "pending", time: "٧:٤٨ پ.ن", Icon: ClipboardList},
+    { id: "B2B-4419", label: "فرۆشی کۆمارەیی",     party: "ئەربیل تریدینگ",  amount: 980_000,   status: "completed", time: "٧:٢٠ پ.ن", Icon: Briefcase    },
   ],
   chartUnitType: "money" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [1_800_000,2_600_000,2_200_000,3_400_000,3_100_000,4_200_000,3_800_000,4_700_000,4_200_000,5_100_000,5_180_000][i], line2: [2_000_000,2_000_000,2_500_000,2_500_000,3_000_000,3_000_000,3_500_000,3_500_000,4_000_000,4_000_000,4_500_000][i] })),
   topItems: [
-    { name: "کاغەزی چاپی A4 (ریم)",       sold: 512, unit: "کارتۆن", pct: 100 },
-    { name: "تۆنەری چاپەری لیزەر",        sold: 384, unit: "دانە",   pct: 75  },
-    { name: "کەرەستەی نووسینی پرۆفیشنەل", sold: 297, unit: "ستۆک",  pct: 58  },
-    { name: "فایلینگی تایبەت (A4)",         sold: 241, unit: "دانە",   pct: 47  },
-    { name: "چاپەری ئۆفیس (HP LaserJet)", sold: 48,  unit: "دانە",   pct: 9   },
+    { name: "کاغەزی چاپی A4 (ریم)",       sold: 512, unit: "کارتۆن", pct: 100, cat: "officeSupplies" as CatKey },
+    { name: "تۆنەری چاپەری لیزەر",        sold: 384, unit: "دانە",   pct: 75,  cat: "computerPrinting" as CatKey },
+    { name: "کەرەستەی نووسینی پرۆفیشنەل", sold: 297, unit: "ستۆک",  pct: 58,  cat: "officeSupplies" as CatKey },
+    { name: "فایلینگی تایبەت (A4)",         sold: 241, unit: "دانە",   pct: 47,  cat: "officeFurniture" as CatKey },
+    { name: "چاپەری ئۆفیس (HP LaserJet)", sold: 48,  unit: "دانە",   pct: 9,   cat: "computerPrinting" as CatKey },
   ],
   alerts: [
-    { name: "کاغەزی A4 ٨٠gm",  qty: 5,  unit: "ریم",  urgent: true  },
-    { name: "تۆنەری HP 85A",   qty: 3,  unit: "دانە", urgent: true  },
-    { name: "فایلینگی دووردی", qty: 8,  unit: "دانە", urgent: false },
-    { name: "ستایپلەری تایبەت",qty: 12, unit: "دانە", urgent: false },
+    { name: "کاغەزی A4 ٨٠gm",  qty: 5,  unit: "ریم",  urgent: true,  cat: "officeSupplies" as CatKey },
+    { name: "تۆنەری HP 85A",   qty: 3,  unit: "دانە", urgent: true,  cat: "computerPrinting" as CatKey },
+    { name: "فایلینگی دووردی", qty: 8,  unit: "دانە", urgent: false, cat: "officeFurniture" as CatKey },
+    { name: "ستایپلەری تایبەت",qty: 12, unit: "دانە", urgent: false, cat: "officeSupplies" as CatKey },
   ],
   rows: [
-    { id: 4421, party: "شیرکەتی ئەڵفا",  count: 12, total: 2_400_000, method: "قەرز", time: "٩:١٤" },
-    { id: 4420, party: "دەلتا تریدینگ",  count: 8,  total: 3_200_000, method: "کارت", time: "٨:١٥" },
-    { id: 4419, party: "ئەربیل تریدینگ", count: 5,  total: 980_000,   method: "نەقد", time: "٧:٢٠" },
-    { id: 4418, party: "کریم کۆمپانی",   count: 18, total: 1_750_000, method: "قەرز", time: "٦:٤٠" },
-    { id: 4417, party: "گروپی گاما",     count: 7,  total: 4_100_000, method: "کارت", time: "٦:١٠" },
-    { id: 4416, party: "کۆمپانیای بێتا", count: 24, total: 5_800_000, method: "قەرز", time: "دوێنێ" },
+    { id: 4421, party: "شیرکەتی ئەڵفا",  count: 12, total: 2_400_000, method: "debt", time: "٩:١٤" },
+    { id: 4420, party: "دەلتا تریدینگ",  count: 8,  total: 3_200_000, method: "card", time: "٨:١٥" },
+    { id: 4419, party: "ئەربیل تریدینگ", count: 5,  total: 980_000,   method: "cash", time: "٧:٢٠" },
+    { id: 4418, party: "کریم کۆمپانی",   count: 18, total: 1_750_000, method: "debt", time: "٦:٤٠" },
+    { id: 4417, party: "گروپی گاما",     count: 7,  total: 4_100_000, method: "card", time: "٦:١٠" },
+    { id: 4416, party: "کۆمپانیای بێتا", count: 24, total: 5_800_000, method: "debt", time: "دوێنێ" },
   ],
 };
 
@@ -272,12 +276,12 @@ const DELIVERY_DATA: SectorData = {
     { labelKey: "sectors.delivery.m3.label", subKey: "sectors.delivery.m3.sub", value: "٩٤٪",  badge: "+٢٪",       up: true,  icon: TrendingUp,   accent: C.purple },
   ],
   activity: [
-    { id: "DLV-8841", label: "گەیاندنی تەواوکرا",      party: "ئەحمەد کەریم — سەگمانی ٢", amount: 145_000, status: "جێبەجێکرا", time: "٩:٢٢ پ.ن", Icon: PackageCheck  },
-    { id: "DLV-8840", label: "گەیاندن لە ڕێگایە",      party: "سارا محەمەد — سەگمانی ٥",  amount: 85_000,  status: "بەرێوەیە",  time: "٩:١٠ پ.ن", Icon: Truck         },
-    { id: "DLV-8839", label: "داواکاری گەیاندنی تازە",  party: "کاریم عەلی — ناوچەی A",    amount: 0,       status: "چاوەڕوانە", time: "٨:٥٧ پ.ن", Icon: ClipboardList  },
-    { id: "DLV-8838", label: "گەیاندنی شیرکەتی",       party: "شیرکەتی ئەڵفا",             amount: 420_000, status: "جێبەجێکرا", time: "٨:٣٠ پ.ن", Icon: Briefcase      },
-    { id: "DLV-8837", label: "ئەرخسرانی بارستە",       party: "شۆفێری ٣ — کرکوک",         amount: 0,       status: "بەرێوەیە",  time: "٧:٤٥ پ.ن", Icon: Navigation     },
-    { id: "DLV-8836", label: "تەواوبوونی مەسیر",       party: "شۆفێری ١ — سلێمانی",       amount: 890_000, status: "جێبەجێکرا", time: "٧:٢٠ پ.ن", Icon: PackageCheck   },
+    { id: "DLV-8841", label: "گەیاندنی تەواوکرا",      party: "ئەحمەد کەریم — سەگمانی ٢", amount: 145_000, status: "completed", time: "٩:٢٢ پ.ن", Icon: PackageCheck  },
+    { id: "DLV-8840", label: "گەیاندن لە ڕێگایە",      party: "سارا محەمەد — سەگمانی ٥",  amount: 85_000,  status: "inProgress",  time: "٩:١٠ پ.ن", Icon: Truck         },
+    { id: "DLV-8839", label: "داواکاری گەیاندنی تازە",  party: "کاریم عەلی — ناوچەی A",    amount: 0,       status: "pending", time: "٨:٥٧ پ.ن", Icon: ClipboardList  },
+    { id: "DLV-8838", label: "گەیاندنی کۆمپانیا",       party: "کۆمپانیای ئەڵفا",             amount: 420_000, status: "completed", time: "٨:٣٠ پ.ن", Icon: Briefcase      },
+    { id: "DLV-8837", label: "بارگرتنی بار",             party: "شۆفێری ٣ — کرکوک",         amount: 0,       status: "inProgress",  time: "٧:٤٥ پ.ن", Icon: Navigation     },
+    { id: "DLV-8836", label: "تەواوبوونی مەسیر",       party: "شۆفێری ١ — سلێمانی",       amount: 890_000, status: "completed", time: "٧:٢٠ پ.ن", Icon: PackageCheck   },
   ],
   chartUnitType: "count" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [28,42,35,54,48,61,57,68,63,74,62][i], line2: [40,40,45,45,50,50,55,55,60,60,65][i] })),
@@ -295,12 +299,12 @@ const DELIVERY_DATA: SectorData = {
     { name: "ئۆتۆمبێلی ٥ — خزمەت",      qty: 1,  unit: "ڕۆژ",           urgent: false },
   ],
   rows: [
-    { id: 8841, party: "ئەحمەد کەریم",   count: 3,  total: 145_000, method: "نەقد",    time: "٩:٢٢" },
-    { id: 8840, party: "سارا محەمەد",    count: 1,  total: 85_000,  method: "ئۆنلاین", time: "٩:١٠" },
-    { id: 8838, party: "شیرکەتی ئەڵفا",  count: 8,  total: 420_000, method: "قەرز",    time: "٨:٣٠" },
-    { id: 8836, party: "مەسیری سلێمانی", count: 12, total: 890_000, method: "کارت",    time: "٧:٢٠" },
-    { id: 8835, party: "نازدار ئەمین",   count: 2,  total: 98_000,  method: "نەقد",    time: "٦:٥٠" },
-    { id: 8834, party: "گروپی گاما",     count: 6,  total: 380_000, method: "قەرز",    time: "٦:٢٠" },
+    { id: 8841, party: "ئەحمەد کەریم",   count: 3,  total: 145_000, method: "cash",    time: "٩:٢٢" },
+    { id: 8840, party: "سارا محەمەد",    count: 1,  total: 85_000,  method: "online", time: "٩:١٠" },
+    { id: 8838, party: "شیرکەتی ئەڵفا",  count: 8,  total: 420_000, method: "debt",    time: "٨:٣٠" },
+    { id: 8836, party: "مەسیری سلێمانی", count: 12, total: 890_000, method: "card",    time: "٧:٢٠" },
+    { id: 8835, party: "نازدار ئەمین",   count: 2,  total: 98_000,  method: "cash",    time: "٦:٥٠" },
+    { id: 8834, party: "گروپی گاما",     count: 6,  total: 380_000, method: "debt",    time: "٦:٢٠" },
   ],
 };
 
@@ -316,12 +320,12 @@ const MARKET_DATA: SectorData = {
     { labelKey: "sectors.market.m3.label", subKey: "sectors.market.m3.sub", value: "١٨",             badge: "٥ تازە",    up: null,  icon: ShoppingBag, accent: C.green  },
   ],
   activity: [
-    { id: "POS-4421", label: "کڕینی سووپەرمارکێت",        party: "ئەحمەد کەریم",  amount: 185_000, status: "جێبەجێکرا", time: "٩:١٤ پ.ن", Icon: ShoppingCart },
-    { id: "ALT-0032", label: "ئاگادارکردنی کەمبوونی کاڵا", party: "کاڵای باسماتی", amount: 0,       status: "چاوەڕوانە", time: "٨:٥٧ پ.ن", Icon: AlertTriangle},
-    { id: "POS-4420", label: "فرۆشی نەقد",                party: "سارا محەمەد",   amount: 320_000, status: "جێبەجێکرا", time: "٨:٤٥ پ.ن", Icon: ShoppingCart },
-    { id: "RET-0114", label: "داواکاری گەرانەوە",          party: "کاریم عەلی",    amount: 45_000,  status: "بەرێوەیە",  time: "٨:٣٠ پ.ن", Icon: ReceiptText  },
-    { id: "STK-0221", label: "بارکردنی کاڵای تازە",        party: "کۆگای سەرەکی",  amount: 0,       status: "جێبەجێکرا", time: "٧:٤٨ پ.ن", Icon: PackageCheck },
-    { id: "POS-4419", label: "کڕینی داواکاری",             party: "نازدار ئەمین",  amount: 240_000, status: "جێبەجێکرا", time: "٧:٢٠ پ.ن", Icon: ShoppingCart },
+    { id: "POS-4421", label: "کڕینی سووپەرمارکێت",        party: "ئەحمەد کەریم",  amount: 185_000, status: "completed", time: "٩:١٤ پ.ن", Icon: ShoppingCart },
+    { id: "ALT-0032", label: "ئاگادارکردنی کەمبوونی کاڵا", party: "کاڵای باسماتی", amount: 0,       status: "pending", time: "٨:٥٧ پ.ن", Icon: AlertTriangle},
+    { id: "POS-4420", label: "فرۆشی نەقد",                party: "سارا محەمەد",   amount: 320_000, status: "completed", time: "٨:٤٥ پ.ن", Icon: ShoppingCart },
+    { id: "RET-0114", label: "داواکاری گەرانەوە",          party: "کاریم عەلی",    amount: 45_000,  status: "inProgress",  time: "٨:٣٠ پ.ن", Icon: ReceiptText  },
+    { id: "STK-0221", label: "بارکردنی کاڵای تازە",        party: "کۆگای سەرەکی",  amount: 0,       status: "completed", time: "٧:٤٨ پ.ن", Icon: PackageCheck },
+    { id: "POS-4419", label: "کڕینی داواکاری",             party: "نازدار ئەمین",  amount: 240_000, status: "completed", time: "٧:٢٠ پ.ن", Icon: ShoppingCart },
   ],
   chartUnitType: "money" as const,
   chartData: DATES.map((date, i) => ({ date, line1: [980_000,1_450_000,1_100_000,1_780_000,1_520_000,2_100_000,1_850_000,2_350_000,1_990_000,2_640_000,3_070_000][i], line2: [1_200_000,1_200_000,1_300_000,1_300_000,1_500_000,1_500_000,1_800_000,1_800_000,2_000_000,2_000_000,2_200_000][i] })),
@@ -339,12 +343,12 @@ const MARKET_DATA: SectorData = {
     { name: "مازۆت ١٠٠٠ مل",       qty: 6,  unit: "شووشە",  urgent: false, cat: "cosmetics" },
   ],
   rows: [
-    { id: 4421, party: "ئەحمەد کەریم", count: 7,  total: 185_000, method: "نەقد", time: "٩:١٤" },
-    { id: 4420, party: "سارا محەمەد",  count: 12, total: 320_000, method: "نەقد", time: "٨:٤٥" },
-    { id: 4419, party: "نازدار ئەمین", count: 5,  total: 240_000, method: "قەرز", time: "٧:٢٠" },
-    { id: 4418, party: "هاوژین بەکر",  count: 9,  total: 175_000, method: "نەقد", time: "٦:٥٥" },
-    { id: 4417, party: "ڕێزان حسێن",  count: 3,  total: 98_000,  method: "نەقد", time: "٦:٣٠" },
-    { id: 4416, party: "کڕیاری گشتی", count: 6,  total: 210_000, method: "کارت", time: "٦:٠٥" },
+    { id: 4421, party: "ئەحمەد کەریم", count: 7,  total: 185_000, method: "cash", time: "٩:١٤" },
+    { id: 4420, party: "سارا محەمەد",  count: 12, total: 320_000, method: "cash", time: "٨:٤٥" },
+    { id: 4419, party: "نازدار ئەمین", count: 5,  total: 240_000, method: "debt", time: "٧:٢٠" },
+    { id: 4418, party: "هاوژین بەکر",  count: 9,  total: 175_000, method: "cash", time: "٦:٥٥" },
+    { id: 4417, party: "ڕێزان حسێن",  count: 3,  total: 98_000,  method: "cash", time: "٦:٣٠" },
+    { id: 4416, party: "کڕیاری گشتی", count: 6,  total: 210_000, method: "card", time: "٦:٠٥" },
   ],
 };
 
@@ -366,6 +370,9 @@ function getSectorData(sector: string): SectorData {
     case "printing":
     case "legal":
     case "education":
+    case "travel_agency":
+    case "technology":
+    case "electronics":
       return OFFICE;
     case "delivery":
     case "logistics":
@@ -416,11 +423,12 @@ function DynChartTooltip({ active, payload, label, unitType }: {
   active?: boolean; payload?: any[]; label?: string; unitType: "money" | "count";
 }) {
   const { t: td, i18n } = useTranslation("dashboard");
+  const { currencyLabel, currency } = useCurrency();
   const numLocale = i18n.language === "en" ? "en-US" : i18n.language === "ar" ? "ar-IQ" : "ku-IQ";
-  const unitLabel = unitType === "count" ? td("chart.deliveryUnit") : td("currency.iqd");
+  const unitLabel = unitType === "count" ? td("chart.deliveryUnit") : currencyLabel;
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: "rgba(11,15,23,0.97)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "12px", padding: "12px 16px", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px rgba(0,0,0,0.75)" }}>
+    <div style={{ background: "var(--shell-dropdown-bg)", border: `1px solid ${C.border}`, borderRadius: "12px", padding: "12px 16px", backdropFilter: "blur(16px)", boxShadow: "var(--shell-shadow)" }}>
       <p style={{ color: C.muted, fontSize: "11px", marginBottom: "8px", fontWeight: 600 }}>{label}</p>
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2" style={{ marginBottom: "3px" }}>
@@ -428,7 +436,9 @@ function DynChartTooltip({ active, payload, label, unitType }: {
           <p style={{ color: p.color, fontWeight: 700, fontSize: "13px" }}>
             {p.name}:{" "}
             <span style={{ color: C.text }}>
-              {new Intl.NumberFormat(numLocale).format(p.value)}
+              {new Intl.NumberFormat(numLocale, {
+                maximumFractionDigits: currency === "USD" ? 2 : 0,
+              }).format(Number(p.value) || 0)}
             </span>{" "}
             <span style={{ color: C.muted, fontSize: "11px" }}>{unitLabel}</span>
           </p>
@@ -444,18 +454,14 @@ function DynChartTooltip({ active, payload, label, unitType }: {
 export default function MarketDashboard() {
   const { user }                   = useAuth();
   const { data: apiStats }         = useGetDashboard();
+  const { currency, setCurrency, formatMoney, toDisplay, currencyLabel } = useCurrency();
   const { t: td, i18n }            = useTranslation("dashboard");
-  const { t: tc }                  = useTranslation("common");
-  const sectorLabel                = useSectorLabel();
-  const [currency, setCurrency]    = useState<"IQD" | "USD">("IQD");
+  const { title: dashboardTitle }  = usePageHeader("dashboard");
   type ChartRange = "week" | "month" | "year";
   const [chartRange, setChartRange]= useState<ChartRange>("month");
   const [now]                      = useState(new Date());
 
-  const sector: string =
-    normalizeSectorKey((user as { sectorKey?: string })?.sectorKey) ??
-    normalizeSectorKey(localStorage.getItem("linqi_sector")) ??
-    "other";
+  const sector: string = useUserSectorKey() ?? "other";
 
   const cfgRaw   = getSectorData(sector);
   const cfg      = useMemo(() => ({
@@ -467,16 +473,86 @@ export default function MarketDashboard() {
   const isEn     = i18n.language === "en";
   const dateLocale = i18n.language === "en" ? "en-US" : i18n.language === "ar" ? "ar-IQ" : "ku-IQ";
 
-  const RATE = 1_310;
-  const fmtMoney = (v: number) =>
-    currency === "IQD"
-      ? isEn
-        ? "IQD " + new Intl.NumberFormat("en-US").format(v)
-        : new Intl.NumberFormat("ku-IQ").format(v) + "\u00A0د.ع"
-      : "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(v / RATE);
-
+  const fmtMoney = formatMoney;
   const fmtNum = (v: number) =>
     new Intl.NumberFormat(isEn ? "en-US" : "ku-IQ").format(v);
+
+  /* Live API totals — zeros for clean accounts (never inject mock numbers) */
+  const totalSales     = Number(apiStats?.totalSales ?? 0);
+  const totalDebts     = Number(apiStats?.totalDebts ?? 0);
+  const totalCustomers = Number(apiStats?.totalCustomers ?? 0);
+  const totalProducts  = Number(apiStats?.totalProducts ?? 0);
+  const recentSales    = apiStats?.recentSales ?? [];
+
+  const liveMetrics = useMemo(() => ([
+    {
+      labelKey: cfg.metrics[0]?.labelKey ?? "sectors.other.m0.label",
+      subKey:   cfg.metrics[0]?.subKey ?? "sectors.other.m0.sub",
+      value:    fmtMoney(totalSales),
+      icon:     cfg.metrics[0]?.icon ?? ShoppingBag,
+      accent:   cfg.metrics[0]?.accent ?? cfg.accent,
+    },
+    {
+      labelKey: cfg.metrics[1]?.labelKey ?? "sectors.other.m1.label",
+      subKey:   cfg.metrics[1]?.subKey ?? "sectors.other.m1.sub",
+      value:    fmtNum(totalCustomers),
+      icon:     cfg.metrics[1]?.icon ?? Users,
+      accent:   cfg.metrics[1]?.accent ?? C.cyan,
+    },
+    {
+      labelKey: cfg.metrics[2]?.labelKey ?? "sectors.other.m2.label",
+      subKey:   cfg.metrics[2]?.subKey ?? "sectors.other.m2.sub",
+      value:    fmtMoney(totalDebts),
+      icon:     cfg.metrics[2]?.icon ?? Bell,
+      accent:   cfg.metrics[2]?.accent ?? C.orange,
+    },
+    {
+      labelKey: cfg.metrics[3]?.labelKey ?? "sectors.other.m3.label",
+      subKey:   cfg.metrics[3]?.subKey ?? "sectors.other.m3.sub",
+      value:    fmtNum(totalProducts),
+      icon:     cfg.metrics[3]?.icon ?? PackageCheck,
+      accent:   cfg.metrics[3]?.accent ?? C.purple,
+    },
+  ]), [cfg, totalSales, totalCustomers, totalDebts, totalProducts, fmtMoney, currency, i18n.language]);
+
+  const liveActivity = useMemo(() => recentSales.slice(0, 8).map((sale) => ({
+    id: String(sale.id),
+    label: sale.customerName ?? "—",
+    party: String(sale.paymentType ?? "—"),
+    amount: Number(sale.totalAmount ?? 0),
+    status: "completed",
+    time: sale.createdAt
+      ? new Date(sale.createdAt as string).toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" })
+      : "—",
+    Icon: ReceiptText,
+  })), [recentSales, dateLocale]);
+
+  const liveRows = useMemo(() => recentSales.slice(0, 8).map((sale) => ({
+    id: Number(sale.id),
+    party: sale.customerName ?? "—",
+    count: Array.isArray(sale.items) ? sale.items.length : 0,
+    total: Number(sale.totalAmount ?? 0),
+    method: String(sale.paymentType ?? "cash"),
+    time: sale.createdAt
+      ? new Date(sale.createdAt as string).toLocaleString(dateLocale, { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })
+      : "—",
+  })), [recentSales, dateLocale]);
+
+  const chartData = useMemo(() => {
+    if (!recentSales.length) return [];
+    const byDay: Record<string, number> = {};
+    for (const sale of recentSales) {
+      const d = sale.createdAt
+        ? new Date(sale.createdAt as string).toLocaleDateString(dateLocale, { day: "numeric", month: "short" })
+        : "—";
+      byDay[d] = (byDay[d] ?? 0) + Number(sale.totalAmount ?? 0);
+    }
+    return Object.entries(byDay).map(([date, line1]) => ({
+      date,
+      line1: toDisplay(line1),
+      line2: 0,
+    }));
+  }, [recentSales, dateLocale, toDisplay, currency]);
 
   const timeStr = now.toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString(dateLocale, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
@@ -489,44 +565,80 @@ export default function MarketDashboard() {
     { key: "year",  label: td("timeRange.year")  },
   ];
 
-  /* Status & payment translators */
   const tStatus = (s: string) => {
     const map: Record<string, string> = {
-      "جێبەجێکرا": td("status.completed"),
-      "بەرێوەیە":  td("status.inProgress"),
-      "چاوەڕوانە": td("status.pending"),
+      "completed": td("status.completed"),
+      "inProgress":  td("status.inProgress"),
+      "pending": td("status.pending"),
     };
     return map[s] ?? s;
   };
 
   const tPayment = (m: string) => {
     const map: Record<string, string> = {
-      "نەقد":      td("payment.cash"),
-      "قەرز":      td("payment.debt"),
-      "بیمە":      td("payment.insurance"),
-      "چاوەڕوانە": td("payment.pending"),
-      "کارت":      td("payment.card"),
-      "ئۆنلاین":   td("payment.online"),
+      "cash":      td("payment.cash"),
+      "debt":      td("payment.debt"),
+      "insurance":      td("payment.insurance"),
+      "pending": td("payment.pending"),
+      "card":      td("payment.card"),
+      "online":   td("payment.online"),
     };
     return map[m] ?? m;
   };
 
   const methodColor = (m: string) => {
-    if (m === "نەقد")      return { bg: "rgba(16,185,129,0.10)",  col: "#34d399", bdr: "rgba(16,185,129,0.20)" };
-    if (m === "قەرز")      return { bg: "rgba(239,68,68,0.10)",   col: "#f87171", bdr: "rgba(239,68,68,0.20)"  };
-    if (m === "بیمە")      return { bg: "rgba(139,92,246,0.10)",  col: "#a78bfa", bdr: "rgba(139,92,246,0.20)" };
-    if (m === "چاوەڕوانە") return { bg: "rgba(234,179,8,0.10)",   col: "#fbbf24", bdr: "rgba(234,179,8,0.20)"  };
+    if (m === "cash")      return { bg: "var(--linqi-success-bg)",  col: "var(--linqi-green)", bdr: "var(--linqi-success-border)" };
+    if (m === "debt")      return { bg: "rgba(239,68,68,0.10)",   col: "#f87171", bdr: "rgba(239,68,68,0.20)"  };
+    if (m === "insurance")      return { bg: "rgba(139,92,246,0.10)",  col: "#a78bfa", bdr: "rgba(139,92,246,0.20)" };
+    if (m === "pending") return { bg: "rgba(234,179,8,0.10)",   col: "#fbbf24", bdr: "rgba(234,179,8,0.20)"  };
     return { bg: "rgba(59,130,246,0.10)", col: "#60a5fa", bdr: "rgba(59,130,246,0.20)" };
   };
 
+  void accentA;
+
+  const isDashboardEmpty =
+    totalSales === 0 &&
+    totalCustomers === 0 &&
+    totalDebts === 0 &&
+    totalProducts === 0 &&
+    recentSales.length === 0;
+
+  const sectionCardProps = (accent?: string, extraClass = "") => ({
+    style: { ...dashboardSectionCard(accent), padding: "20px" },
+    className: `rounded-2xl backdrop-blur-md transition-shadow duration-300 hover:shadow-lg ${extraClass}`.trim(),
+  });
+
   return (
-    <div style={{ background: BG, minHeight: "100%" }}>
+    <div className="relative min-h-full overflow-hidden" style={{ background: BG }}>
+      {/* Ambient background glow */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div
+          className="absolute -top-32 start-[10%] h-80 w-80 rounded-full blur-3xl opacity-25 dark:opacity-35"
+          style={{ background: cfg.accent }}
+        />
+        <div
+          className="absolute top-1/3 end-[5%] h-64 w-64 rounded-full blur-3xl opacity-15 dark:opacity-25"
+          style={{ background: accentB }}
+        />
+        <div
+          className="absolute bottom-0 start-1/2 -translate-x-1/2 h-48 w-[80%] rounded-full blur-3xl opacity-10"
+          style={{ background: "var(--linqi-purple)" }}
+        />
+      </div>
+
+      <div className="relative z-10">
 
       {/* ══ HEADER ══════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32 }}
-        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-        style={{ padding: "22px 28px 18px", background: "rgba(255,255,255,0.015)", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "28px" }}
+        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 backdrop-blur-md"
+        style={{
+          padding: "22px 28px 18px",
+          background: "color-mix(in srgb, var(--terminal-card) 85%, transparent)",
+          borderBottom: `1px solid color-mix(in srgb, ${C.border} 80%, transparent)`,
+          marginBottom: "28px",
+          boxShadow: "inset 0 -1px 0 color-mix(in srgb, white 4%, transparent)",
+        }}
       >
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
@@ -539,8 +651,8 @@ export default function MarketDashboard() {
               <span className="text-[11px] font-bold" style={{ color: C.green }}>{td(`sectors.${sk}.statusText`)}</span>
               <span style={{ color: C.muted, fontSize: "10px" }}>· {timeStr}</span>
             </div>
-            <h1 className="text-lg font-extrabold leading-tight" style={{ color: C.text }}>
-              {tc("pageTitles.dashboard", { sector: sectorLabel })}
+            <h1 className="text-lg font-extrabold leading-tight text-slate-900 dark:text-slate-100 linqi-page-header-title">
+              {dashboardTitle}
             </h1>
             <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>{dateStr}</p>
           </div>
@@ -548,24 +660,24 @@ export default function MarketDashboard() {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-0.5 rounded-xl p-1"
-            style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}` }}>
+            style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
             {(["IQD", "USD"] as const).map(c => (
               <button key={c} onClick={() => setCurrency(c)}
                 className="px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all duration-200"
                 style={currency === c
                   ? { background: `${cfg.accent}2e`, color: cfg.accent, border: `1px solid ${cfg.accent}59` }
                   : { color: C.muted, border: "1px solid transparent" }}>
-                {c}
+                {c === "IQD" ? currencyLabel : "$"}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
-            style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+            style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
             <Globe className="w-3.5 h-3.5" style={{ color: cfg.accent }} />
-            <span className="text-[11px] font-semibold" style={{ color: C.sub }}>{td("header.iraqIQD")}</span>
+            <span className="text-[11px] font-semibold" style={{ color: C.sub }}>{currencyLabel}</span>
           </div>
           <button className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+            style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
             <RefreshCw className="w-3.5 h-3.5" style={{ color: C.muted }} />
           </button>
         </div>
@@ -575,50 +687,18 @@ export default function MarketDashboard() {
 
         {/* ══ METRIC CARDS ════════════════════════════════════════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-7">
-          {cfg.metrics.map((card, i) => {
-            const Icon = card.icon;
-            return (
-              <motion.div key={card.labelKey}
-                initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07, duration: 0.36, type: "spring", stiffness: 220, damping: 22 }}
-                className="relative overflow-hidden cursor-default"
-                style={glassCard(card.accent)}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.glassHover; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.glass; }}
-              >
-                <div style={{ position: "absolute", top: "-28px", insetInlineEnd: "-18px", width: "90px", height: "90px", borderRadius: "50%", background: `radial-gradient(circle, ${card.accent}22, transparent 70%)`, filter: "blur(16px)", pointerEvents: "none" }} />
-                <div className="p-5 relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: `${card.accent}15`, border: `1.5px solid ${card.accent}30` }}>
-                      <Icon className="w-5 h-5" style={{ color: card.accent }} />
-                    </div>
-                    {card.up === true && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
-                        style={{ background: "rgba(16,185,129,0.10)", color: "#34d399", border: "1px solid rgba(16,185,129,0.20)" }}>
-                        <ArrowUpRight className="w-3 h-3" />{card.badge}
-                      </div>
-                    )}
-                    {card.up === false && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
-                        style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.20)" }}>
-                        <AlertTriangle className="w-3 h-3" />{card.badge}
-                      </div>
-                    )}
-                    {card.up === null && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
-                        style={{ background: `${cfg.accent}14`, color: cfg.accent, border: `1px solid ${cfg.accent}2e` }}>
-                        <Activity className="w-3 h-3" />{card.badge}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-[10px] font-semibold mb-1.5 tracking-wide" style={{ color: C.muted }}>{td(card.labelKey)}</p>
-                  <p className="text-[22px] font-extrabold leading-none mb-1.5 tracking-tight" style={{ color: C.text }}>{card.value}</p>
-                  <p className="text-[10px]" style={{ color: C.muted }}>{td(card.subKey)}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+          {liveMetrics.map((card, i) => (
+            <PremiumMetricCard
+              key={card.labelKey}
+              label={td(card.labelKey)}
+              value={card.value}
+              sub={td(card.subKey)}
+              icon={card.icon}
+              accent={card.accent}
+              index={i}
+              isEmpty={isDashboardEmpty}
+            />
+          ))}
         </div>
 
         {/* ══ MID: Activity + Chart ═══════════════════════════════════ */}
@@ -627,8 +707,7 @@ export default function MarketDashboard() {
           {/* Activity Feed */}
           <motion.div
             initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.28, duration: 0.38 }}
-            className="xl:col-span-2 flex flex-col"
-            style={{ ...glassCard(), padding: "20px" }}
+            {...sectionCardProps(cfg.accent, "xl:col-span-2 flex flex-col")}
           >
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
@@ -644,18 +723,26 @@ export default function MarketDashboard() {
               <PulseDot color={C.green} size="h-2.5 w-2.5" />
             </div>
             <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "380px" }}>
-              {cfg.activity.map((act, idx) => {
-                const ss = STATUS_STYLE[act.status] ?? STATUS_STYLE["چاوەڕوانە"];
+              {liveActivity.length === 0 ? (
+                <DashboardEmptyState
+                  icon={Activity}
+                  title={td("empty.noActivity")}
+                  subtitle={td("empty.noActivitySubtitle")}
+                  accent={cfg.accent}
+                  compact
+                />
+              ) : liveActivity.map((act, idx) => {
+                const ss = STATUS_STYLE[act.status] ?? STATUS_STYLE.pending;
                 const accentColor =
-                  act.status === "جێبەجێکرا" ? cfg.accent :
-                  act.status === "بەرێوەیە"  ? C.blue    : C.orange;
+                  act.status === "completed"  ? cfg.accent :
+                  act.status === "inProgress" ? C.blue    : C.orange;
                 return (
                   <motion.div key={act.id}
                     initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.32 + idx * 0.04 }}
                     className="flex items-center gap-3 rounded-xl"
-                    style={{ background: "rgba(255,255,255,0.022)", border: "1px solid rgba(255,255,255,0.05)", padding: "10px 12px" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.045)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.022)"; }}
+                    style={{ background: C.glassHover, border: `1px solid ${C.border}`, padding: "10px 12px" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.rowHover; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.glassHover; }}
                   >
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                       style={{ background: `${accentColor}14`, border: `1px solid ${accentColor}28` }}>
@@ -671,7 +758,7 @@ export default function MarketDashboard() {
                       </div>
                       <p className="text-[10px] truncate mb-1" style={{ color: C.muted }}>{act.party}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-mono font-semibold" style={{ color: "rgba(100,116,139,0.85)" }}>#{act.id}</span>
+                        <span className="text-[9px] font-mono font-semibold" style={{ color: C.muted }}>#{act.id}</span>
                         <div className="flex items-center gap-1.5">
                           {act.amount > 0 && (
                             <span className="text-[10px] font-extrabold tabular-nums" style={{ color: cfg.accent }}>
@@ -691,8 +778,7 @@ export default function MarketDashboard() {
           {/* Chart */}
           <motion.div
             initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.33, duration: 0.38 }}
-            className="xl:col-span-3"
-            style={{ ...glassCard(), padding: "20px" }}
+            {...sectionCardProps(accentB, "xl:col-span-3")}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -706,7 +792,7 @@ export default function MarketDashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-0.5 rounded-lg p-0.5"
-                style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+                style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
                 {timeRanges.map(r => (
                   <button key={r.key} onClick={() => setChartRange(r.key)}
                     className="px-2.5 py-1 rounded-md text-[10px] font-bold transition-all"
@@ -730,8 +816,17 @@ export default function MarketDashboard() {
               ))}
             </div>
             <div style={{ height: "290px" }} dir="ltr">
+              {chartData.length === 0 ? (
+                <DashboardEmptyState
+                  icon={BarChart3}
+                  title={td("empty.noChart")}
+                  subtitle={td("empty.noChartSubtitle")}
+                  accent={cfg.accent}
+                  compact
+                />
+              ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={cfg.chartData} margin={{ top: 4, right: 6, left: 0, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 4, right: 6, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gL1" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor={cfg.accent} stopOpacity={0.28} />
@@ -742,18 +837,23 @@ export default function MarketDashboard() {
                       <stop offset="95%" stopColor={accentB} stopOpacity={0}    />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.border} />
                   <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 9, fontWeight: 600 }} dy={6} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 9, fontWeight: 600 }}
-                    tickFormatter={v => cfg.chartUnitType === "count"
-                      ? String(v)
-                      : `${(v / 1_000_000).toFixed(1)}M`}
-                    width={40} />
-                  <Tooltip content={<DynChartTooltip unitType={cfg.chartUnitType} />} />
+                    tickFormatter={v => currency === "USD"
+                      ? `$${Number(v).toFixed(0)}`
+                      : Number(v) >= 1_000_000
+                        ? `${(Number(v) / 1_000_000).toFixed(1)}M`
+                        : Number(v) >= 1_000
+                          ? `${(Number(v) / 1_000).toFixed(0)}K`
+                          : String(v)}
+                    width={44} />
+                  <Tooltip content={<DynChartTooltip unitType="money" />} />
                   <Area type="monotone" dataKey="line1" name={td(`sectors.${sk}.chart.line1`)} stroke={cfg.accent} strokeWidth={2} fill="url(#gL1)" activeDot={{ r: 4, fill: cfg.accent, strokeWidth: 0 }} />
                   <Area type="monotone" dataKey="line2" name={td(`sectors.${sk}.chart.line2`)} stroke={accentB}   strokeWidth={2} fill="url(#gL2)" activeDot={{ r: 4, fill: accentB,    strokeWidth: 0 }} strokeDasharray="5 3" />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
           </motion.div>
         </div>
@@ -761,12 +861,11 @@ export default function MarketDashboard() {
         {/* ══ BOTTOM: Top Items + Table ════════════════════════════════ */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-          {/* Top items + Alerts */}
+          {/* Top items + Alerts — live empty until inventory analytics exist */}
           <motion.div
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48, duration: 0.38 }}
-            style={{ ...glassCard(cfg.accent), padding: "20px" }}
+            {...sectionCardProps(cfg.accent)}
           >
-            {/* Top items */}
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ background: `${cfg.accent}1a`, border: `1px solid ${cfg.accent}40` }}>
@@ -777,60 +876,31 @@ export default function MarketDashboard() {
                 <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>{td(`sectors.${sk}.top.sub`)}</p>
               </div>
             </div>
-            <div className="space-y-2.5 mb-5">
-              {cfg.topItems.map((item, i) => (
-                <div key={item.name} className="rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.022)", border: "1px solid rgba(255,255,255,0.05)", padding: "10px 12px" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.022)"; }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center font-extrabold text-[10px] shrink-0"
-                        style={{ background: i === 0 ? "rgba(234,179,8,0.15)" : i === 1 ? "rgba(148,163,184,0.12)" : "rgba(255,255,255,0.06)", color: i === 0 ? "#fbbf24" : i === 1 ? "#94a3b8" : C.muted, border: i === 0 ? "1px solid rgba(234,179,8,0.25)" : `1px solid ${C.border}` }}>
-                        {i + 1}
-                      </div>
-                      <p className="text-[10px] font-bold leading-snug" style={{ color: C.text }}>{item.name}</p>
-                    </div>
-                    <span className="text-[10px] font-extrabold tabular-nums shrink-0 ms-2" style={{ color: cfg.accent }}>
-                      {fmtNum(item.sold)}&nbsp;
-                      <span style={{ color: C.muted, fontWeight: 400, fontSize: "9px" }}>{item.unit}</span>
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full overflow-hidden" style={{ height: "3px", background: "rgba(255,255,255,0.06)" }}>
-                    <div className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${item.pct}%`, background: `linear-gradient(90deg,${cfg.accent},${accentB})` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <DashboardEmptyState
+              icon={TrendingUp}
+              title={td("empty.noItems")}
+              subtitle={td("empty.noItemsSubtitle")}
+              accent={cfg.accent}
+              compact
+            />
 
-            {/* Alerts */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 mt-5">
               <Bell className="w-3.5 h-3.5" style={{ color: C.orange }} />
               <h3 className="text-[11px] font-extrabold" style={{ color: C.orange }}>{td(`sectors.${sk}.alerts.title`)}</h3>
             </div>
-            <div className="space-y-1.5">
-              {cfg.alerts.map(item => (
-                <div key={item.name} className="flex items-center justify-between rounded-lg px-3 py-2"
-                  style={{ background: item.urgent ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.022)", border: `1px solid ${item.urgent ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.05)"}` }}>
-                  <div className="flex items-center gap-2">
-                    {item.urgent && <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: "#f87171" }} />}
-                    <span className="text-[10px] font-semibold" style={{ color: item.urgent ? "#f87171" : C.sub }}>{item.name}</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold shrink-0 ms-2" style={{ color: item.urgent ? "#f87171" : C.muted }}>
-                    {item.qty}&nbsp;<span style={{ fontWeight: 400, fontSize: "9px" }}>{item.unit}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
+            <DashboardEmptyState
+              icon={AlertTriangle}
+              title={td("empty.noAlerts")}
+              subtitle={td("empty.noAlertsSubtitle")}
+              accent={C.orange}
+              compact
+            />
           </motion.div>
 
           {/* Table */}
           <motion.div
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.53, duration: 0.38 }}
-            className="xl:col-span-2"
-            style={{ ...glassCard(), padding: "20px" }}
+            {...sectionCardProps(accentB, "xl:col-span-2")}
           >
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -842,10 +912,10 @@ export default function MarketDashboard() {
                 <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>{td(`sectors.${sk}.table.sub`)}</p>
               </div>
             </div>
-            <div className="overflow-hidden rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+            <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${C.border}` }}>
               <table className="w-full">
                 <thead>
-                  <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  <tr style={{ background: C.glassHover, borderBottom: `1px solid ${C.border}` }}>
                     {[
                       td("table.id"),
                       td(`sectors.${sk}.table.colParty`),
@@ -860,12 +930,24 @@ export default function MarketDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {cfg.rows.map((row, idx) => {
+                  {liveRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-0">
+                        <DashboardEmptyState
+                          icon={ReceiptText}
+                          title={td("empty.noRows")}
+                          subtitle={td("empty.noRowsSubtitle")}
+                          accent={accentB}
+                          compact
+                        />
+                      </td>
+                    </tr>
+                  ) : liveRows.map((row, idx) => {
                     const mc = methodColor(row.method);
                     return (
                       <tr key={row.id}
-                        style={{ borderBottom: idx < cfg.rows.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)"; }}
+                        style={{ borderBottom: idx < liveRows.length - 1 ? `1px solid ${C.border}` : "none" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.rowHover; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                       >
                         <td className="px-3 py-3">
@@ -875,7 +957,7 @@ export default function MarketDashboard() {
                           </div>
                         </td>
                         <td className="px-3 py-3 font-bold" style={{ color: C.text, fontSize: "11px" }}>{row.party}</td>
-                        <td className="px-3 py-3" style={{ color: C.sub, fontSize: "10px" }}>{row.count} {td(`sectors.${sk}.table.colCount`)}</td>
+                        <td className="px-3 py-3" style={{ color: C.sub, fontSize: "10px" }}>{row.count}</td>
                         <td className="px-3 py-3">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-md font-bold"
                             style={{ fontSize: "9px", background: mc.bg, color: mc.col, border: `1px solid ${mc.bdr}` }}>
@@ -898,6 +980,7 @@ export default function MarketDashboard() {
 
         </div>
       </div>
+    </div>
     </div>
   );
 }

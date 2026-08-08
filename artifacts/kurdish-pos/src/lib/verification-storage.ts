@@ -172,30 +172,7 @@ export function migrateLegacyPendingReview() {
   }
 }
 
-export function mockRecordToStored(r: VerificationRecord): StoredVerification {
-  return {
-    id: r.id,
-    sectorKey: r.sectorKey,
-    sectorGroup: r.sectorGroup,
-    businessName: r.businessName,
-    email: r.email,
-    mobile: r.mobile,
-    governorate: r.governorate,
-    city: r.city,
-    address: r.address ?? `${r.lat}, ${r.lng}`,
-    extraData: {
-      lat: r.lat,
-      lng: r.lng,
-      role: r.role,
-      documents: r.documents,
-    },
-    status: r.status,
-    rejectionReason: r.rejectionReason,
-    submittedAt: r.submittedAt,
-  };
-}
-
-/** Merge mock defaults, local storage, and API — API wins on id conflicts */
+/** Merge local storage and API rows — API wins on id conflicts */
 export function mergeVerificationLists(
   mocks: StoredVerification[],
   local: StoredVerification[],

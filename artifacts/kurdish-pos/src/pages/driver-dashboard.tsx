@@ -10,7 +10,9 @@ import {
   CircleDot, ChevronRight, BadgeCheck, Wallet, Map as MapIcon, X, Loader,
 } from "lucide-react";
 import i18n from "@/i18n";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useDriverTracking } from "@/hooks/useDriverTracking";
+import { useDriverCodWorkspace } from "@/hooks/useDriverCodWorkspace";
 
 // Lazy-load map (Leaflet is heavy)
 const LiveTrackingMap = lazy(() =>
@@ -89,17 +91,7 @@ function nextStep(s: DeliveryStatus): DeliveryStatus | null {
   return i < STEPS.length - 1 ? STEPS[i + 1] : null;
 }
 
-// ─── Demo shipments ───────────────────────────────────────────────────────────
-const DEMO_SHIPMENTS: Shipment[] = [
-  { id: "sh-1", orderId: "ORD-M4X92A", buyerName: "فرۆشگای ئەمین",       supplierName: "کۆمپانیای ئەڵبان",   pickupProvince: "erbil",        deliveryProvince: "sulaymaniyah", deliveryFee: 25000, items: 8,  weight: "120 کگ", createdAgo: "5",  priority: "urgent" },
-  { id: "sh-2", orderId: "ORD-K7W3BZ", buyerName: "مارکێتی ئارام",       supplierName: "شیرکەتی دەشتاو",    pickupProvince: "duhok",        deliveryProvince: "erbil",        deliveryFee: 18000, items: 4,  weight: "60 کگ",  createdAgo: "12", priority: "normal" },
-  { id: "sh-3", orderId: "ORD-P2Q8CV", buyerName: "سووپەرمارکێتی هەلالە", supplierName: "بازرگانی ئەمین",   pickupProvince: "sulaymaniyah", deliveryProvince: "kirkuk",       deliveryFee: 20000, items: 12, weight: "200 کگ", createdAgo: "18", priority: "normal" },
-  { id: "sh-4", orderId: "ORD-R9T5DH", buyerName: "دووکانی بەختیار",      supplierName: "ئیمپۆرتی ئارام",  pickupProvince: "erbil",        deliveryProvince: "duhok",        deliveryFee: 22000, items: 6,  weight: "90 کگ",  createdAgo: "25", priority: "urgent" },
-  { id: "sh-5", orderId: "ORD-N3F7GJ", buyerName: "مارکێتی سەردەم",      supplierName: "کەرزەی ئاوینتا",  pickupProvince: "kirkuk",       deliveryProvince: "baghdad",      deliveryFee: 35000, items: 20, weight: "350 کگ", createdAgo: "30", priority: "normal" },
-  { id: "sh-6", orderId: "ORD-L6B2KN", buyerName: "هایپەری نوێ",          supplierName: "دیستریبیوتەری ماجد", pickupProvince: "baghdad",    deliveryProvince: "basra",        deliveryFee: 45000, items: 15, weight: "280 کگ", createdAgo: "42", priority: "normal" },
-  { id: "sh-7", orderId: "ORD-X1V4MP", buyerName: "فرۆشگای ئاسمان",      supplierName: "ئیمپۆرتی دانا",   pickupProvince: "sulaymaniyah", deliveryProvince: "halabja",      deliveryFee: 12000, items: 3,  weight: "45 کگ",  createdAgo: "55", priority: "normal" },
-  { id: "sh-8", orderId: "ORD-C8Y6WQ", buyerName: "گرووپی تاجر",          supplierName: "گرووپی ئەلفاتح",  pickupProvince: "baghdad",      deliveryProvince: "najaf",        deliveryFee: 28000, items: 10, weight: "160 کگ", createdAgo: "68", priority: "urgent" },
-];
+// ─── Shipments loaded from API (COD deliveries) ─────────────────────────────
 
 // ─── Delivery Map Modal ───────────────────────────────────────────────────────
 function DeliveryMapModal({
@@ -229,6 +221,7 @@ function CompletionOverlay({
   onDone: () => void;
 }) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
 
   useEffect(() => {
     const timer = setTimeout(onDone, 3800);
@@ -331,7 +324,7 @@ function CompletionOverlay({
             <div className="text-left">
               <p className="text-[9px] text-white/40 uppercase tracking-wide">{t("driver.earned")}</p>
               <p className="text-lg font-extrabold" style={{ color: "rgba(110,231,183,1)" }}>
-                {shipment.deliveryFee.toLocaleString()} IQD
+                {formatMoney(shipment.deliveryFee)}
               </p>
             </div>
           </motion.div>
@@ -361,9 +354,11 @@ function CompletionOverlay({
 function StatusStepper({
   status,
   onAdvance,
+  isCollecting = false,
 }: {
   status: DeliveryStatus;
   onAdvance: () => void;
+  isCollecting?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -452,10 +447,11 @@ function StatusStepper({
       {/* Advance button */}
       {next && (
         <motion.button
-          whileTap={{ scale: 0.97 }}
-          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: isCollecting ? 1 : 0.97 }}
+          whileHover={{ scale: isCollecting ? 1 : 1.01 }}
           onClick={onAdvance}
-          className="w-full py-2.5 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 transition-all"
+          disabled={isCollecting}
+          className="w-full py-2.5 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           style={
             next === "delivered"
               ? {
@@ -470,12 +466,14 @@ function StatusStepper({
                 }
           }
         >
-          {next === "delivered" ? (
+          {isCollecting ? (
+            <Loader className="w-3.5 h-3.5 animate-spin" />
+          ) : next === "delivered" ? (
             <BadgeCheck className="w-3.5 h-3.5" />
           ) : (
             <ChevronRight className="w-3.5 h-3.5" />
           )}
-          {nextLabels[status]}
+          {isCollecting ? t("common.loading", { ns: "common" }) : nextLabels[status]}
         </motion.button>
       )}
     </div>
@@ -488,13 +486,16 @@ function ActiveDeliveryCard({
   status,
   onAdvance,
   onOpenMap,
+  isCollecting = false,
 }: {
   shipment: Shipment;
   status: DeliveryStatus;
   onAdvance: (id: string) => void;
   onOpenMap: (shipment: Shipment) => void;
+  isCollecting?: boolean;
 }) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
 
   const statusColors: Record<DeliveryStatus, { bg: string; border: string; glow: string }> = {
     picked_up: { bg: "rgba(29,78,216,0.08)",   border: "rgba(59,130,246,0.35)",   glow: "rgba(59,130,246,0.12)"  },
@@ -539,9 +540,8 @@ function ActiveDeliveryCard({
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <Banknote className="w-3 h-3" style={{ color: "rgba(110,231,183,0.9)" }} />
           <span className="text-xs font-extrabold" style={{ color: "rgba(110,231,183,1)" }}>
-            {shipment.deliveryFee.toLocaleString()}
+            {formatMoney(shipment.deliveryFee)}
           </span>
-          <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.3)" }}>IQD</span>
         </div>
       </div>
 
@@ -617,7 +617,11 @@ function ActiveDeliveryCard({
             نەخشە
           </button>
         </div>
-        <StatusStepper status={status} onAdvance={() => onAdvance(shipment.id)} />
+        <StatusStepper
+          status={status}
+          onAdvance={() => onAdvance(shipment.id)}
+          isCollecting={isCollecting}
+        />
       </div>
     </motion.div>
   );
@@ -632,6 +636,7 @@ function AvailableCard({
   onAccept: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
 
   return (
     <motion.div
@@ -671,9 +676,8 @@ function AvailableCard({
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <Banknote className="w-3 h-3" style={{ color: "rgba(110,231,183,0.9)" }} />
           <span className="text-xs font-extrabold" style={{ color: "rgba(110,231,183,1)" }}>
-            {shipment.deliveryFee.toLocaleString()}
+            {formatMoney(shipment.deliveryFee)}
           </span>
-          <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.3)" }}>IQD</span>
         </div>
       </div>
 
@@ -750,18 +754,26 @@ export default function DriverDashboard() {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { formatMoney } = useCurrency();
+
+  const {
+    isLoading: codLoading,
+    available,
+    activeShipments,
+    activeStatuses,
+    completedIds,
+    collectingOrderId,
+    totalEarned,
+    acceptShipment,
+    advanceStatus,
+    collectCash,
+  } = useDriverCodWorkspace();
 
   const [isOnline, setIsOnline]         = useState(true);
   const [currentLang, setCurrentLang]   = useState(i18n.language);
   const [selectedProvince, setSelectedProvince] = useState(user?.province ?? "erbil");
 
-  // shipmentId → status
-  const [activeStatuses, setActiveStatuses] = useState<Map<string, DeliveryStatus>>(new Map());
-  // completed shipments (ids)
-  const [completedIds, setCompletedIds]     = useState<Set<string>>(new Set());
-  // overlay state
   const [completedShipment, setCompletedShipment] = useState<Shipment | null>(null);
-  // map modal
   const [mapShipment, setMapShipment] = useState<Shipment | null>(null);
 
   const changeLang = (code: string) => {
@@ -772,61 +784,57 @@ export default function DriverDashboard() {
     document.documentElement.lang = code;
   };
 
-  const handleAccept = (id: string) => {
-    const shipment = DEMO_SHIPMENTS.find(s => s.id === id);
+  const handleAccept = async (id: string) => {
+    const shipment = available.find((s) => s.id === id);
     if (!shipment) return;
-    setActiveStatuses(prev => new Map([...prev, [id, "picked_up"]]));
-    toast({
-      title: t("driver.acceptedTitle"),
-      description: `${shipment.orderId} — ${getProvinceName(shipment.pickupProvince)} → ${getProvinceName(shipment.deliveryProvince)}`,
-    });
+    try {
+      await acceptShipment(id);
+      toast({
+        title: t("driver.acceptedTitle"),
+        description: `${shipment.orderId} — ${getProvinceName(shipment.pickupProvince)} → ${getProvinceName(shipment.deliveryProvince)}`,
+      });
+    } catch (err) {
+      toast({
+        title: t("common.error"),
+        description: err instanceof Error ? err.message : t("common.retryHint"),
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAdvanceStatus = (id: string) => {
+  const handleAdvanceStatus = async (id: string) => {
     const current = activeStatuses.get(id);
     if (!current) return;
-    const next = nextStep(current);
-    if (!next) return;
 
-    if (next === "delivered") {
-      // Move to delivered first, then show overlay
-      setActiveStatuses(prev => new Map([...prev, [id, "delivered"]]));
-      const shipment = DEMO_SHIPMENTS.find(s => s.id === id)!;
-      // Short delay so stepper animates to delivered state before overlay
-      setTimeout(() => {
-        setCompletedShipment(shipment);
-      }, 400);
-    } else {
-      setActiveStatuses(prev => new Map([...prev, [id, next]]));
+    if (current === "arrived") {
+      try {
+        setActiveStatuses((prev) => new Map([...prev, [id, "delivered"]]));
+        const result = await collectCash(id);
+        const shipment = activeShipments.find((s) => s.id === id);
+        if (shipment && result) {
+          setTimeout(() => setCompletedShipment(shipment), 400);
+        }
+      } catch (err) {
+        setActiveStatuses((prev) => {
+          const m = new Map(prev);
+          m.set(id, "arrived");
+          return m;
+        });
+        toast({
+          title: t("common.error"),
+          description: err instanceof Error ? err.message : t("common.retryHint"),
+          variant: "destructive",
+        });
+      }
+      return;
     }
+
+    advanceStatus(id);
   };
 
   const handleOverlayDone = () => {
-    if (completedShipment) {
-      setCompletedIds(prev => new Set([...prev, completedShipment.id]));
-      setActiveStatuses(prev => {
-        const m = new Map(prev);
-        m.delete(completedShipment.id);
-        return m;
-      });
-      setCompletedShipment(null);
-    }
+    setCompletedShipment(null);
   };
-
-  const available = useMemo(
-    () => DEMO_SHIPMENTS.filter(s => !activeStatuses.has(s.id) && !completedIds.has(s.id)),
-    [activeStatuses, completedIds]
-  );
-
-  const activeShipments = useMemo(
-    () => DEMO_SHIPMENTS.filter(s => activeStatuses.has(s.id)),
-    [activeStatuses]
-  );
-
-  const totalEarned = useMemo(
-    () => DEMO_SHIPMENTS.filter(s => completedIds.has(s.id)).reduce((sum, s) => sum + s.deliveryFee, 0),
-    [completedIds]
-  );
 
   const provinceOptions = PROVINCES.map(p => ({ value: p.id, label: getProvinceName(p.id) }));
 
@@ -891,14 +899,12 @@ export default function DriverDashboard() {
               <MapPin className="w-3 h-3 absolute ltr:left-2.5 rtl:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ color: "rgba(110,231,183,0.7)" }} />
               <select value={selectedProvince} onChange={e => setSelectedProvince(e.target.value)}
-                className="appearance-none ltr:pl-7 rtl:pr-7 ltr:pr-7 rtl:pl-7 py-1.5 rounded-xl text-xs font-semibold cursor-pointer"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(110,231,183,0.9)", outline: "none" }}>
+                className="appearance-none ltr:pl-7 rtl:pr-7 ltr:pr-7 rtl:pl-7 py-1.5 rounded-xl text-xs font-semibold cursor-pointer linqi-shell-select text-slate-900 dark:text-emerald-300 min-w-[120px]">
                 {provinceOptions.map(p => (
-                  <option key={p.value} value={p.value} style={{ background: "#0a1629" }}>{p.label}</option>
+                  <option key={p.value} value={p.value}>{p.label}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute ltr:right-2 rtl:left-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
-                style={{ color: "rgba(110,231,183,0.5)" }} />
+              <ChevronDown className="absolute ltr:right-2 rtl:left-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none text-slate-400 dark:text-emerald-300/50" />
             </div>
 
             {/* Online toggle */}
@@ -998,9 +1004,9 @@ export default function DriverDashboard() {
                 <div className="flex flex-col items-center px-4 py-2.5 rounded-2xl"
                   style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.22)" }}>
                   <span className="font-extrabold text-lg leading-none" style={{ color: "rgba(196,181,253,1)" }}>
-                    {totalEarned.toLocaleString()}
+                    {formatMoney(totalEarned)}
                   </span>
-                  <span className="text-[10px] mt-0.5" style={{ color: "rgba(196,181,253,0.7)" }}>IQD {t("driver.earned")}</span>
+                  <span className="text-[10px] mt-0.5" style={{ color: "rgba(196,181,253,0.7)" }}>{t("driver.earned")}</span>
                 </div>
               )}
             </div>
@@ -1044,6 +1050,7 @@ export default function DriverDashboard() {
                       status={activeStatuses.get(s.id)!}
                       onAdvance={handleAdvanceStatus}
                       onOpenMap={setMapShipment}
+                      isCollecting={collectingOrderId === s.id}
                     />
                   ))}
                 </AnimatePresence>
@@ -1080,7 +1087,9 @@ export default function DriverDashboard() {
               </div>
               <div className="text-center">
                 <p className="text-white/50 font-semibold text-sm">{t("driver.allAccepted")}</p>
-                <p className="text-white/25 text-xs mt-1">{t("driver.allAcceptedSubtitle")}</p>
+                <p className="text-white/25 text-xs mt-1">
+                  {codLoading ? t("common.loading", { ns: "common" }) : available.length === 0 ? t("driver.welcomeSubtitle") : t("driver.allAcceptedSubtitle")}
+                </p>
               </div>
             </motion.div>
           ) : (

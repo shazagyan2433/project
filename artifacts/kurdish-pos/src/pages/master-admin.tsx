@@ -12,9 +12,12 @@ import {
   BarChart3, ArrowUpRight,
   AlertTriangle, Layers, X, FileText,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { PAGE_BADGE_SUCCESS } from "@/lib/page-theme";
 import { AdminVerificationTab } from "@/components/admin/AdminVerificationTab";
 import { AdminContractsTab } from "@/components/admin/AdminContractsTab";
 import { AdminSectorsTab } from "@/components/admin/AdminSectorsTab";
+import { AdminRewardsTab } from "@/components/admin/AdminRewardsTab";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, Cell,
@@ -22,7 +25,6 @@ import {
 import { LiveDriverTracking } from "@/components/LiveDriverTracking";
 import type { TrackedDriver } from "@/lib/admin-types";
 import { useAdminOverview, EMPTY_ADMIN_OVERVIEW, type AdminOverviewData } from "@/hooks/useAdminData";
-import { cn } from "@/lib/utils";
 import { adminTabActive, adminTabInactive } from "@/lib/admin-nav-styles";
 
 const KURDISTAN_REGIONS = [
@@ -89,7 +91,7 @@ function PayBadge({ method }: { method: string }) {
   if (method === "qr_payment") return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] font-bold border border-violet-500/30"><QrCode className="w-2.5 h-2.5" /> QR</span>;
   if (method === "cash_on_delivery") return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30"><Truck className="w-2.5 h-2.5" /> COD</span>;
   if (method === "debt") return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-bold border border-rose-500/30"><CreditCard className="w-2.5 h-2.5" /> Debt</span>;
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30"><Banknote className="w-2.5 h-2.5" /> Cash</span>;
+  return <span className={PAGE_BADGE_SUCCESS}><Banknote className="w-2.5 h-2.5" /> Cash</span>;
 }
 
 function KurdistanMap({ lang }: { lang: string }) {
@@ -352,7 +354,7 @@ function SuppliersTab({ data }: { data: any }) {
                       {product.stock === 0 ? (
                         <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 text-[10px] border border-rose-500/20">Out of Stock</span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">Active</span>
+                        <span className={PAGE_BADGE_SUCCESS}>Active</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -362,7 +364,7 @@ function SuppliersTab({ data }: { data: any }) {
                           className={`text-[10px] font-bold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none appearance-none pr-5 ${vInfo.bg} ${vInfo.color}`}
                           style={{ background: "transparent" }}>
                           {VERIFICATION_STATUSES.map(v => (
-                            <option key={v.key} value={v.key} className="bg-[#0d1526] text-white text-xs">
+                            <option key={v.key} value={v.key} className="text-xs">
                               {v.label[lang] ?? v.label.en}
                             </option>
                           ))}
@@ -437,7 +439,7 @@ function BuyersTab({ data }: { data: any }) {
                     <td className="px-4 py-3 text-xs text-cyan-400 font-bold">{formatIQD(c.totalPurchases)}</td>
                     <td className="px-4 py-3">
                       {c.transactionCount > 0 ? (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">Active</span>
+                        <span className={PAGE_BADGE_SUCCESS}>Active</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500 text-[10px] border border-slate-500/20">Inactive</span>
                       )}
@@ -527,6 +529,7 @@ const TABS = [
   { id: "verification", icon: Shield, labelKey: "master.verification" },
   { id: "contracts", icon: FileText, labelKey: "master.contracts" },
   { id: "sectors", icon: Layers, labelKey: "master.sectors" },
+  { id: "rewards", icon: Award, labelKey: "master.rewards" },
   { id: "suppliers", icon: Package, labelKey: "master.suppliers" },
   { id: "buyers", icon: Users, labelKey: "master.buyers" },
   { id: "drivers", icon: Truck, labelKey: "master.drivers" },
@@ -536,7 +539,7 @@ export default function MasterAdminPanel() {
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
-  const { data = EMPTY_ADMIN_OVERVIEW, isLoading } = useAdminOverview();
+  const { data = EMPTY_ADMIN_OVERVIEW, isLoading, isError, refetch } = useAdminOverview();
 
   if (!isLocalDev() && !isAdmin) {
     return (
@@ -574,7 +577,18 @@ export default function MasterAdminPanel() {
           })}
         </div>
 
-        {isLoading ? (
+        {isError ? (
+          <div className="flex flex-col items-center justify-center h-64 gap-3">
+            <p className="text-slate-400 text-sm">{t("common.loadError", { ns: "common", defaultValue: "Failed to load data" })}</p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+            >
+              {t("common.retry", { ns: "common", defaultValue: "Retry" })}
+            </button>
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="w-12 h-12 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4" />
@@ -588,6 +602,7 @@ export default function MasterAdminPanel() {
               {activeTab === "verification" && <AdminVerificationTab />}
               {activeTab === "contracts" && <AdminContractsTab />}
               {activeTab === "sectors" && <AdminSectorsTab />}
+              {activeTab === "rewards" && <AdminRewardsTab />}
               {activeTab === "suppliers" && <SuppliersTab data={data} />}
               {activeTab === "buyers" && <BuyersTab data={data} />}
               {activeTab === "drivers" && <DriversTab data={data} />}

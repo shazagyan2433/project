@@ -122,7 +122,7 @@ export default function BarcodeScannerModal({ open, onClose, onScanned }: Props)
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-sm"
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden w-full max-w-sm border border-slate-200 dark:border-slate-800"
           >
             {/* Header */}
             <div className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
@@ -185,8 +185,8 @@ export default function BarcodeScannerModal({ open, onClose, onScanned }: Props)
             </div>
 
             {/* Footer hint */}
-            <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 text-center">
-              <p className="text-slate-500 text-xs">
+            <div className="px-5 py-4 border-t border-slate-200 dark:border-slate-800 text-center">
+              <p className="text-slate-600 dark:text-slate-400 text-xs">
                 بارکۆدی کاڵاکە ببە بەرامبەر کامێراکە بۆ ئەوەی بە خۆکارەوە زیاد بکرێت بۆ پسوولەکە
               </p>
             </div>

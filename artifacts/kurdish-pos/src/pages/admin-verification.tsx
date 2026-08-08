@@ -612,10 +612,10 @@ function VerifQueue({ regs, loading, onReview }: {
         <div className="relative">
           <Filter className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: "#475569" }} />
           <select value={statusF} onChange={e => setStatusF(e.target.value)}
-            className="appearance-none ps-9 pe-4 py-2.5 rounded-xl text-sm text-white outline-none cursor-pointer"
+            className="appearance-none ps-9 pe-4 py-2.5 rounded-xl text-sm outline-none cursor-pointer linqi-shell-select text-slate-900 dark:text-white"
             style={{ ...gl.input }}>
             {["all","pending","approved","rejected","suspended","more_docs_needed"].map(s => (
-              <option key={s} value={s} style={{ background: "#050d1a" }}>
+              <option key={s} value={s}>
                 {s === "all" ? t("console.queue.allStatuses") : t(`verification.status.${s}`, { defaultValue: s })}
               </option>
             ))}
@@ -624,11 +624,11 @@ function VerifQueue({ regs, loading, onReview }: {
         <div className="relative">
           <Layers className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: "#475569" }} />
           <select value={sectorF} onChange={e => setSectorF(e.target.value)}
-            className="appearance-none ps-9 pe-4 py-2.5 rounded-xl text-sm text-white outline-none cursor-pointer"
+            className="appearance-none ps-9 pe-4 py-2.5 rounded-xl text-sm outline-none cursor-pointer linqi-shell-select text-slate-900 dark:text-white"
             style={{ ...gl.input }}>
-            <option value="all" style={{ background: "#050d1a" }}>{t("console.queue.allSectors")}</option>
+            <option value="all">{t("console.queue.allSectors")}</option>
             {Object.keys(SM).map(k => (
-              <option key={k} value={k} style={{ background: "#050d1a" }}>{t(`console.sectors.${k}`)}</option>
+              <option key={k} value={k}>{t(`console.sectors.${k}`)}</option>
             ))}
           </select>
         </div>

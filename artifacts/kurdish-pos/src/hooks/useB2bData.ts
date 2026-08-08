@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authedFetch, fetchJsonArray } from "@/lib/authedFetch";
+import { authedFetch, fetchJsonArray, fetchSuppliersArray } from "@/lib/authedFetch";
 import type { CatKey } from "@/lib/industries";
 
 export interface ApiSupplier {
@@ -7,6 +7,8 @@ export interface ApiSupplier {
   name: string;
   city: string;
   governorate: string;
+  address?: string;
+  email?: string;
   sectorKey: string;
   sectorGroup: string;
   phone: string;
@@ -16,6 +18,7 @@ export interface ApiSupplier {
   badge: string;
   color: string;
   products: string[];
+  submittedAt?: string | null;
 }
 
 export type RfqStatus = "pending" | "responded" | "approved" | "declined";
@@ -53,8 +56,25 @@ export interface ApiDelivery {
 export function useSuppliers() {
   return useQuery({
     queryKey: ["suppliers"],
-    queryFn: () => fetchJsonArray<ApiSupplier>("/api/suppliers"),
-    placeholderData: [],
+    queryFn: () => fetchSuppliersArray<ApiSupplier>(),
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    retry: false,
+  });
+}
+
+export function useSupplier(supplierId: number | null) {
+  return useQuery({
+    queryKey: ["suppliers", supplierId],
+    queryFn: async () => {
+      if (!supplierId) return null;
+      const res = await authedFetch(`/api/suppliers/${supplierId}`);
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("Failed to fetch supplier");
+      return (await res.json()) as ApiSupplier;
+    },
+    enabled: supplierId != null && supplierId > 0,
   });
 }
 
@@ -116,5 +136,23 @@ export function useSalesPrediction() {
         hasEnoughData: boolean;
       }>;
     },
+  });
+}
+
+export type NotificationType = "sale" | "rfq" | "stock" | "delivery" | "cod_collected" | "system";
+
+export interface ApiNotification {
+  id: string;
+  type: NotificationType;
+  createdAt: string;
+  payload: Record<string, unknown>;
+}
+
+export function useNotifications() {
+  return useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => fetchJsonArray<ApiNotification>("/api/notifications"),
+    placeholderData: [],
+    refetchInterval: 60_000,
   });
 }

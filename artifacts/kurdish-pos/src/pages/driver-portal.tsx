@@ -10,6 +10,7 @@ import {
   MapPin, ArrowRight, CheckCircle2, Package,
 } from "lucide-react";
 import i18n from "@/i18n";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import DriverDashboard from "./driver-dashboard";
 import { RoleTabBar, type RoleTab } from "@/components/RoleTabBar";
 import { MetricSkeleton, TableRowSkeleton } from "@/components/SkeletonLoader";
@@ -35,30 +36,16 @@ const C = {
   purple: "#8b5cf6",
 };
 
-/* ── Demo data ─────────────────────────────────────────────────── */
+/* ── Demo data (empty until API wired) ─────────────────────────── */
 const PROVINCES: Record<string, string> = {
   erbil:"هەولێر", sulaymaniyah:"سلێمانی", duhok:"دهۆک",
   halabja:"هەڵەبجە", kirkuk:"کەرکووک", baghdad:"بەغداد",
   basra:"بەسرە", mosul:"مووسڵ",
 };
 
-const HISTORY = [
-  { id:"sh-c1", orderId:"ORD-P9K4XA", buyer:"فرۆشگای ئەمین",     fee:25_000, from:"erbil",        to:"sulaymaniyah", date:"١٣ی تیرمەه",items:8  },
-  { id:"sh-c2", orderId:"ORD-M3G8ZB", buyer:"مارکێتی ئارام",      fee:18_000, from:"duhok",        to:"erbil",        date:"١٣ی تیرمەه",items:4  },
-  { id:"sh-c3", orderId:"ORD-X1V4MP", buyer:"فرۆشگای ئاسمان",     fee:12_000, from:"sulaymaniyah", to:"halabja",      date:"١٢ی تیرمەه",items:3  },
-  { id:"sh-c4", orderId:"ORD-R9T5DH", buyer:"دووکانی بەختیار",     fee:22_000, from:"erbil",        to:"duhok",        date:"١٢ی تیرمەه",items:6  },
-  { id:"sh-c5", orderId:"ORD-L6B2KN", buyer:"هایپەری نوێ",         fee:45_000, from:"baghdad",      to:"basra",        date:"١١ی تیرمەه",items:15 },
-  { id:"sh-c6", orderId:"ORD-C8Y6WQ", buyer:"گرووپی تاجر",         fee:28_000, from:"baghdad",      to:"mosul",        date:"١١ی تیرمەه",items:10 },
-];
+const HISTORY: Array<{ id: string; orderId: string; buyer: string; fee: number; from: string; to: string; date: string; items: number }> = [];
 
-const totalHistoryFee = HISTORY.reduce((s, h) => s + h.fee, 0);
-
-const WEEKLY_EARN = [
-  { d:"دو", v:58_000 }, { d:"سێ", v:95_000 }, { d:"چو", v:42_000 },
-  { d:"پێ", v:110_000 }, { d:"هە", v:87_000 }, { d:"شە", v:122_000 },
-  { d:"یە", v:63_000 },
-];
-const maxW = Math.max(...WEEKLY_EARN.map(d => d.v));
+const WEEKLY_EARN: Array<{ d: string; v: number }> = [];
 
 /* ── Shared panel shell ─────────────────────────────────────────── */
 function PanelShell({ children }: { children: React.ReactNode }) {
@@ -77,15 +64,17 @@ function PanelShell({ children }: { children: React.ReactNode }) {
 
 /* ── HISTORY tab ─────────────────────────────────────────────────── */
 function HistoryPanel({ isLoading }: { isLoading: boolean }) {
+  const { formatMoney } = useCurrency();
+
   return (
     <PanelShell>
       <h1 className="text-sm font-extrabold text-white mb-4">مێژووی گەیاندنەکان</h1>
 
       <div className="grid grid-cols-3 gap-3 mb-4">
         {isLoading ? [0,1,2].map(i => <MetricSkeleton key={i} />) : [
-          { label:"کۆی گەیاندن", value:"١٤",    color:C.blue   },
-          { label:"کۆیی دەستمووزی", value:`${(totalHistoryFee/1_000).toFixed(0)}K`, color:C.green  },
-          { label:"ئەمجار",      value:"٦",    color:C.purple },
+          { label:"کۆی گەیاندن", value:"0", color:C.blue   },
+          { label:"کۆیی دەستمووزی", value:formatMoney(0), color:C.green  },
+          { label:"ئەمجار",      value:"0",    color:C.purple },
         ].map(m => (
           <div key={m.label} style={GLASS} className="p-4 text-center">
             <p className="text-2xl font-extrabold" style={{ color:m.color }}>{m.value}</p>
@@ -100,7 +89,12 @@ function HistoryPanel({ isLoading }: { isLoading: boolean }) {
         </div>
         {isLoading
           ? <div className="p-4"><TableRowSkeleton rows={5} /></div>
-          : HISTORY.map((h, idx) => (
+          : HISTORY.length === 0
+            ? <div className="flex flex-col items-center py-16 gap-3">
+                <History className="w-10 h-10" style={{ color:"rgba(16,185,129,0.35)" }} />
+                <p className="text-white/40 text-sm font-semibold">هیچ گەیاندنێک نییە</p>
+              </div>
+            : HISTORY.map((h, idx) => (
               <div key={h.id}
                 className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.025]"
                 style={{ borderBottom: idx < HISTORY.length-1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
@@ -118,8 +112,7 @@ function HistoryPanel({ isLoading }: { isLoading: boolean }) {
                 </div>
                 <div className="text-end shrink-0">
                   <p className="text-[12px] font-extrabold tabular-nums" style={{ color:"#34d399" }}>
-                    +{new Intl.NumberFormat("ku-IQ").format(h.fee)}
-                    <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                    +{formatMoney(h.fee)}
                   </p>
                   <p className="text-[9px]" style={{ color:C.muted }}>{h.date}</p>
                 </div>
@@ -133,7 +126,8 @@ function HistoryPanel({ isLoading }: { isLoading: boolean }) {
 
 /* ── EARNINGS tab ───────────────────────────────────────────────── */
 function EarningsPanel({ isLoading }: { isLoading: boolean }) {
-  const weeklyTotal = WEEKLY_EARN.reduce((s, d) => s + d.v, 0);
+  const { formatMoney } = useCurrency();
+  const hasChartData = WEEKLY_EARN.length > 0;
 
   return (
     <PanelShell>
@@ -141,14 +135,12 @@ function EarningsPanel({ isLoading }: { isLoading: boolean }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         {isLoading ? [0,1,2].map(i => <MetricSkeleton key={i} />) : [
-          { label:"کۆیی دەستمووز — ئەمسەر", value:`${(totalHistoryFee/1_000).toFixed(0)}K`, color:C.green  },
-          { label:"ئەمجار",                  value:`${(weeklyTotal/1_000).toFixed(0)}K`,      color:C.blue   },
-          { label:"باشترین ڕۆژ",             value:"شەممە",                                   color:C.orange },
+          { label:"کۆیی دەستمووز — ئەمسەر", value:formatMoney(0), color:C.green  },
+          { label:"ئەمجار",                  value:formatMoney(0), color:C.blue   },
+          { label:"باشترین ڕۆژ",             value:"—",                                   color:C.orange },
         ].map(m => (
           <div key={m.label} style={GLASS} className="p-4">
-            <p className="text-2xl font-extrabold" style={{ color:m.color }}>{m.value}
-              {m.label !== "باشترین ڕۆژ" && <span className="text-xs font-normal text-white/40 ms-1">د.ع</span>}
-            </p>
+            <p className="text-2xl font-extrabold" style={{ color:m.color }}>{m.value}</p>
             <p className="text-[10px] mt-1 font-semibold" style={{ color:C.muted }}>{m.label}</p>
           </div>
         ))}
@@ -159,18 +151,26 @@ function EarningsPanel({ isLoading }: { isLoading: boolean }) {
         <h2 className="text-[12px] font-extrabold text-white mb-3">دەستمووزی هەفتەیی</h2>
         {isLoading
           ? <div className="animate-pulse rounded-xl" style={{ height:140, background:"rgba(255,255,255,0.03)" }} />
-          : <div className="flex items-end gap-1.5" style={{ height:"140px" }} role="img" aria-label="هەفتەیی دەستمووز چارت">
-              {WEEKLY_EARN.map(d => (
-                <div key={d.d} className="flex-1 flex flex-col items-center justify-end gap-1">
-                  <span className="text-[8px] font-bold" style={{ color:C.muted }}>
-                    {d.v >= 1000 ? `${(d.v/1_000).toFixed(0)}K` : d.v}
-                  </span>
-                  <div className="w-full rounded-t-md transition-all"
-                    style={{ height:`${(d.v/maxW)*110}px`, background:"linear-gradient(180deg,#10b981,#059669)" }} />
-                  <span className="text-[8px]" style={{ color:"#475569" }}>{d.d}</span>
-                </div>
-              ))}
-            </div>
+          : hasChartData
+            ? <div className="flex items-end gap-1.5" style={{ height:"140px" }} role="img" aria-label="هەفتەیی دەستمووز چارت">
+                {WEEKLY_EARN.map(d => {
+                  const maxW = Math.max(...WEEKLY_EARN.map(x => x.v), 1);
+                  return (
+                    <div key={d.d} className="flex-1 flex flex-col items-center justify-end gap-1">
+                      <span className="text-[8px] font-bold" style={{ color:C.muted }}>
+                        {formatMoney(d.v, { compact: true })}
+                      </span>
+                      <div className="w-full rounded-t-md transition-all"
+                        style={{ height:`${(d.v/maxW)*110}px`, background:"linear-gradient(180deg,#10b981,#059669)" }} />
+                      <span className="text-[8px]" style={{ color:"#475569" }}>{d.d}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            : <div className="flex flex-col items-center py-12 gap-2">
+                <Banknote className="w-8 h-8" style={{ color:"rgba(16,185,129,0.25)" }} />
+                <p className="text-white/40 text-xs font-semibold">هیچ داتای دەستمووز نییە</p>
+              </div>
         }
       </div>
 
@@ -179,7 +179,9 @@ function EarningsPanel({ isLoading }: { isLoading: boolean }) {
         <h2 className="text-[12px] font-extrabold text-white mb-3">فیشەکانی دەستمووز</h2>
         {isLoading
           ? <TableRowSkeleton rows={4} />
-          : HISTORY.slice(0, 4).map((h, idx) => (
+          : HISTORY.length === 0
+            ? <p className="text-white/40 text-xs font-semibold py-6 text-center">هیچ فیشێک نییە</p>
+            : HISTORY.slice(0, 4).map((h, idx) => (
               <div key={h.id} className="flex items-center gap-3 py-2"
                 style={{ borderBottom: idx < 3 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
                 <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -191,8 +193,7 @@ function EarningsPanel({ isLoading }: { isLoading: boolean }) {
                   <span className="text-[9px]" style={{ color:C.muted }}>{PROVINCES[h.to] ?? h.to}</span>
                 </div>
                 <p className="text-[11px] font-extrabold tabular-nums shrink-0" style={{ color:"#34d399" }}>
-                  +{new Intl.NumberFormat("ku-IQ").format(h.fee)}
-                  <span className="text-[9px] font-normal text-white/30 ms-0.5">د.ع</span>
+                  +{formatMoney(h.fee)}
                 </p>
               </div>
             ))

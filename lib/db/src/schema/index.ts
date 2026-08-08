@@ -8,3 +8,4 @@ export * from "./deliveries";
 export * from "./rfqs";
 export * from "./admin-contracts";
 export * from "./platform-settings";
+export * from "./loyalty";

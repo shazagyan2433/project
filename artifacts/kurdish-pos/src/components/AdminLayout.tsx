@@ -138,6 +138,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleSwitchToApp = () => {
+    if (import.meta.env.PROD) {
+      // Production: navigate to merchant app with the current JWT session only.
+      prepareMerchantSession();
+      hardNavigate(MERCHANT_APP_PATH);
+      return;
+    }
     try {
       prepareMerchantSession();
       const user = ensureMerchantAppSession();

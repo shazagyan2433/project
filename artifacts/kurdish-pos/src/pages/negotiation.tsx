@@ -2,14 +2,14 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Handshake, Send, Search, Circle, CheckCheck, Paperclip, Smile } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useSectorLabel } from "@/hooks/useSectorScope";
+import { PageHeader } from "@/components/PageHeader";
 import { useGetCustomers } from "@workspace/api-client-react";
+import { PAGE_INPUT, PAGE_SURFACE, PAGE_MUTED } from "@/lib/page-theme";
 
 type Message = { id: number; from: "me" | "them"; text: string; time: string; read: boolean };
 
 export default function Negotiation() {
   const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
   const { data: customers = [], isLoading } = useGetCustomers();
 
   const contacts = useMemo(
@@ -17,7 +17,7 @@ export default function Negotiation() {
       customers.map((c, i) => ({
         id: c.id,
         name: c.name,
-        role: t("emptyStates.customerRole", { defaultValue: "کڕیار" }),
+        role: t("emptyStates.customerRole"),
         avatar: c.name.charAt(0),
         color: ["#3B82F6", "#10B981", "#F59E0B", "#EC4899", "#A855F7"][i % 5],
         unread: 0,
@@ -54,13 +54,12 @@ export default function Negotiation() {
           <Handshake className="w-5 h-5" style={{ color: "#EC4899" }} />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-white">{t("pageTitles.negotiation", { sector: sectorLabel })}</h1>
-          <p className="text-xs text-white/40">{t("pageTitles.negotiationSubtitle", { sector: sectorLabel })}</p>
+          <PageHeader id="negotiation" />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center text-white/30 text-sm">{t("common.loading", { defaultValue: "بارکردن…" })}</div>
+        <div className="flex-1 flex items-center justify-center text-white/30 text-sm">{t("common.loading")}</div>
       ) : contacts.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
           <Handshake className="w-12 h-12 mb-3 opacity-20 text-white" />

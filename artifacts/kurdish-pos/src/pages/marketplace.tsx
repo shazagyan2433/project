@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSectorFilteredProducts, useUserSectorKey, useSectorLabel } from "@/hooks/useSectorScope";
+import { useSectorFilteredProducts, useUserSectorKey, useSectorCategoryOptions } from "@/hooks/useSectorScope";
+import { usePageHeader } from "@/lib/page-headers";
 import {
   Store, Search, ShieldCheck, BarChart2, PackageCheck,
   Star, MapPin, Phone, MessageSquare, ArrowUpRight,
@@ -12,31 +13,62 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { useTranslation } from "react-i18next";
-import { getSectorCategoryChips, normalizeCategoryKey, isProductAllowedForSector, isSupplierSectorAllowedForBuyer, type CatKey } from "@/lib/industries";
+import { useLocaleDir } from "@/lib/use-locale-dir";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { Link } from "wouter";
+import { getSectorCategoryChips, normalizeCategoryKey, isProductAllowedForSector, isSupplierSectorAllowedForBuyer, getDefaultSectorCategory, type CatKey } from "@/lib/industries";
 import { useGetSales } from "@workspace/api-client-react";
 import { useSuppliers } from "@/hooks/useB2bData";
+import {
+  MarketplaceRequestModal,
+  type MarketplaceRequestContext,
+} from "@/components/marketplace/MarketplaceRequestModal";
+import { cn } from "@/lib/utils";
+import {
+  PAGE_INPUT,
+  PAGE_CHIP_INACTIVE,
+  PAGE_CHIP_ACTIVE_BLUE,
+  PAGE_CHIP_ACTIVE_GREEN,
+  PAGE_CHIP_ACTIVE_PURPLE,
+  PAGE_CHIP_ACTIVE_CYAN,
+  PAGE_CARD_TITLE,
+  PAGE_CARD_DETAIL,
+  PAGE_CARD_LABEL,
+  PAGE_MUTED as PAGE_MUTED_CLS,
+} from "@/lib/page-theme";
+import {
+  BG,
+  C,
+  glassCard,
+  chartTooltipStyle,
+  heroGradient,
+  PAGE_TEXT as TEXT,
+  PAGE_MUTED as MUTED,
+  PAGE_SUB as SUB,
+} from "./dashboard-tokens";
 
 /* ─────────────────────────────────────────────────────────────────── */
-/*  DESIGN TOKENS                                                       */
+/*  ACCENT COLORS                                                       */
 /* ─────────────────────────────────────────────────────────────────── */
-const BG     = "#0b0f17";
 const BLUE   = "#3b82f6";
 const CYAN   = "#06b6d4";
 const GREEN  = "#10b981";
 const PURPLE = "#8b5cf6";
 const ORANGE = "#f97316";
-const MUTED  = "#64748b";
-const SUB    = "#94a3b8";
-const TEXT   = "#f1f5f9";
 
-const glass = (extra?: React.CSSProperties): React.CSSProperties => ({
-  background:           "rgba(255,255,255,0.03)",
-  backdropFilter:       "blur(24px)",
-  WebkitBackdropFilter: "blur(24px)",
-  border:               "1px solid rgba(255,255,255,0.06)",
-  borderRadius:         "16px",
-  ...extra,
-});
+/** Readable metric/status text (switches with light/dark) */
+const GREEN_TXT = C.green;
+const CYAN_TXT  = C.cyan;
+const BLUE_TXT  = C.blue;
+
+const glass = glassCard;
+
+const TAB_ACTIVE_CHIP = {
+  catalog: PAGE_CHIP_ACTIVE_BLUE,
+  sellers: PAGE_CHIP_ACTIVE_GREEN,
+  analytics: PAGE_CHIP_ACTIVE_PURPLE,
+  fulfillment: PAGE_CHIP_ACTIVE_CYAN,
+} as const;
 
 const fmt = (v: number, locale = "ku-IQ") => new Intl.NumberFormat(locale).format(v);
 
@@ -70,6 +102,49 @@ const CAT_IMAGES: Partial<Record<CatKey, string[]>> = {
   medicine: [
     "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=480&h=320&fit=crop&auto=format",
     "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=480&h=320&fit=crop&auto=format",
+  ],
+  medicalSupplies: [
+    "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=480&h=320&fit=crop&auto=format",
+  ],
+  mobile: [
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=480&h=320&fit=crop&auto=format",
+  ],
+  accessories: [
+    "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=480&h=320&fit=crop&auto=format",
+  ],
+  software: [
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=480&h=320&fit=crop&auto=format",
+  ],
+  computer: [
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=480&h=320&fit=crop&auto=format",
+  ],
+  pcParts: [
+    "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=480&h=320&fit=crop&auto=format",
+  ],
+  ticketsFlights: [
+    "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=480&h=320&fit=crop&auto=format",
+  ],
+  hotelsBooking: [
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=480&h=320&fit=crop&auto=format",
+  ],
+  visasTours: [
+    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=480&h=320&fit=crop&auto=format",
+  ],
+  travelInsurance: [
+    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=480&h=320&fit=crop&auto=format",
+  ],
+  pensionTransport: [
+    "https://images.unsplash.com/photo-1544620307-c4fd4fcadab5?w=480&h=320&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=480&h=320&fit=crop&auto=format",
   ],
   cosmetics: [
     "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=480&h=320&fit=crop&auto=format",
@@ -119,21 +194,19 @@ function Stars({ rating }: { rating: number }) {
 }
 
 /* Tooltip for charts */
-function ChartTip({ active, payload, label }: any) {
+function ChartTip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; color?: string; value: number; dataKey?: string }>; label?: string }) {
+  const { formatMoney } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      background: "rgba(11,15,23,0.97)", border: "1px solid rgba(59,130,246,0.3)",
-      borderRadius: "10px", padding: "10px 14px", backdropFilter: "blur(12px)",
-    }}>
+    <div style={chartTooltipStyle(BLUE)}>
       <p style={{ color: MUTED, fontSize: "10px", marginBottom: "6px" }}>{label}</p>
-      {payload.map((p: any, i: number) => (
+      {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-1.5" style={{ marginBottom: "2px" }}>
           <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
           <span style={{ color: TEXT, fontSize: "12px", fontWeight: 700 }}>{p.name}:</span>
           <span style={{ color: p.color, fontSize: "12px", fontWeight: 800 }}>
-            {typeof p.value === "number" && p.value > 100
-              ? fmt(p.value * 1000) + " د.ع"
+            {p.dataKey === "sales" && typeof p.value === "number"
+              ? formatMoney(p.value)
               : p.value}
           </span>
         </div>
@@ -143,8 +216,9 @@ function ChartTip({ active, payload, label }: any) {
 }
 
 /* ── TAB 1: Product Catalog ────────────────────────────────────────── */
-function CatalogTab() {
+function CatalogTab({ onRequest }: { onRequest: (ctx: MarketplaceRequestContext) => void }) {
   const { t, i18n } = useTranslation("common");
+  const { formatMoney } = useCurrency();
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState<CatKey | "all">("all");
 
@@ -152,7 +226,8 @@ function CatalogTab() {
 
   const { data: apiProductsRaw = [] } = useSectorFilteredProducts();
   const sectorKey = useUserSectorKey();
-  const allowedCatKeys = useMemo(() => getSectorCategoryChips(sectorKey), [sectorKey]);
+  const sectorCategoryOptions = useSectorCategoryOptions();
+  const allowedCatKeys = useMemo(() => sectorCategoryOptions.map(o => o.key), [sectorCategoryOptions]);
 
   useEffect(() => {
     if (selectedCat !== "all" && !allowedCatKeys.includes(selectedCat)) {
@@ -184,47 +259,51 @@ function CatalogTab() {
   );
 
   const tCat = (k: CatKey | "all") =>
-    k === "all" ? t("marketplace.catalog.allCategories") : t(`marketplace.cats.${k}`);
+    k === "all"
+      ? t("marketplace.catalog.allCategories")
+      : sectorCategoryOptions.find(o => o.key === k)?.label ?? t(`marketplace.cats.${k}`);
 
   return (
-    <div dir="rtl">
+    <div>
       {/* Search + filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4"
-            style={{ color: MUTED }} />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-400" />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t("marketplace.catalog.searchPlaceholder")}
-            className="w-full rounded-xl text-sm outline-none transition-all"
-            style={{
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-              padding: "10px 40px 10px 14px", color: TEXT, fontFamily: "Vazirmatn,sans-serif",
-            }}
-            onFocus={e  => { e.currentTarget.style.borderColor = `${BLUE}60`; e.currentTarget.style.boxShadow = `0 0 0 3px ${BLUE}18`; }}
-            onBlur={e   => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.boxShadow = "none"; }}
+            className={cn(PAGE_INPUT, "pe-10")}
+            style={{ padding: "10px 40px 10px 14px", fontFamily: "Vazirmatn,sans-serif" }}
           />
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Filter className="w-4 h-4 shrink-0" style={{ color: MUTED }} />
-          {/* "All" button */}
+        {sectorKey && allowedCatKeys.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className={cn("text-[10px] font-bold uppercase tracking-wide px-0.5", PAGE_CARD_LABEL)}>
+            {t("marketplace.catalog.categoriesLabel")}
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+          <Filter className="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-400" />
+          {/* "All" — scoped to the user's sector ecosystem only */}
           <button key="all" onClick={() => setSelectedCat("all")}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-            style={selectedCat === "all"
-              ? { background: `${BLUE}22`, color: "#93c5fd", border: `1px solid ${BLUE}45` }
-              : { background: "rgba(255,255,255,0.04)", color: MUTED, border: "1px solid rgba(255,255,255,0.07)" }}>
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+              selectedCat === "all" ? PAGE_CHIP_ACTIVE_BLUE : PAGE_CHIP_INACTIVE,
+            )}
+            title={t("marketplace.catalog.sectorOnlyHint")}>
             {tCat("all")}
           </button>
-          {allowedCatKeys.map(c => (
-            <button key={c} onClick={() => setSelectedCat(c)}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-              style={selectedCat === c
-                ? { background: `${BLUE}22`, color: "#93c5fd", border: `1px solid ${BLUE}45` }
-                : { background: "rgba(255,255,255,0.04)", color: MUTED, border: "1px solid rgba(255,255,255,0.07)" }}>
-              {tCat(c)}
+          {sectorCategoryOptions.map(({ key, label }) => (
+            <button key={key} onClick={() => setSelectedCat(key)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+                selectedCat === key ? PAGE_CHIP_ACTIVE_BLUE : PAGE_CHIP_INACTIVE,
+              )}>
+              {label}
             </button>
           ))}
+          </div>
         </div>
+        )}
       </div>
 
       {/* Product grid */}
@@ -235,20 +314,20 @@ function CatalogTab() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="rounded-2xl overflow-hidden group cursor-pointer"
+            className="rounded-2xl overflow-hidden group"
             style={glass()}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.055)";
+              (e.currentTarget as HTMLElement).style.background = C.glassHover;
               (e.currentTarget as HTMLElement).style.borderColor = `${BLUE}30`;
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+              (e.currentTarget as HTMLElement).style.background = C.glass;
+              (e.currentTarget as HTMLElement).style.borderColor = C.border;
             }}
           >
             {/* Product image */}
             <div className="relative h-36 overflow-hidden"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              style={{ borderBottom: `1px solid ${C.border}` }}>
               <img
                 src={getCatImage(p.cat, p.id)}
                 alt={p.name}
@@ -256,12 +335,12 @@ function CatalogTab() {
                 className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
               <div className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(to bottom, rgba(11,15,23,0.45) 0%, transparent 45%, rgba(11,15,23,0.65) 100%)" }} />
+                style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--terminal-bg) 50%, transparent) 0%, transparent 45%, color-mix(in srgb, var(--terminal-bg) 70%, transparent) 100%)" }} />
 
               {/* Category badge */}
               <div className="absolute top-2.5 start-2.5">
                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm"
-                  style={{ background: "rgba(11,15,23,0.75)", color: SUB, border: "1px solid rgba(255,255,255,0.1)" }}>
+                  style={{ background: "color-mix(in srgb, var(--terminal-bg) 80%, transparent)", color: SUB, border: `1px solid ${C.border}` }}>
                   {tCat(p.cat)}
                 </span>
               </div>
@@ -284,24 +363,39 @@ function CatalogTab() {
             </div>
 
             <div className="p-4">
-              <h3 className="text-[13px] font-extrabold mb-1 leading-snug" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+              <h3 className={cn("text-[13px] mb-1 leading-snug", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                 {p.name}
               </h3>
-              <p className="text-[10px] mb-2" style={{ color: MUTED }}>{p.seller} · {p.unit}</p>
+              <p className={cn("text-[10px] mb-2", PAGE_CARD_DETAIL)}>{p.seller} · {p.unit}</p>
               <Stars rating={p.rating} />
 
               <div className="flex items-center justify-between mt-3 pt-3"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                style={{ borderTop: `1px solid ${C.border}` }}>
                 <div>
-                  <p className="text-[10px] font-semibold" style={{ color: MUTED }}>{t("marketplace.catalog.listPrice")}</p>
+                  <p className={cn("text-[10px] font-semibold", PAGE_CARD_LABEL)}>{t("marketplace.catalog.listPrice")}</p>
                   <p className="text-[15px] font-extrabold tabular-nums" style={{ color: CYAN }}>
-                    {fmt(p.price, numLocale)} <span style={{ color: MUTED, fontWeight: 400, fontSize: "9px" }}>{t("common.currency")}</span>
+                    {formatMoney(p.price)}
                   </p>
                 </div>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all"
-                  style={{ background: `${BLUE}18`, color: "#93c5fd", border: `1px solid ${BLUE}35` }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${BLUE}30`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${BLUE}18`; }}>
+                <button
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all",
+                    PAGE_CHIP_ACTIVE_BLUE,
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRequest({
+                      productName: p.name,
+                      supplierName: p.seller,
+                      unit: p.unit,
+                      category: p.cat,
+                      price: p.price,
+                      quantity: "1",
+                    });
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).classList.add("dark:bg-blue-500/25"); }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).classList.remove("dark:bg-blue-500/25"); }}>
                   <MessageSquare className="w-3.5 h-3.5" />
                   {t("marketplace.catalog.request")}
                 </button>
@@ -312,7 +406,7 @@ function CatalogTab() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="py-20 text-center" style={{ color: MUTED }}>
+        <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
           <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm font-semibold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("marketplace.catalog.noResults")}</p>
         </div>
@@ -322,7 +416,7 @@ function CatalogTab() {
 }
 
 /* ── TAB 2: Verified Sellers ───────────────────────────────────────── */
-function SellersTab() {
+function SellersTab({ onRequest }: { onRequest: (ctx: MarketplaceRequestContext) => void }) {
   const { t } = useTranslation("common");
   const [contactId, setContactId] = useState<number | null>(null);
   const sectorKey = useUserSectorKey();
@@ -347,13 +441,13 @@ function SellersTab() {
   );
 
   return (
-    <div dir="rtl">
+    <div>
       {isLoading ? (
-        <div className="py-20 text-center" style={{ color: MUTED }}>
-          <p className="text-sm font-semibold">{t("common.loading", { defaultValue: "بارکردن…" })}</p>
+        <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
+          <p className="text-sm font-semibold">{t("common.loading")}</p>
         </div>
       ) : sectorSellers.length === 0 ? (
-        <div className="py-20 text-center" style={{ color: MUTED }}>
+        <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
           <ShieldCheck className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm font-semibold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("emptyStates.noSuppliers")}</p>
         </div>
@@ -366,28 +460,28 @@ function SellersTab() {
             className="p-5 rounded-2xl" style={glass()}>
             <div className="flex items-start gap-4 mb-4">
               {/* Avatar */}
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-extrabold text-lg"
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-extrabold text-lg text-blue-600 dark:text-blue-300"
                 style={{
                   background: `${BLUE}18`, border: `1.5px solid ${BLUE}35`,
-                  color: "#93c5fd", fontFamily: "Vazirmatn,sans-serif",
+                  fontFamily: "Vazirmatn,sans-serif",
                 }}>
                 {s.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="text-[13px] font-extrabold" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+                  <h3 className={cn("text-[13px]", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                     {s.name}
                   </h3>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
                     style={{
                       background: s.badgeKey === "goldPartner" ? "rgba(245,158,11,0.15)" : "rgba(148,163,184,0.12)",
-                      color:      s.badgeKey === "goldPartner" ? "#fbbf24" : "#94a3b8",
+                      color:      s.badgeKey === "goldPartner" ? "var(--linqi-amber)" : "var(--shell-text-muted)",
                       border:     `1px solid ${s.badgeKey === "goldPartner" ? "rgba(245,158,11,0.30)" : "rgba(148,163,184,0.20)"}`,
                     }}>
                     {t(`marketplace.sellers.${s.badgeKey}`)}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-[10px]" style={{ color: MUTED }}>
+                <div className={cn("flex items-center gap-3 text-[10px]", PAGE_CARD_DETAIL)}>
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.region}</span>
                   <span>{t("marketplace.sellers.founded")} {s.founded}</span>
                 </div>
@@ -402,21 +496,20 @@ function SellersTab() {
                 { label: t("marketplace.sellers.rating"),   value: `★ ${s.rating}`   },
               ].map(stat => (
                 <div key={stat.label} className="p-2.5 rounded-xl text-center"
-                  style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <p className="text-[13px] font-extrabold mb-0.5" style={{ color: TEXT }}>{stat.value}</p>
-                  <p className="text-[9px]" style={{ color: MUTED }}>{stat.label}</p>
+                  style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
+                  <p className={cn("text-[13px] font-extrabold mb-0.5", PAGE_CARD_TITLE)}>{stat.value}</p>
+                  <p className={cn("text-[9px]", PAGE_CARD_LABEL)}>{stat.label}</p>
                 </div>
               ))}
             </div>
 
             {/* Specialties */}
             <div className="flex items-center gap-1.5 flex-wrap mb-4">
-              <span className="text-[9.5px] font-bold uppercase tracking-wide" style={{ color: MUTED }}>
+              <span className={cn("text-[9.5px] font-bold uppercase tracking-wide", PAGE_CARD_LABEL)}>
                 {t("marketplace.sellers.specialties")}:
               </span>
               {s.specialties.filter(sp => isProductAllowedForSector(sp, sectorKey)).map((sp, idx) => (
-                <span key={idx} className="text-[9px] font-bold px-2 py-0.5 rounded-md"
-                  style={{ background: "rgba(59,130,246,0.10)", color: "#93c5fd", border: "1px solid rgba(59,130,246,0.20)" }}>
+                <span key={idx} className={cn("text-[9px] font-bold px-2 py-0.5 rounded-md", PAGE_CHIP_ACTIVE_BLUE)}>
                   {t(`marketplace.cats.${sp}`)}
                 </span>
               ))}
@@ -425,20 +518,51 @@ function SellersTab() {
             {/* Actions */}
             <div className="flex items-center gap-2">
               <button
+                type="button"
+                onClick={() => {
+                  const category = s.specialties.find(sp => isProductAllowedForSector(sp, sectorKey))
+                    ?? getDefaultSectorCategory(sectorKey);
+                  if (!category) return;
+                  onRequest({
+                    productName: "",
+                    supplierName: s.name,
+                    unit: "دانە",
+                    category,
+                    quantity: "1",
+                  });
+                }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-bold transition-all",
+                  PAGE_CHIP_ACTIVE_BLUE,
+                )}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).classList.add("dark:bg-blue-500/25"); }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).classList.remove("dark:bg-blue-500/25"); }}>
+                <MessageSquare className="w-3.5 h-3.5" />
+                {t("marketplace.catalog.request")}
+              </button>
+              <button
+                type="button"
                 onClick={() => setContactId(contactId === s.id ? null : s.id)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-bold transition-all"
-                style={{ background: `${BLUE}18`, color: "#93c5fd", border: `1px solid ${BLUE}35` }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${BLUE}28`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${BLUE}18`; }}>
+                className={cn(
+                  "flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all min-w-[7rem]",
+                  PAGE_CHIP_INACTIVE,
+                )}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).classList.add("dark:bg-slate-700/80"); }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).classList.remove("dark:bg-slate-700/80"); }}>
                 <Phone className="w-3.5 h-3.5" />
                 {t("marketplace.sellers.contact")}
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all"
-                style={{ background: "rgba(255,255,255,0.04)", color: MUTED, border: "1px solid rgba(255,255,255,0.08)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}>
+              <Link
+                href="/procurement"
+                title={t("marketplace.sellers.viewProcurement")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all",
+                  PAGE_CHIP_INACTIVE,
+                )}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).classList.add("dark:bg-slate-700/80"); }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).classList.remove("dark:bg-slate-700/80"); }}>
                 <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
+              </Link>
             </div>
 
             {/* Contact reveal */}
@@ -450,10 +574,10 @@ function SellersTab() {
                   className="overflow-hidden">
                   <div className="mt-3 flex items-center justify-between p-3 rounded-xl"
                     style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}20` }}>
-                    <span className="text-[12px] font-bold" style={{ color: "#34d399", fontFamily: "Vazirmatn,sans-serif" }}>
+                    <span className="text-[12px] font-bold" style={{ color: GREEN_TXT, fontFamily: "Vazirmatn,sans-serif" }}>
                       {s.phone}
                     </span>
-                    <button onClick={() => setContactId(null)} style={{ color: MUTED }}>
+                    <button onClick={() => setContactId(null)} className="text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -471,6 +595,7 @@ function SellersTab() {
 /* ── TAB 3: Sales Analytics ────────────────────────────────────────── */
 function AnalyticsTab() {
   const { t, i18n } = useTranslation("common");
+  const { formatMoney } = useCurrency();
   const [metric, setMetric] = useState<"sales" | "requests">("sales");
   const numLocale = i18n.language === "en" ? "en-US" : i18n.language === "ar" ? "ar-IQ" : "ku-IQ";
   const { data: sales = [] } = useGetSales();
@@ -495,7 +620,7 @@ function AnalyticsTab() {
   const hasData = analyticsData.length > 0;
 
   const KPI = [
-    { labelKey: "monthlySales",  value: hasData ? fmt(totalSales, numLocale) : "0", subKey: "vsLastMonth",      color: CYAN   },
+    { labelKey: "monthlySales",  value: hasData ? formatMoney(totalSales) : formatMoney(0), subKey: "vsLastMonth",      color: CYAN   },
     { labelKey: "newRequests",   value: String(sales.length),                       subKey: "thisYear",          color: PURPLE },
     { labelKey: "activePartners",value: "0",                                        subKey: "companiesPartners", color: GREEN  },
     { labelKey: "fulfillmentRate",value: hasData ? "—" : "0%",                    subKey: "yearlyAvg",         color: ORANGE },
@@ -503,7 +628,7 @@ function AnalyticsTab() {
 
   if (!hasData) {
     return (
-      <div dir="rtl" className="py-20 text-center" style={{ color: MUTED }}>
+      <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
         <BarChart2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
         <p className="text-sm font-semibold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("emptyStates.noAnalytics")}</p>
       </div>
@@ -511,7 +636,7 @@ function AnalyticsTab() {
   }
 
   return (
-    <div dir="rtl">
+    <div>
       {/* KPI chips */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {KPI.map((k, i) => (
@@ -526,10 +651,10 @@ function AnalyticsTab() {
               background: `radial-gradient(circle, ${k.color}22, transparent 70%)`,
               filter: "blur(14px)", pointerEvents: "none",
             }} />
-            <p className="text-[10px] font-semibold mb-1" style={{ color: MUTED }}>
+            <p className={cn("text-[10px] font-semibold mb-1", PAGE_CARD_LABEL)}>
               {t(`marketplace.analytics.kpi.${k.labelKey}`)}
             </p>
-            <p className="text-2xl font-extrabold mb-0.5" style={{ color: TEXT }}>{k.value}</p>
+            <p className={cn("text-2xl font-extrabold mb-0.5", PAGE_CARD_TITLE)}>{k.value}</p>
             <p className="text-[10px]" style={{ color: k.color }}>
               {t(`marketplace.analytics.kpiSub.${k.subKey}`)}
             </p>
@@ -541,19 +666,18 @@ function AnalyticsTab() {
       <div className="p-5 rounded-2xl mb-5" style={glass()}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-[14px] font-extrabold" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+            <h3 className={cn("text-[14px]", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
               {t("marketplace.analytics.title")}
             </h3>
-            <p className="text-[10px] mt-0.5" style={{ color: MUTED }}>{t("marketplace.analytics.subtitle")}</p>
+            <p className={cn("text-[10px] mt-0.5", PAGE_CARD_DETAIL)}>{t("marketplace.analytics.subtitle")}</p>
           </div>
-          <div className="flex items-center gap-0.5 rounded-lg p-0.5"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center gap-0.5 rounded-lg p-0.5 border bg-slate-100 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700">
             {(["sales", "requests"] as const).map(m => (
               <button key={m} onClick={() => setMetric(m)}
-                className="px-3 py-1.5 rounded-md text-[11px] font-bold transition-all"
-                style={metric === m
-                  ? { background: `${BLUE}25`, color: "#93c5fd", border: `1px solid ${BLUE}40` }
-                  : { color: MUTED, border: "1px solid transparent" }}>
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-[11px] font-bold transition-all",
+                  metric === m ? PAGE_CHIP_ACTIVE_BLUE : "text-slate-600 dark:text-slate-300",
+                )}>
                 {t(`marketplace.analytics.metric${m === "sales" ? "Sales" : "Requests"}`)}
               </button>
             ))}
@@ -569,12 +693,12 @@ function AnalyticsTab() {
                   <stop offset="95%" stopColor={metric === "sales" ? CYAN : PURPLE} stopOpacity={0}   />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.border} />
               <XAxis dataKey="month" axisLine={false} tickLine={false}
                 tick={{ fill: MUTED, fontSize: 10, fontWeight: 600 }} dy={6} />
               <YAxis axisLine={false} tickLine={false}
                 tick={{ fill: MUTED, fontSize: 10 }} width={36}
-                tickFormatter={v => metric === "sales" ? `${(v/1000).toFixed(0)}M` : `${v}`} />
+                tickFormatter={v => metric === "sales" ? formatMoney(v, { compact: true }) : `${v}`} />
               <Tooltip content={<ChartTip />} />
               <Area type="monotone"
                 dataKey={metric}
@@ -589,19 +713,19 @@ function AnalyticsTab() {
 
       {/* Bar chart: monthly comparison */}
       <div className="p-5 rounded-2xl" style={glass()}>
-        <h3 className="text-[13px] font-extrabold mb-4" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+        <h3 className={cn("text-[13px] mb-4", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
           {t("marketplace.analytics.barTitle")}
         </h3>
         <div style={{ height: "200px" }} dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={analyticsData} margin={{ top: 2, right: 8, left: 0, bottom: 0 }}
               barCategoryGap="30%">
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.border} />
               <XAxis dataKey="month" axisLine={false} tickLine={false}
                 tick={{ fill: MUTED, fontSize: 9, fontWeight: 600 }} dy={4} />
               <YAxis axisLine={false} tickLine={false}
                 tick={{ fill: MUTED, fontSize: 9 }} width={32}
-                tickFormatter={v => `${(v/1000).toFixed(0)}M`} />
+                tickFormatter={v => formatMoney(v, { compact: true })} />
               <Tooltip content={<ChartTip />} />
               <Bar dataKey="sales"    name={t("marketplace.analytics.metricSales")}    fill={CYAN}     radius={[4,4,0,0]} fillOpacity={0.7} />
               <Bar dataKey="requests" name={t("marketplace.analytics.metricRequests")} fill={PURPLE}   radius={[4,4,0,0]} fillOpacity={0.6} />
@@ -616,6 +740,7 @@ function AnalyticsTab() {
 /* ── TAB 4: Order Fulfillment ──────────────────────────────────────── */
 function FulfillmentTab() {
   const { t, i18n } = useTranslation("common");
+  const { formatMoney } = useCurrency();
   const [expanded, setExpanded] = useState<string | null>(null);
   const numLocale = i18n.language === "en" ? "en-US" : i18n.language === "ar" ? "ar-IQ" : "ku-IQ";
   const { data: sales = [], isLoading } = useGetSales();
@@ -651,15 +776,15 @@ function FulfillmentTab() {
 
   if (isLoading) {
     return (
-      <div dir="rtl" className="py-20 text-center" style={{ color: MUTED }}>
-        <p className="text-sm">{t("common.loading", { defaultValue: "بارکردن…" })}</p>
+      <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
+        <p className="text-sm">{t("common.loading")}</p>
       </div>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div dir="rtl" className="py-20 text-center" style={{ color: MUTED }}>
+      <div className={cn("py-20 text-center", PAGE_MUTED_CLS)}>
         <PackageCheck className="w-12 h-12 mx-auto mb-3 opacity-30" />
         <p className="text-sm font-semibold" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t("emptyStates.noOrders")}</p>
       </div>
@@ -667,11 +792,11 @@ function FulfillmentTab() {
   }
 
   return (
-    <div dir="rtl">
+    <div>
       <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl"
         style={{ background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.15)" }}>
         <Truck className="w-5 h-5 shrink-0" style={{ color: CYAN }} />
-        <p className="text-[12px] font-semibold" style={{ color: "#67e8f9", fontFamily: "Vazirmatn,sans-serif" }}>
+        <p className="text-[12px] font-semibold" style={{ color: CYAN_TXT, fontFamily: "Vazirmatn,sans-serif" }}>
           {t("marketplace.fulfillment.info", { count: orders.length })}
         </p>
       </div>
@@ -704,27 +829,29 @@ function FulfillmentTab() {
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
                       style={{
                         background: order.steps >= 4 ? "rgba(16,185,129,0.12)" : "rgba(59,130,246,0.12)",
-                        color:      order.steps >= 4 ? "#34d399" : "#60a5fa",
+                        color:      order.steps >= 4 ? GREEN_TXT : BLUE_TXT,
                         border:     `1px solid ${order.steps >= 4 ? "rgba(16,185,129,0.22)" : "rgba(59,130,246,0.22)"}`,
                       }}>
                       {order.steps >= 4 ? t("marketplace.fulfillment.delivered") : t("marketplace.fulfillment.inTransit")}
                     </span>
                   </div>
-                  <p className="text-[12px] font-bold truncate" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+                  <p className={cn("text-[12px] font-bold truncate", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                     {order.buyer} → {order.seller}
                   </p>
-                  <p className="text-[10px] truncate" style={{ color: MUTED }}>{order.items}</p>
+                  <p className={cn("text-[10px] truncate", PAGE_CARD_DETAIL)}>{order.items}</p>
                 </div>
 
                 <div className="text-end shrink-0">
                   <p className="text-[12px] font-extrabold tabular-nums" style={{ color: CYAN }}>
-                    {fmt(order.amount, numLocale)} <span style={{ color: MUTED, fontWeight: 400, fontSize: "9px" }}>{t("common.currency")}</span>
+                    {formatMoney(order.amount)}
                   </p>
-                  <p className="text-[10px]" style={{ color: MUTED }}>{t("marketplace.fulfillment.eta")}: {order.eta}</p>
+                  <p className={cn("text-[10px]", PAGE_CARD_LABEL)}>{t("marketplace.fulfillment.eta")}: {order.eta}</p>
                 </div>
 
-                <ChevronDown className="w-4 h-4 shrink-0 transition-transform"
-                  style={{ color: MUTED, transform: isOpen ? "rotate(180deg)" : "rotate(0)" }} />
+                <ChevronDown className={cn(
+                  "w-4 h-4 shrink-0 transition-transform text-slate-400 dark:text-slate-400",
+                  isOpen && "rotate-180",
+                )} />
               </button>
 
               {/* Expanded pipeline */}
@@ -735,7 +862,7 @@ function FulfillmentTab() {
                     exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }}
                     className="overflow-hidden">
                     <div className="px-5 pb-5 pt-1"
-                      style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                      style={{ borderTop: `1px solid ${C.border}` }}>
 
                       {/* Step pipeline */}
                       <div className="flex items-center gap-0 mt-4 overflow-x-auto pb-2">
@@ -750,10 +877,10 @@ function FulfillmentTab() {
                                   style={{
                                     background: done
                                       ? active ? `${CYAN}22` : `${GREEN}18`
-                                      : "rgba(255,255,255,0.05)",
+                                      : C.glassHover,
                                     border: done
                                       ? active ? `1.5px solid ${CYAN}55` : `1.5px solid ${GREEN}40`
-                                      : "1.5px solid rgba(255,255,255,0.08)",
+                                      : `1.5px solid ${C.border}`,
                                     boxShadow: active ? `0 0 14px ${CYAN}35` : "none",
                                   }}>
                                   <StepIcon className="w-4 h-4" style={{
@@ -774,7 +901,7 @@ function FulfillmentTab() {
                                   style={{
                                     background: si < order.steps - 1
                                       ? `linear-gradient(90deg, ${GREEN}, ${si === order.steps - 2 ? CYAN : GREEN})`
-                                      : "rgba(255,255,255,0.07)",
+                                      : C.border,
                                   }} />
                               )}
                             </div>
@@ -790,11 +917,11 @@ function FulfillmentTab() {
                           { labelKey: "eta",    value: order.eta    },
                         ].map(d => (
                           <div key={d.labelKey} className="p-3 rounded-xl"
-                            style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                            <p className="text-[9px] mb-0.5" style={{ color: MUTED }}>
+                            style={{ background: C.glassHover, border: `1px solid ${C.border}` }}>
+                            <p className={cn("text-[9px] mb-0.5", PAGE_CARD_LABEL)}>
                               {t(`marketplace.fulfillment.${d.labelKey}`)}
                             </p>
-                            <p className="text-[11px] font-bold" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
+                            <p className={cn("text-[11px] font-bold", PAGE_CARD_TITLE)} style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                               {d.value}
                             </p>
                           </div>
@@ -817,8 +944,13 @@ function FulfillmentTab() {
 /* ─────────────────────────────────────────────────────────────────── */
 export default function Marketplace() {
   const { t } = useTranslation("common");
-  const sectorLabel = useSectorLabel();
+  const { dir } = useLocaleDir("common");
+  const { title, description } = usePageHeader("marketplace");
   const [activeTab, setActiveTab] = useState<"catalog" | "sellers" | "analytics" | "fulfillment">("catalog");
+  const [requestContext, setRequestContext] = useState<MarketplaceRequestContext | null>(null);
+
+  const openRequest = (ctx: MarketplaceRequestContext) => setRequestContext(ctx);
+  const closeRequest = () => setRequestContext(null);
 
   const TABS = [
     { id: "catalog"     as const, labelKey: "marketplace.tabs.catalog",     icon: Package,       color: BLUE   },
@@ -828,7 +960,7 @@ export default function Marketplace() {
   ];
 
   return (
-    <div dir="rtl" style={{ background: BG, minHeight: "100%" }}>
+    <div dir={dir} className="linqi-page" style={{ background: BG, minHeight: "100%" }}>
 
       {/* ── Page Header ── */}
       <motion.div
@@ -836,7 +968,7 @@ export default function Marketplace() {
         transition={{ duration: 0.3 }}
         className="relative overflow-hidden rounded-2xl mb-6 p-6"
         style={{
-          background: `linear-gradient(135deg, ${BLUE}18 0%, rgba(8,13,30,0.96) 60%)`,
+          background: heroGradient(BLUE),
           border: `1px solid ${BLUE}30`,
           boxShadow: `0 8px 48px ${BLUE}14`,
         }}>
@@ -850,14 +982,14 @@ export default function Marketplace() {
         <div className="relative flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
             style={{ background: `${BLUE}22`, border: `1.5px solid ${BLUE}45`, boxShadow: `0 0 24px ${BLUE}28` }}>
-            <Store className="w-7 h-7" style={{ color: "#93c5fd" }} />
+            <Store className="w-7 h-7 text-blue-600 dark:text-blue-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold mb-0.5" style={{ color: TEXT, fontFamily: "Vazirmatn,sans-serif" }}>
-              {t("pageTitles.marketplace", { sector: sectorLabel })}
+            <h1 className="text-2xl font-extrabold mb-0.5 text-slate-900 dark:text-slate-100 linqi-page-header-title" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
+              {title}
             </h1>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "Vazirmatn,sans-serif" }}>
-              {t("pageTitles.marketplaceSubtitle", { sector: sectorLabel })}
+            <p className="text-sm linqi-page-subtitle linqi-page-header-subtitle" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
+              {description}
             </p>
           </div>
 
@@ -870,7 +1002,7 @@ export default function Marketplace() {
                 style={{ background: GREEN }} />
               <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: GREEN }} />
             </span>
-            <span className="text-[11px] font-bold" style={{ color: "#34d399" }}>{t("marketplace.live")}</span>
+            <span className="text-[11px] font-bold" style={{ color: GREEN_TXT }}>{t("marketplace.live")}</span>
           </div>
         </div>
       </motion.div>
@@ -882,13 +1014,10 @@ export default function Marketplace() {
           const active = activeTab === tab.id;
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shrink-0"
-              style={active
-                ? { background: `${tab.color}20`, color: tab.color === BLUE ? "#93c5fd" : tab.color === GREEN ? "#34d399" : tab.color === PURPLE ? "#c4b5fd" : "#67e8f9",
-                    border: `1px solid ${tab.color}40`, boxShadow: `0 0 18px ${tab.color}18` }
-                : { background: "rgba(255,255,255,0.03)", color: MUTED, border: "1px solid rgba(255,255,255,0.06)" }}
-              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.borderColor = `${tab.color}25`; }}
-              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)"; }}>
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shrink-0",
+                active ? TAB_ACTIVE_CHIP[tab.id] : PAGE_CHIP_INACTIVE,
+              )}>
               <TIcon className="w-4 h-4" />
               <span style={{ fontFamily: "Vazirmatn,sans-serif" }}>{t(tab.labelKey)}</span>
             </button>
@@ -904,12 +1033,18 @@ export default function Marketplace() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.22 }}>
-          {activeTab === "catalog"     && <CatalogTab />}
-          {activeTab === "sellers"     && <SellersTab />}
+          {activeTab === "catalog"     && <CatalogTab onRequest={openRequest} />}
+          {activeTab === "sellers"     && <SellersTab onRequest={openRequest} />}
           {activeTab === "analytics"   && <AnalyticsTab />}
           {activeTab === "fulfillment" && <FulfillmentTab />}
         </motion.div>
       </AnimatePresence>
+
+      <MarketplaceRequestModal
+        open={requestContext !== null}
+        onClose={closeRequest}
+        initial={requestContext}
+      />
 
     </div>
   );

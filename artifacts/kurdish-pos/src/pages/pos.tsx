@@ -221,11 +221,16 @@ export default function POS() {
           queryClient.invalidateQueries({ queryKey: ["/api/debts"] });
           queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
           queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+          queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+          queryClient.invalidateQueries({ queryKey: ["driver", "cod-deliveries"] });
           toast({
             title: t("pos.saleDone"),
-            description: derivedPaymentType === "debt"
-              ? t("pos.debtRecorded", { amount: formatCurrency(totalAmount), name: selectedCustomer?.name })
-              : t("pos.receiptCreated", { id: sale.id }),
+            description:
+              paymentMethod === "cash_on_delivery"
+                ? t("pos.codPendingDelivery", { id: sale.id })
+                : derivedPaymentType === "debt"
+                  ? t("pos.debtRecorded", { amount: formatCurrency(totalAmount), name: selectedCustomer?.name })
+                  : t("pos.receiptCreated", { id: sale.id }),
           });
         },
         onError: () => {

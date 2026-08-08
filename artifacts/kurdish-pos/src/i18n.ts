@@ -56,6 +56,11 @@ import enAdmin from "./locales/en/admin.json";
 import arAdmin from "./locales/ar/admin.json";
 import kuAdmin from "./locales/ku/admin.json";
 
+// ── Namespaced: ui (inventory modals, notifications, portals, etc.) ───────────
+import enUi from "./locales/en/ui.json";
+import arUi from "./locales/ar/ui.json";
+import kuUi from "./locales/ku/ui.json";
+
 // ─── Restore persisted language choice ────────────────────────────────────────
 const savedLang = localStorage.getItem("linqi_lang") || "ku";
 
@@ -69,6 +74,7 @@ i18n.use(initReactI18next).init({
       supplier:    enSupplier,
       dashboard:   enDashboard,
       admin:       enAdmin,
+      ui:          enUi,
     },
     ku: {
       translation: kuFlat,
@@ -77,6 +83,7 @@ i18n.use(initReactI18next).init({
       supplier:    kuSupplier,
       dashboard:   kuDashboard,
       admin:       kuAdmin,
+      ui:          kuUi,
     },
     ar: {
       translation: arFlat,
@@ -85,6 +92,7 @@ i18n.use(initReactI18next).init({
       supplier:    arSupplier,
       dashboard:   arDashboard,
       admin:       arAdmin,
+      ui:          arUi,
     },
   },
 
@@ -95,7 +103,10 @@ i18n.use(initReactI18next).init({
   defaultNS: "translation",
 
   // Namespaces available for useTranslation("ns") calls
-  ns: ["translation", "common", "auth", "supplier", "dashboard", "admin"],
+  ns: ["translation", "common", "auth", "supplier", "dashboard", "admin", "ui"],
+
+  // Cross-namespace fallback so missing keys resolve from common / translation
+  fallbackNS: ["common", "translation"],
 
   interpolation: {
     escapeValue: false,  // React already escapes

@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export interface AuthPayload {
   userId: number;
   username: string;
-  role: "admin" | "staff";
+  role: "admin" | "staff" | "driver";
   name: string;
 }
 
@@ -26,10 +26,18 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.SESSION_SECRET ?? "fallback-secret-change-me";
+const JWT_SECRET = process.env.SESSION_SECRET;
+
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET must be set in production");
+  }
+}
+
+const EFFECTIVE_JWT_SECRET = JWT_SECRET ?? "dev-only-secret-change-me";
 
 export function signToken(payload: AuthPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, EFFECTIVE_JWT_SECRET, { expiresIn: "7d" });
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
@@ -40,7 +48,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   }
   const token = header.slice(7);
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as AuthPayload;
+    const payload = jwt.verify(token, EFFECTIVE_JWT_SECRET) as AuthPayload;
     req.user = payload;
     next();
   } catch {
@@ -48,6 +56,15 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   }
 }
 
+export function requireDriver(req: Request, res: Response, next: NextFunction): void {
+  requireAuth(req, res, () => {
+    if (req.user?.role !== "driver") {
+      res.status(403).json({ message: "تەنها شۆفێر دەتوانێت ئەم کارە بکات" });
+      return;
+    }
+    next();
+  });
+}
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   requireAuth(req, res, () => {
     if (req.user?.role !== "admin") {
@@ -67,6 +84,17 @@ export async function loadPermissions(req: Request, res: Response, next: NextFun
       canDeleteData: true,
       canEditStock: true,
       canAccessReports: true,
+    };
+    next();
+    return;
+  }
+
+  if (req.user.role === "driver") {
+    req.userPermissions = {
+      canViewProfit: false,
+      canDeleteData: false,
+      canEditStock: false,
+      canAccessReports: false,
     };
     next();
     return;

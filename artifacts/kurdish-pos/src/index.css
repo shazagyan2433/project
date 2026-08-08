@@ -81,8 +81,8 @@
   --warning: 38 92% 48%;
   --warning-foreground: 0 0% 100%;
 
-  --border: 214 25% 68%;
-  --input: 214 25% 68%;
+  --border: 214 32% 82%;
+  --input: 214 32% 82%;
   --ring: 217 100% 55%;
 
   --sidebar: 220 40% 6%;
@@ -90,19 +90,37 @@
   --sidebar-active: 217 100% 55%;
   --sidebar-border: 220 40% 14%;
 
-  /* LinQi shell layout (sidebar, header, main) */
+  /* LinQi shell layout (sidebar, header, main) — high-contrast light */
   --shell-page-bg: #f1f5f9;
   --shell-sidebar-bg: #ffffff;
-  --shell-header-bg: rgba(255, 255, 255, 0.92);
-  --shell-border: rgba(15, 23, 42, 0.10);
+  --shell-header-bg: rgba(255, 255, 255, 0.96);
+  --shell-border: rgba(15, 23, 42, 0.14);
   --shell-text-primary: #0f172a;
-  --shell-text-secondary: #475569;
-  --shell-text-muted: #64748b;
-  --shell-hover: rgba(15, 23, 42, 0.06);
-  --shell-input-bg: #f8fafc;
-  --shell-input-border: rgba(15, 23, 42, 0.12);
-  --shell-dropdown-bg: rgba(255, 255, 255, 0.98);
-  --shell-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --shell-text-secondary: #1e293b;
+  --shell-text-muted: #334155;
+  --shell-hover: rgba(15, 23, 42, 0.07);
+  --shell-input-bg: #ffffff;
+  --shell-input-border: rgba(15, 23, 42, 0.18);
+  --shell-dropdown-bg: #ffffff;
+  --shell-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 16px rgba(15, 23, 42, 0.07);
+
+  /* Semantic accents — darker on light surfaces for readable badges/metrics */
+  --linqi-green: #047857;
+  --linqi-green-soft: #059669;
+  --linqi-cyan: #0e7490;
+  --linqi-blue: #1d4ed8;
+  --linqi-purple: #6d28d9;
+  --linqi-orange: #c2410c;
+  --linqi-amber: #b45309;
+  --linqi-red: #b91c1c;
+  --linqi-success-bg: #ecfdf5;
+  --linqi-success-border: #a7f3d0;
+  --linqi-warning-bg: #fffbeb;
+  --linqi-warning-border: #fde68a;
+  --linqi-info-bg: #eff6ff;
+  --linqi-info-border: #bfdbfe;
+  --linqi-danger-bg: #fef2f2;
+  --linqi-danger-border: #fecaca;
 }
 
 /* ═══════════════════════════════════════════
@@ -148,18 +166,35 @@
   --sidebar-active: 217 100% 60%;
   --sidebar-border: 220 40% 14%;
 
-  --shell-page-bg: #0d1117;
-  --shell-sidebar-bg: rgba(13, 17, 23, 0.94);
-  --shell-header-bg: rgba(11, 15, 23, 0.80);
-  --shell-border: rgba(255, 255, 255, 0.07);
+  --shell-page-bg: #020617;
+  --shell-sidebar-bg: #020617;
+  --shell-header-bg: #020617;
+  --shell-border: #1e293b;
   --shell-text-primary: #f1f5f9;
-  --shell-text-secondary: rgba(255, 255, 255, 0.78);
-  --shell-text-muted: rgba(255, 255, 255, 0.35);
-  --shell-hover: rgba(255, 255, 255, 0.08);
-  --shell-input-bg: rgba(255, 255, 255, 0.06);
-  --shell-input-border: rgba(255, 255, 255, 0.08);
-  --shell-dropdown-bg: rgba(9, 13, 22, 0.96);
-  --shell-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
+  --shell-text-secondary: #94a3b8;
+  --shell-text-muted: #64748b;
+  --shell-hover: #1e293b;
+  --shell-input-bg: #020617;
+  --shell-input-border: #1e293b;
+  --shell-dropdown-bg: #0f172a;
+  --shell-shadow: none;
+
+  --linqi-green: #34d399;
+  --linqi-green-soft: #10b981;
+  --linqi-cyan: #22d3ee;
+  --linqi-blue: #60a5fa;
+  --linqi-purple: #a78bfa;
+  --linqi-orange: #fb923c;
+  --linqi-amber: #fbbf24;
+  --linqi-red: #f87171;
+  --linqi-success-bg: rgba(16, 185, 129, 0.12);
+  --linqi-success-border: rgba(16, 185, 129, 0.28);
+  --linqi-warning-bg: rgba(234, 179, 8, 0.12);
+  --linqi-warning-border: rgba(234, 179, 8, 0.28);
+  --linqi-info-bg: rgba(59, 130, 246, 0.12);
+  --linqi-info-border: rgba(59, 130, 246, 0.28);
+  --linqi-danger-bg: rgba(239, 68, 68, 0.12);
+  --linqi-danger-border: rgba(239, 68, 68, 0.28);
 }
 
 /* ═══════════════════════════════════════════
@@ -172,15 +207,15 @@
   --terminal-text:        #0f172a;
   --terminal-accent:      #1A6AFF;
   --terminal-accent-glow: #1A6AFF38;
-  --terminal-card:        rgba(15, 23, 42, 0.04);
+  --terminal-card:        #ffffff;
 }
 
 .dark {
-  --terminal-bg:          #0b0f17;
+  --terminal-bg:          #020617;
   --terminal-text:        #f1f5f9;
   --terminal-accent:      #1A6AFF;
   --terminal-accent-glow: #1A6AFF38;
-  --terminal-card:        rgba(255, 255, 255, 0.03);
+  --terminal-card:        #0f172a;
 }
 
 /* Make Tailwind's primary classes respond to the custom accent in real-time */
@@ -313,9 +348,12 @@ input, textarea, select, button, a, table, thead, tbody, tr, td, th {
 .dark .text-slate-400          { color: hsl(0 0% 50%) !important; }
 .dark .text-slate-300          { color: hsl(0 0% 42%) !important; }
 
-.dark .border-slate-100        { border-color: hsl(0 0% 20%) !important; }
-.dark .border-slate-200        { border-color: hsl(0 0% 24%) !important; }
-.dark .border-slate-300        { border-color: hsl(0 0% 28%) !important; }
+.dark .border-slate-100        { border-color: rgb(30 41 59 / 0.7) !important; }
+.dark .border-slate-200        { border-color: rgb(30 41 59 / 0.85) !important; }
+.dark .border-slate-300        { border-color: rgb(51 65 85 / 0.7) !important; }
+.dark .border-gray-100         { border-color: rgb(30 41 59 / 0.65) !important; }
+.dark .border-gray-200         { border-color: rgb(30 41 59 / 0.85) !important; }
+.dark .border-gray-300         { border-color: rgb(51 65 85 / 0.7) !important; }
 
 .dark .hover\:bg-slate-50:hover  { background-color: hsl(0 0% 16%) !important; }
 .dark .hover\:bg-slate-100:hover { background-color: hsl(0 0% 18%) !important; }
@@ -333,6 +371,11 @@ input, textarea, select, button, a, table, thead, tbody, tr, td, th {
   color: hsl(0 0% 40%) !important;
 }
 
+.dark .linqi-page .linqi-shell-input::placeholder,
+.dark .linqi-page input::placeholder {
+  color: rgb(148 163 184) !important;
+}
+
 .dark .bg-white.rounded-2xl,
 .dark .bg-white.rounded-3xl,
 .dark .bg-white.rounded-xl {
@@ -347,9 +390,25 @@ input, textarea, select, button, a, table, thead, tbody, tr, td, th {
 }
 
 .dark .bg-white {
-  box-shadow:
-    0 1px 3px rgba(0,0,0,0.25),
-    0 4px 14px rgba(0,0,0,0.30) !important;
+  box-shadow: none !important;
+}
+
+/* Shell surfaces — no white glow/shadow artifacts in dark mode */
+.dark .linqi-sidebar,
+.dark .linqi-top-header,
+.dark .linqi-mobile-header,
+.dark .linqi-main-scroll,
+.dark .linqi-app-root,
+.dark .linqi-user-card,
+.dark .linqi-dropdown {
+  box-shadow: none !important;
+}
+
+/* Remap legacy white-tint borders to slate in dark shell */
+.dark .linqi-app-root [class*="border-white"],
+.dark .linqi-sidebar [class*="border-white"],
+.dark .linqi-main-scroll [class*="border-white"] {
+  border-color: #1e293b !important;
 }
 
 .dark .text-slate-800 h1,
@@ -393,8 +452,8 @@ input, textarea, select, button, a, table, thead, tbody, tr, td, th {
   }
 
   .dark .glass-card {
-    background: rgba(30,30,30,0.80);
-    border-color: rgba(255,255,255,0.08);
+    background: rgba(15, 23, 42, 0.85);
+    border-color: #1e293b;
   }
 
   .text-gradient {
@@ -438,11 +497,62 @@ a.bg-primary:active {
   transform: scale(0.98) !important;
 }
 
-/* ── White bg cards soft shadow (light mode) ── */
-:root:not(.dark) .bg-white {
+/* ── LinQi success buttons & badges (light + dark) ── */
+.linqi-btn-success {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, filter 0.15s ease !important;
+}
+
+:root:not(.dark) .linqi-btn-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+:root:not(.dark) .linqi-btn-success:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  box-shadow: 0 6px 22px rgba(5, 150, 105, 0.45);
+  transform: translateY(-1px);
+}
+
+:root:not(.dark) .linqi-btn-success:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.dark .linqi-btn-success:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.linqi-btn-success-outline:hover {
+  transform: translateY(-1px);
+}
+
+.linqi-badge-success,
+.linqi-badge-warning,
+.linqi-badge-danger,
+.linqi-badge-info {
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dark .linqi-badge-success {
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.08);
+}
+
+.dark .linqi-icon-success {
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.1);
+}
+
+/* ── White bg cards soft shadow (light mode) — skip modal footers ── */
+:root:not(.dark) .bg-white:not(.linqi-modal-footer):not(.linqi-page-modal .linqi-modal-footer) {
   box-shadow:
     0 1px 3px rgba(0,0,0,0.05),
     0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* Modal footers inherit panel background — no contrasting strip */
+.linqi-page-modal .linqi-modal-footer {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Fix recharts tooltips in RTL */
@@ -484,10 +594,21 @@ a.bg-primary:active {
   box-shadow: var(--shell-shadow);
 }
 
+.dark .linqi-sidebar {
+  background: var(--shell-sidebar-bg);
+  border-inline-end-color: #1e293b;
+  box-shadow: none;
+}
+
 .linqi-mobile-header {
   background: var(--shell-header-bg);
   border-bottom: 1px solid var(--shell-border);
   box-shadow: var(--shell-shadow);
+}
+
+.dark .linqi-mobile-header {
+  border-bottom-color: #1e293b;
+  box-shadow: none;
 }
 
 .linqi-top-header {
@@ -499,14 +620,34 @@ a.bg-primary:active {
   color: var(--shell-text-primary);
 }
 
+.dark .linqi-top-header {
+  background: var(--shell-header-bg);
+  border-bottom-color: #1e293b;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .linqi-main-scroll {
   background: var(--shell-page-bg);
 }
 
+.dark .linqi-main-scroll {
+  background: var(--shell-page-bg);
+}
+
 .linqi-dropdown {
-  background: var(--shell-dropdown-bg);
-  border: 1px solid var(--shell-border);
-  box-shadow: var(--shell-shadow);
+  background: #ffffff;
+  border: 1px solid rgb(226 232 240 / 0.8);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .linqi-dropdown {
+  background: #0f172a;
+  border-color: rgb(51 65 85 / 0.8);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
 }
 
 .linqi-header-icon-btn {
@@ -518,39 +659,126 @@ a.bg-primary:active {
   background: var(--shell-hover);
   color: var(--shell-text-primary);
 }
+:root:not(.dark) .linqi-header-icon-btn {
+  color: #0f172a;
+}
+:root:not(.dark) .linqi-header-icon-btn:hover {
+  background: rgb(226 232 240 / 0.65);
+  color: #0f172a;
+}
 
 .linqi-sidebar-theme-btn {
   background: var(--shell-hover);
   border: 1px solid var(--shell-border);
-  color: var(--shell-text-secondary);
+  color: var(--shell-text-primary);
+  font-weight: 700;
 }
 .linqi-sidebar-theme-btn:hover {
   background: var(--shell-hover);
   color: var(--shell-text-primary);
 }
+:root:not(.dark) .linqi-sidebar-theme-btn {
+  color: #0f172a;
+}
+:root:not(.dark) .linqi-sidebar-theme-btn:hover {
+  background: rgb(226 232 240 / 0.65);
+}
 
 .linqi-sidebar-label {
   color: var(--shell-text-secondary);
+  font-weight: 700;
+}
+:root:not(.dark) .linqi-sidebar-label {
+  color: #0f172a;
 }
 
 /* Sidebar nav — light mode readable text */
-:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) {
-  color: var(--shell-text-secondary) !important;
+.linqi-shell-heading {
+  color: var(--shell-text-primary);
+  font-weight: 800;
 }
-:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) .linqi-nav-icon {
-  color: var(--terminal-accent) !important;
+.linqi-shell-body {
+  color: var(--shell-text-secondary);
+  font-weight: 600;
+}
+.linqi-shell-muted {
+  color: var(--shell-text-muted);
+  font-weight: 500;
+}
+
+:root:not(.dark) .linqi-shell-heading {
+  color: #0f172a;
+}
+:root:not(.dark) .linqi-shell-body {
+  color: #1e293b;
+}
+:root:not(.dark) .linqi-shell-muted {
+  color: #334155;
+}
+.linqi-shell-border-b {
+  border-color: var(--shell-border);
+}
+.linqi-shell-divider {
+  background: var(--shell-border);
+}
+
+.dark .linqi-shell-divider {
+  background: #1e293b !important;
+}
+
+.dark .linqi-shell-border-b {
+  border-color: #1e293b !important;
+}
+
+.linqi-icon-btn {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  color: var(--shell-text-secondary);
+}
+.linqi-icon-btn:hover {
+  color: var(--shell-text-primary);
+  border-color: color-mix(in srgb, var(--terminal-accent) 35%, var(--shell-border));
+}
+
+/* Sidebar nav — beat legacy text-white utilities in light mode */
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) {
+  color: #0f172a !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) .linqi-nav-label {
+  color: #0f172a !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
 }
 :root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active):hover {
-  background: var(--shell-hover) !important;
+  color: #0f172a !important;
+  background: rgb(226 232 240 / 0.65) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active):hover .linqi-nav-label {
+  color: #0f172a !important;
 }
 :root:not(.dark) .linqi-sidebar .linqi-section-label {
-  color: var(--shell-text-muted) !important;
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+.linqi-user-card {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+}
+
+.dark .linqi-user-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
 }
 :root:not(.dark) .linqi-sidebar .linqi-brand-title {
-  color: var(--shell-text-primary) !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
 }
 :root:not(.dark) .linqi-sidebar .linqi-brand-sub {
-  color: var(--shell-text-muted) !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
 }
 
 .linqi-shell-input {
@@ -558,15 +786,281 @@ a.bg-primary:active {
   border: 1px solid var(--shell-input-border) !important;
   color: var(--shell-text-primary) !important;
 }
+
+.dark .linqi-shell-input {
+  border-color: rgb(30 41 59 / 0.9) !important;
+  background: #020617 !important;
+}
 .linqi-shell-input::placeholder {
   color: var(--shell-text-muted) !important;
 }
 
+/* Native selects — high-contrast surfaces & option lists */
+.linqi-shell-select {
+  background: var(--shell-input-bg);
+  border: 1px solid var(--shell-input-border);
+  color: var(--shell-text-primary);
+  cursor: pointer;
+  appearance: auto;
+}
+
+:root:not(.dark) .linqi-shell-select,
+:root:not(.dark) .linqi-app-root select,
+:root:not(.dark) .linqi-page select,
+:root:not(.dark) .linqi-main-scroll select,
+:root:not(.dark) select.linqi-shell-select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: var(--shell-input-border) !important;
+}
+
+:root:not(.dark) select.text-white {
+  color: #0f172a !important;
+}
+
+:root:not(.dark) .linqi-shell-select option,
+:root:not(.dark) .linqi-app-root select option,
+:root:not(.dark) .linqi-page select option,
+:root:not(.dark) .linqi-main-scroll select option,
+:root:not(.dark) select option {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.dark .linqi-shell-select,
+.dark .linqi-app-root select,
+.dark .linqi-page select,
+.dark .linqi-main-scroll select {
+  background-color: rgb(15 23 42) !important;
+  color: rgb(241 245 249) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .linqi-shell-select option,
+.dark .linqi-app-root select option,
+.dark .linqi-page select option,
+.dark .linqi-main-scroll select option,
+.dark select option {
+  background: rgb(15 23 42) !important;
+  background-color: rgb(15 23 42) !important;
+  color: rgb(241 245 249) !important;
+}
+
+:root:not(.dark) select {
+  color-scheme: light;
+}
+
+.dark select {
+  color-scheme: dark;
+}
+
+/* Dropdown / popover panels */
+:root:not(.dark) .linqi-dropdown {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: var(--shell-border) !important;
+}
+
+:root:not(.dark) .linqi-dropdown-item {
+  color: #0f172a !important;
+}
+
+:root:not(.dark) .linqi-dropdown-item:hover,
+:root:not(.dark) .linqi-dropdown-item:focus-visible {
+  background: rgb(241 245 249) !important;
+  color: #0f172a !important;
+}
+
+.dark .linqi-dropdown-item:hover,
+.dark .linqi-dropdown-item:focus-visible {
+  background: rgb(30 41 59) !important;
+  color: rgb(241 245 249) !important;
+}
+
+/* Radix portals (render outside .linqi-app-root) */
+:root:not(.dark) [data-radix-select-content],
+:root:not(.dark) [data-radix-popover-content] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: var(--shell-border) !important;
+}
+
+/* RFQ modal — portal dialog, isolated from terminal page tints */
+:root:not(.dark) .linqi-rfq-modal {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+.dark .linqi-rfq-modal {
+  background: rgb(15 23 42) !important;
+  color: rgb(241 245 249) !important;
+  border-color: rgb(30 41 59) !important;
+}
+
+.linqi-rfq-modal input:not([type="checkbox"]),
+.linqi-rfq-modal textarea {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.dark .linqi-rfq-modal input:not([type="checkbox"]),
+.dark .linqi-rfq-modal textarea {
+  background: rgb(2 6 23) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(241 245 249) !important;
+}
+
+.linqi-rfq-modal input::placeholder,
+.linqi-rfq-modal textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.dark .linqi-rfq-modal input::placeholder,
+.dark .linqi-rfq-modal textarea::placeholder {
+  color: rgb(100 116 139) !important;
+}
+
+.linqi-rfq-modal input,
+.linqi-rfq-modal textarea {
+  color-scheme: light;
+}
+
+.dark .linqi-rfq-modal input,
+.dark .linqi-rfq-modal textarea {
+  color-scheme: dark;
+}
+
+.linqi-rfq-modal input.linqi-rfq-date::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+}
+
+.dark .linqi-rfq-modal input.linqi-rfq-date::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+  opacity: 0.7;
+}
+
+.linqi-rfq-modal > button[type="button"].absolute {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+.linqi-rfq-modal > button[type="button"].absolute:hover {
+  color: rgb(15 23 42) !important;
+  background: rgb(241 245 249) !important;
+}
+
+.dark .linqi-rfq-modal > button[type="button"].absolute {
+  color: rgb(148 163 184) !important;
+}
+
+.dark .linqi-rfq-modal > button[type="button"].absolute:hover {
+  color: rgb(241 245 249) !important;
+  background: rgb(30 41 59) !important;
+}
+
+:root:not(.dark) [data-radix-select-content] [data-radix-select-item]:hover,
+:root:not(.dark) [data-radix-select-content] [data-radix-select-item][data-highlighted] {
+  background: rgb(241 245 249) !important;
+  color: #0f172a !important;
+}
+
 .linqi-breadcrumb-muted {
   color: var(--shell-text-muted);
+  font-weight: 600;
 }
-:root:not(.dark) .linqi-dropdown {
+:root:not(.dark) .linqi-breadcrumb-muted {
+  color: #334155;
+}
+
+.linqi-breadcrumb-text {
   color: var(--shell-text-primary);
+  font-weight: 800;
+}
+
+.linqi-shell-input:focus {
+  border-color: color-mix(in srgb, var(--terminal-accent) 45%, var(--shell-input-border)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--terminal-accent) 10%, transparent) !important;
+}
+
+.linqi-search-icon {
+  color: var(--shell-text-muted);
+}
+.linqi-search-icon-focused {
+  color: color-mix(in srgb, var(--terminal-accent) 70%, transparent);
+}
+
+.linqi-dropdown-header {
+  border-bottom: 1px solid var(--shell-border);
+}
+.linqi-dropdown-footer {
+  border-top: 1px solid var(--shell-border);
+}
+.linqi-dropdown-item:hover {
+  background: var(--shell-hover);
+}
+:root:not(.dark) .linqi-dropdown-item:hover {
+  background: rgb(226 232 240 / 0.65) !important;
+}
+:root:not(.dark) .linqi-dropdown .linqi-dropdown-item {
+  color: #1e293b !important;
+}
+:root:not(.dark) .linqi-dropdown .linqi-dropdown-item span,
+:root:not(.dark) .linqi-dropdown .linqi-dropdown-item p {
+  color: #0f172a !important;
+}
+:root:not(.dark) .linqi-dropdown-header .linqi-shell-muted {
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+.linqi-lang-trigger {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  color: var(--shell-text-primary);
+  font-weight: 800;
+}
+.linqi-lang-trigger[data-open="true"] {
+  border-color: color-mix(in srgb, var(--terminal-accent) 35%, var(--shell-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--terminal-accent) 10%, transparent);
+}
+.linqi-lang-trigger:hover {
+  background: var(--shell-hover);
+  border-color: color-mix(in srgb, var(--terminal-accent) 25%, var(--shell-border));
+}
+:root:not(.dark) .linqi-lang-trigger:hover {
+  background: rgb(226 232 240 / 0.65);
+}
+
+.linqi-theme-customizer-trigger {
+  background: var(--shell-hover);
+  border: 1px solid var(--shell-border);
+  color: var(--shell-text-primary);
+  font-weight: 700;
+}
+:root:not(.dark) .linqi-theme-customizer-trigger {
+  color: #0f172a;
+}
+:root:not(.dark) .linqi-theme-customizer-trigger:hover {
+  background: rgb(226 232 240 / 0.65);
+}
+:root:not(.dark) .linqi-theme-customizer-trigger .linqi-shell-body {
+  color: #0f172a !important;
+}
+.linqi-theme-customizer-trigger[data-open="true"] {
+  border-color: color-mix(in srgb, var(--terminal-accent) 35%, var(--shell-border));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--terminal-accent) 13%, transparent);
+  color: var(--shell-text-primary);
+}
+.linqi-theme-customizer-panel {
+  background: var(--shell-dropdown-bg);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
 }
 
 :root:not(.dark) .linqi-dropdown p,
@@ -574,3 +1068,702 @@ a.bg-primary:active {
 :root:not(.dark) .linqi-dropdown button {
   color: inherit;
 }
+
+/* ── Page content (dashboard, marketplace, AI, settings) ── */
+.linqi-page {
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+}
+
+.dark .linqi-page {
+  background: transparent;
+  color: var(--shell-text-primary);
+}
+
+.linqi-page-title {
+  color: var(--shell-text-primary);
+  font-weight: 800;
+}
+
+/* Page headers — Tailwind utility fallback when variables or inline styles lag */
+.linqi-page h1.linqi-page-title,
+.linqi-page .linqi-page-header-title {
+  @apply text-slate-900 dark:text-slate-100;
+}
+
+.linqi-page .linqi-page-header-subtitle,
+.linqi-page .linqi-page-subtitle {
+  @apply text-slate-700 dark:text-slate-300/80 font-medium;
+}
+
+.linqi-page-heading {
+  color: var(--shell-text-primary);
+  font-weight: 700;
+}
+
+.linqi-page-subtitle {
+  color: var(--shell-text-secondary);
+  font-weight: 600;
+}
+
+.linqi-page-muted {
+  color: var(--shell-text-muted);
+  font-weight: 500;
+}
+
+:root:not(.dark) .linqi-page-muted,
+:root:not(.dark) .linqi-page-subtitle {
+  color: #334155;
+}
+
+:root:not(.dark) .linqi-page-chip-inactive,
+:root:not(.dark) .linqi-tab-inactive {
+  color: #1e293b !important;
+  font-weight: 700;
+}
+
+.linqi-page-card {
+  background: var(--terminal-card);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+}
+
+.dark .linqi-page-card {
+  border-color: rgb(30 41 59 / 0.85) !important;
+  box-shadow: none !important;
+  background: #0f172a !important;
+}
+
+.dark .linqi-page-chip-inactive,
+.dark .linqi-tab-inactive {
+  border-color: rgb(30 41 59 / 0.85) !important;
+  background: rgb(2 6 23 / 0.85) !important;
+}
+
+/* Soft borders on cards, chips, and buttons in page content */
+.dark .linqi-main-scroll .border-gray-200,
+.dark .linqi-page .border-gray-200,
+.dark .linqi-main-scroll .border-gray-100,
+.dark .linqi-page .border-gray-100 {
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+.dark .linqi-main-scroll .bg-white\/5,
+.dark .linqi-page .bg-white\/5 {
+  background-color: rgb(15 23 42 / 0.55) !important;
+  border-color: rgb(51 65 85 / 0.35) !important;
+}
+
+.dark .linqi-main-scroll div.rounded-2xl[style*="255,255,255"],
+.dark .linqi-main-scroll div.rounded-xl[style*="255,255,255"],
+.dark .linqi-page div.rounded-2xl[style*="255,255,255"],
+.dark .linqi-page div.rounded-xl[style*="255,255,255"] {
+  border-color: rgb(51 65 85 / 0.4) !important;
+}
+
+.dark .linqi-main-scroll tr[style*="255,255,255"],
+.dark .linqi-page tr[style*="255,255,255"] {
+  border-color: rgb(30 41 59 / 0.5) !important;
+}
+
+.linqi-page-divider {
+  border-color: var(--shell-border);
+  background: var(--shell-border);
+}
+
+.linqi-settings-card {
+  background: var(--terminal-card);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shell-shadow);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.linqi-settings-input {
+  background: var(--shell-input-bg) !important;
+  border: 1px solid var(--shell-input-border) !important;
+  color: var(--shell-text-primary) !important;
+  font-family: "Vazirmatn", sans-serif;
+  border-radius: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  outline: none;
+  font-size: 13px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.linqi-settings-input::placeholder,
+.linqi-shell-input::placeholder,
+textarea.linqi-page-input::placeholder {
+  color: var(--shell-text-muted);
+  opacity: 1;
+}
+
+.linqi-settings-input:focus,
+textarea.linqi-page-input:focus {
+  border-color: color-mix(in srgb, var(--terminal-accent) 45%, var(--shell-input-border)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--terminal-accent) 10%, transparent) !important;
+}
+
+textarea.linqi-page-input {
+  background: var(--shell-input-bg);
+  border: 1px solid var(--shell-input-border);
+  color: var(--shell-text-primary);
+  font-family: "Vazirmatn", sans-serif;
+  border-radius: 12px;
+  outline: none;
+  resize: none;
+}
+
+.linqi-page-chip-inactive {
+  background: var(--shell-hover);
+  color: var(--shell-text-muted);
+  border: 1px solid var(--shell-border);
+}
+
+.linqi-tab-inactive {
+  background: var(--shell-hover);
+  color: var(--shell-text-muted);
+  border: 1px solid var(--shell-border);
+}
+
+/* Recharts axis labels in light mode */
+:root:not(.dark) .recharts-cartesian-axis-tick text {
+  fill: var(--shell-text-muted) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE — system-wide contrast (all sidebar pages)
+   Remaps legacy dark-terminal utilities inside main scroll.
+═══════════════════════════════════════════════════════════════ */
+:root:not(.dark) .linqi-main-scroll,
+:root:not(.dark) .linqi-page {
+  color: var(--shell-text-primary);
+}
+
+/* text-white and opacity variants → readable slate (main content + page wrappers) */
+:root:not(.dark) .linqi-main-scroll .text-white,
+:root:not(.dark) .linqi-page .text-white,
+:root:not(.dark) .linqi-top-header .text-white,
+:root:not(.dark) .linqi-mobile-header .text-white {
+  color: rgb(15 23 42);
+}
+:root:not(.dark) .linqi-main-scroll .text-white\/85,
+:root:not(.dark) .linqi-page .text-white\/85 { color: rgb(30 41 59); }
+:root:not(.dark) .linqi-main-scroll .text-white\/80,
+:root:not(.dark) .linqi-page .text-white\/80 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/70,
+:root:not(.dark) .linqi-page .text-white\/70 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/60,
+:root:not(.dark) .linqi-page .text-white\/60 { color: rgb(71 85 105); }
+:root:not(.dark) .linqi-main-scroll .text-white\/55,
+:root:not(.dark) .linqi-page .text-white\/55 { color: rgb(71 85 105); }
+:root:not(.dark) .linqi-main-scroll .text-white\/50,
+:root:not(.dark) .linqi-page .text-white\/50,
+:root:not(.dark) .linqi-sidebar .text-white\/50 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/45,
+:root:not(.dark) .linqi-page .text-white\/45,
+:root:not(.dark) .linqi-sidebar .text-white\/45 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/40,
+:root:not(.dark) .linqi-page .text-white\/40,
+:root:not(.dark) .linqi-sidebar .text-white\/40 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/35,
+:root:not(.dark) .linqi-page .text-white\/35,
+:root:not(.dark) .linqi-sidebar .text-white\/35 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/30,
+:root:not(.dark) .linqi-page .text-white\/30,
+:root:not(.dark) .linqi-sidebar .text-white\/30 { color: rgb(51 65 85); }
+:root:not(.dark) .linqi-main-scroll .text-white\/25,
+:root:not(.dark) .linqi-page .text-white\/25 { color: rgb(148 163 184); }
+:root:not(.dark) .linqi-main-scroll .text-white\/20,
+:root:not(.dark) .linqi-page .text-white\/20 { color: rgb(148 163 184); }
+:root:not(.dark) .linqi-main-scroll .text-white\/15,
+:root:not(.dark) .linqi-page .text-white\/15 { color: rgb(148 163 184); }
+:root:not(.dark) .linqi-main-scroll .text-white\/10,
+:root:not(.dark) .linqi-page .text-white\/10 { color: rgb(203 213 225); }
+
+/* Keep white text on colored / gradient controls */
+:root:not(.dark) .linqi-main-scroll .bg-primary,
+:root:not(.dark) .linqi-main-scroll .bg-primary .text-white,
+:root:not(.dark) .linqi-main-scroll [class*="bg-gradient-to-"] .text-white,
+:root:not(.dark) .linqi-main-scroll .bg-amber-500 .text-white,
+:root:not(.dark) .linqi-main-scroll button[style*="gradient"] .text-white,
+:root:not(.dark) .linqi-main-scroll button[style*="gradient"].text-white,
+:root:not(.dark) .linqi-main-scroll [style*="linear-gradient"].text-white,
+:root:not(.dark) .linqi-main-scroll [style*="linear-gradient"] .text-white {
+  color: #ffffff !important;
+}
+
+/* Placeholders in legacy inputs */
+:root:not(.dark) .linqi-main-scroll .placeholder-white\/25::placeholder {
+  color: rgb(148 163 184) !important;
+  opacity: 1;
+}
+
+/* Inline white-tint surfaces → theme cards & inputs */
+:root:not(.dark) .linqi-main-scroll input[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll textarea[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll select[style*="255,255,255"] {
+  background: var(--shell-input-bg) !important;
+  border-color: var(--shell-input-border) !important;
+  color: var(--shell-text-primary) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll div.rounded-2xl[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll div.rounded-xl[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll div.rounded-lg[style*="255,255,255"] {
+  background: var(--terminal-card) !important;
+  border-color: var(--shell-border) !important;
+  box-shadow: var(--shell-shadow);
+}
+
+:root:not(.dark) .linqi-main-scroll [style*="#0d1526"],
+:root:not(.dark) .linqi-main-scroll [style*="0d1526"],
+:root:not(.dark) .linqi-main-scroll [style*="rgba(8,13,30"] {
+  background: var(--terminal-card) !important;
+  border-color: var(--shell-border) !important;
+  color: var(--shell-text-primary) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll tr[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll th[style*="255,255,255"] {
+  border-color: var(--shell-border) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll .recharts-cartesian-grid line {
+  stroke: var(--shell-border) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll .text-cyan-400 {
+  color: #0891b2 !important;
+}
+
+/* Table striping legibility */
+:root:not(.dark) .linqi-main-scroll table {
+  color: var(--shell-text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE — high-contrast pass (cards, text, inputs, badges)
+═══════════════════════════════════════════════════════════════ */
+
+/* Page canvas — subtle off-white so white cards pop */
+:root:not(.dark) .linqi-app-root,
+:root:not(.dark) .linqi-main-scroll,
+:root:not(.dark) .linqi-page {
+  background: var(--shell-page-bg) !important;
+  color: #0f172a !important;
+}
+
+/* Force primary / body text readability (beat faint utilities & opacity) */
+:root:not(.dark) .linqi-main-scroll .text-white,
+:root:not(.dark) .linqi-page .text-white,
+:root:not(.dark) .linqi-top-header .text-white,
+:root:not(.dark) .linqi-mobile-header .text-white {
+  color: #0f172a !important;
+}
+:root:not(.dark) .linqi-main-scroll .text-white\/90,
+:root:not(.dark) .linqi-main-scroll .text-white\/85,
+:root:not(.dark) .linqi-page .text-white\/90,
+:root:not(.dark) .linqi-page .text-white\/85 { color: #1e293b !important; }
+:root:not(.dark) .linqi-main-scroll .text-white\/80,
+:root:not(.dark) .linqi-main-scroll .text-white\/70,
+:root:not(.dark) .linqi-page .text-white\/80,
+:root:not(.dark) .linqi-page .text-white\/70 { color: #334155 !important; }
+:root:not(.dark) .linqi-main-scroll .text-white\/60,
+:root:not(.dark) .linqi-main-scroll .text-white\/55,
+:root:not(.dark) .linqi-main-scroll .text-white\/50,
+:root:not(.dark) .linqi-page .text-white\/60,
+:root:not(.dark) .linqi-page .text-white\/55,
+:root:not(.dark) .linqi-page .text-white\/50 { color: #475569 !important; }
+:root:not(.dark) .linqi-main-scroll .text-white\/45,
+:root:not(.dark) .linqi-main-scroll .text-white\/40,
+:root:not(.dark) .linqi-main-scroll .text-white\/35,
+:root:not(.dark) .linqi-main-scroll .text-white\/30,
+:root:not(.dark) .linqi-page .text-white\/45,
+:root:not(.dark) .linqi-page .text-white\/40,
+:root:not(.dark) .linqi-page .text-white\/35,
+:root:not(.dark) .linqi-page .text-white\/30 { color: #475569 !important; }
+:root:not(.dark) .linqi-main-scroll .text-white\/25,
+:root:not(.dark) .linqi-main-scroll .text-white\/20,
+:root:not(.dark) .linqi-main-scroll .text-white\/15,
+:root:not(.dark) .linqi-page .text-white\/25,
+:root:not(.dark) .linqi-page .text-white\/20,
+:root:not(.dark) .linqi-page .text-white\/15 { color: #64748b !important; }
+
+/* Keep white text on saturated action surfaces */
+:root:not(.dark) .linqi-main-scroll .bg-primary,
+:root:not(.dark) .linqi-main-scroll .bg-primary .text-white,
+:root:not(.dark) .linqi-main-scroll .linqi-nav-active,
+:root:not(.dark) .linqi-main-scroll .linqi-nav-active .text-white,
+:root:not(.dark) .linqi-sidebar .linqi-nav-active,
+:root:not(.dark) .linqi-sidebar .linqi-nav-active .text-white,
+:root:not(.dark) .linqi-sidebar .linqi-nav-active .linqi-nav-label,
+:root:not(.dark) .linqi-sidebar .linqi-nav-active .linqi-nav-icon,
+:root:not(.dark) .linqi-main-scroll [class*="bg-gradient-to-"] .text-white,
+:root:not(.dark) .linqi-main-scroll .bg-amber-500 .text-white,
+:root:not(.dark) .linqi-main-scroll button[style*="gradient"] .text-white,
+:root:not(.dark) .linqi-main-scroll button[style*="gradient"].text-white,
+:root:not(.dark) .linqi-main-scroll [style*="linear-gradient"].text-white,
+:root:not(.dark) .linqi-main-scroll [style*="linear-gradient"] .text-white,
+:root:not(.dark) .linqi-btn-success,
+:root:not(.dark) .linqi-btn-success .text-white {
+  color: #ffffff !important;
+}
+
+/* Soft slate muted utilities → high-contrast readable tones (light mode) */
+:root:not(.dark) .linqi-app-root .text-slate-400,
+:root:not(.dark) .linqi-sidebar .text-slate-400,
+:root:not(.dark) .linqi-top-header .text-slate-400,
+:root:not(.dark) .linqi-mobile-header .text-slate-400,
+:root:not(.dark) .linqi-main-scroll .text-slate-400,
+:root:not(.dark) .linqi-page .text-slate-400 { color: #334155 !important; }
+:root:not(.dark) .linqi-app-root .text-slate-500,
+:root:not(.dark) .linqi-sidebar .text-slate-500,
+:root:not(.dark) .linqi-top-header .text-slate-500,
+:root:not(.dark) .linqi-mobile-header .text-slate-500,
+:root:not(.dark) .linqi-main-scroll .text-slate-500,
+:root:not(.dark) .linqi-page .text-slate-500 { color: #334155 !important; }
+:root:not(.dark) .linqi-app-root .text-slate-600,
+:root:not(.dark) .linqi-sidebar .text-slate-600,
+:root:not(.dark) .linqi-top-header .text-slate-600,
+:root:not(.dark) .linqi-mobile-header .text-slate-600,
+:root:not(.dark) .linqi-main-scroll .text-slate-600,
+:root:not(.dark) .linqi-page .text-slate-600 { color: #1e293b !important; }
+:root:not(.dark) .linqi-app-root .text-zinc-400,
+:root:not(.dark) .linqi-app-root .text-zinc-500,
+:root:not(.dark) .linqi-main-scroll .text-zinc-400,
+:root:not(.dark) .linqi-main-scroll .text-zinc-500,
+:root:not(.dark) .linqi-page .text-zinc-400,
+:root:not(.dark) .linqi-page .text-zinc-500 { color: #334155 !important; }
+:root:not(.dark) .linqi-app-root .text-muted-foreground,
+:root:not(.dark) .linqi-main-scroll .text-muted-foreground,
+:root:not(.dark) .linqi-page .text-muted-foreground { color: #334155 !important; }
+:root:not(.dark) .linqi-main-scroll .text-slate-300,
+:root:not(.dark) .linqi-page .text-slate-300 { color: #334155 !important; }
+
+/* Cards / panels — crisp borders + soft elevation */
+:root:not(.dark) .linqi-page-card,
+:root:not(.dark) .linqi-settings-card,
+:root:not(.dark) .linqi-main-scroll .rounded-2xl.border,
+:root:not(.dark) .linqi-main-scroll .rounded-xl.border,
+:root:not(.dark) .linqi-page .rounded-2xl.border,
+:root:not(.dark) .linqi-page .rounded-xl.border {
+  border-color: rgb(226 232 240 / 0.95) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll .bg-white,
+:root:not(.dark) .linqi-page .bg-white,
+:root:not(.dark) .linqi-main-scroll .bg-card {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+:root:not(.dark) .linqi-main-scroll div.rounded-2xl[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll div.rounded-xl[style*="255,255,255"],
+:root:not(.dark) .linqi-main-scroll div.rounded-lg[style*="255,255,255"],
+:root:not(.dark) .linqi-page div.rounded-2xl[style*="255,255,255"],
+:root:not(.dark) .linqi-page div.rounded-xl[style*="255,255,255"] {
+  background: #ffffff !important;
+  border-color: rgb(226 232 240) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+  color: #0f172a !important;
+}
+
+/* Translucent white surfaces → solid white cards */
+:root:not(.dark) .linqi-main-scroll .bg-white\/5,
+:root:not(.dark) .linqi-main-scroll .bg-white\/10,
+:root:not(.dark) .linqi-main-scroll .bg-white\/\[0\.04\],
+:root:not(.dark) .linqi-page .bg-white\/5,
+:root:not(.dark) .linqi-page .bg-white\/10 {
+  background-color: #ffffff !important;
+  border-color: rgb(226 232 240) !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 3px 10px rgba(15, 23, 42, 0.05);
+}
+
+/* Inputs / search / selects — solid white + dark text */
+:root:not(.dark) .linqi-main-scroll input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+:root:not(.dark) .linqi-main-scroll textarea,
+:root:not(.dark) .linqi-page input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+:root:not(.dark) .linqi-page textarea,
+:root:not(.dark) .linqi-shell-input,
+:root:not(.dark) .linqi-settings-input {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgb(203 213 225) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll input::placeholder,
+:root:not(.dark) .linqi-main-scroll textarea::placeholder,
+:root:not(.dark) .linqi-page input::placeholder,
+:root:not(.dark) .linqi-page textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+/* Remap legacy pastel status / metric text colors on light surfaces */
+:root:not(.dark) .linqi-main-scroll [style*="color: #34d399"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#34d399"],
+:root:not(.dark) .linqi-main-scroll [style*='color: "#34d399"'],
+:root:not(.dark) .linqi-page [style*="color: #34d399"],
+:root:not(.dark) .linqi-page [style*="color:#34d399"] { color: #047857 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #60a5fa"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#60a5fa"],
+:root:not(.dark) .linqi-page [style*="color: #60a5fa"],
+:root:not(.dark) .linqi-page [style*="color:#60a5fa"] { color: #1d4ed8 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #67e8f9"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#67e8f9"],
+:root:not(.dark) .linqi-page [style*="color: #67e8f9"] { color: #0e7490 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #c4b5fd"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#c4b5fd"],
+:root:not(.dark) .linqi-page [style*="color: #c4b5fd"] { color: #6d28d9 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #fbbf24"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#fbbf24"],
+:root:not(.dark) .linqi-page [style*="color: #fbbf24"] { color: #b45309 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #94a3b8"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#94a3b8"],
+:root:not(.dark) .linqi-page [style*="color: #94a3b8"] { color: #475569 !important; }
+
+:root:not(.dark) .linqi-main-scroll [style*="color: #64748B"],
+:root:not(.dark) .linqi-main-scroll [style*="color:#64748B"],
+:root:not(.dark) .linqi-main-scroll [style*="color: #64748b"],
+:root:not(.dark) .linqi-page [style*="color: #64748b"] { color: #475569 !important; }
+
+/* Soft pastel Tailwind text utilities → darker readable tones */
+:root:not(.dark) .linqi-main-scroll .text-emerald-300,
+:root:not(.dark) .linqi-main-scroll .text-emerald-400,
+:root:not(.dark) .linqi-page .text-emerald-300,
+:root:not(.dark) .linqi-page .text-emerald-400 { color: #047857 !important; }
+
+:root:not(.dark) .linqi-main-scroll .text-cyan-300,
+:root:not(.dark) .linqi-main-scroll .text-cyan-400,
+:root:not(.dark) .linqi-page .text-cyan-300,
+:root:not(.dark) .linqi-page .text-cyan-400 { color: #0e7490 !important; }
+
+:root:not(.dark) .linqi-main-scroll .text-blue-300,
+:root:not(.dark) .linqi-main-scroll .text-blue-400,
+:root:not(.dark) .linqi-page .text-blue-300,
+:root:not(.dark) .linqi-page .text-blue-400 { color: #1d4ed8 !important; }
+
+:root:not(.dark) .linqi-main-scroll .text-amber-300,
+:root:not(.dark) .linqi-main-scroll .text-amber-400,
+:root:not(.dark) .linqi-page .text-amber-300,
+:root:not(.dark) .linqi-page .text-amber-400 { color: #b45309 !important; }
+
+:root:not(.dark) .linqi-main-scroll .text-violet-300,
+:root:not(.dark) .linqi-main-scroll .text-purple-300,
+:root:not(.dark) .linqi-page .text-violet-300,
+:root:not(.dark) .linqi-page .text-purple-300 { color: #6d28d9 !important; }
+
+/* Status badges — high-contrast fills in light mode */
+:root:not(.dark) .linqi-badge-success {
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+:root:not(.dark) .linqi-badge-warning {
+  background: #fffbeb !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+:root:not(.dark) .linqi-badge-danger {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+:root:not(.dark) .linqi-badge-info {
+  background: #eff6ff !important;
+  color: #1e40af !important;
+  border-color: #bfdbfe !important;
+}
+
+/* Sidebar active nav — vivid primary + crisp white labels */
+:root:not(.dark) .linqi-sidebar .linqi-nav-active {
+  background: var(--terminal-accent) !important;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--terminal-accent) 35%, transparent) !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-active .linqi-nav-label,
+:root:not(.dark) .linqi-sidebar .linqi-nav-active .linqi-nav-icon {
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Inactive sidebar items — primary slate-900 labels */
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) {
+  color: #0f172a !important;
+}
+:root:not(.dark) .linqi-sidebar .linqi-nav-item:not(.linqi-nav-active) .linqi-nav-label {
+  color: #0f172a !important;
+}
+
+/* Borders used as dividers */
+:root:not(.dark) .linqi-main-scroll .border-white\/10,
+:root:not(.dark) .linqi-main-scroll .border-white\/15,
+:root:not(.dark) .linqi-main-scroll .border-white\/20,
+:root:not(.dark) .linqi-page .border-white\/10,
+:root:not(.dark) .linqi-page .border-white\/15,
+:root:not(.dark) .linqi-page .border-white\/20 {
+  border-color: rgb(226 232 240) !important;
+}
+
+:root:not(.dark) .linqi-main-scroll .border-gray-100,
+:root:not(.dark) .linqi-page .border-gray-100 {
+  border-color: rgb(226 232 240) !important;
+}
+:root:not(.dark) .linqi-main-scroll .border-gray-200,
+:root:not(.dark) .linqi-page .border-gray-200 {
+  border-color: rgb(203 213 225) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE ONLY — soft slate borders (do not touch light mode)
+   Remaps bright white / light-gray outlines on cards, chips, inputs.
+═══════════════════════════════════════════════════════════════ */
+
+.dark {
+  --shell-border: #1e293b;
+  --shell-input-border: #1e293b;
+  --border: 215 25% 18%;
+  --input: 215 25% 18%;
+}
+
+/* Exact utility remaps */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+/* Opacity / fractional variants (Tailwind v4: border-slate-200/80, etc.)
+   Excludes accent/status borders (primary, emerald, blue, …). */
+.dark .linqi-app-root [class*="border-slate-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-app-root [class*="border-slate-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-app-root [class*="border-slate-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-app-root [class*="border-gray-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-app-root [class*="border-gray-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-app-root [class*="border-gray-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-main-scroll [class*="border-slate-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-main-scroll [class*="border-slate-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-main-scroll [class*="border-slate-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]):not([class*="border-violet"]):not([class*="border-cyan"]),
+.dark .linqi-main-scroll [class*="border-gray-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-main-scroll [class*="border-gray-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-main-scroll [class*="border-gray-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-slate-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-slate-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-slate-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-gray-100"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-gray-200"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page [class*="border-gray-300"]:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-sidebar [class*="border-slate-100"]:not([class*="border-primary"]),
+.dark .linqi-sidebar [class*="border-slate-200"]:not([class*="border-primary"]),
+.dark .linqi-sidebar [class*="border-gray-200"]:not([class*="border-primary"]),
+.dark .linqi-top-header [class*="border-slate-200"]:not([class*="border-primary"]),
+.dark .linqi-top-header [class*="border-gray-200"]:not([class*="border-primary"]) {
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+/* Explicit dark:border-slate-700/800 tokens → consistent slate-800 */
+.dark .linqi-app-root [class*="border-slate-700"],
+.dark .linqi-main-scroll [class*="border-slate-700"],
+.dark .linqi-page [class*="border-slate-700"],
+.dark .linqi-app-root [class*="border-slate-800"],
+.dark .linqi-main-scroll [class*="border-slate-800"],
+.dark .linqi-page [class*="border-slate-800"] {
+  border-color: rgb(30 41 59 / 0.8) !important;
+}
+
+/* Legacy white-tint borders → slate-800 */
+.dark .linqi-app-root [class*="border-white"],
+.dark .linqi-sidebar [class*="border-white"],
+.dark .linqi-main-scroll [class*="border-white"],
+.dark .linqi-page [class*="border-white"],
+.dark .linqi-top-header [class*="border-white"],
+.dark .linqi-mobile-header [class*="border-white"],
+.dark .border-white,
+.dark .border-white\/5,
+.dark .border-white\/10,
+.dark .border-white\/15,
+.dark .border-white\/20,
+.dark .border-white\/25,
+.dark .border-white\/30 {
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+/* Cards / panels / chips / tables — seamless dark outlines */
+.dark .linqi-page-card,
+.dark .linqi-settings-card,
+.dark .linqi-user-card,
+.dark .linqi-main-scroll .rounded-2xl.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-main-scroll .rounded-xl.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-main-scroll .rounded-lg.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page .rounded-2xl.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page .rounded-xl.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]),
+.dark .linqi-page .rounded-lg.border:not([class*="border-primary"]):not([class*="border-emerald"]):not([class*="border-blue"]):not([class*="border-red"]):not([class*="border-amber"]) {
+  border-color: rgb(30 41 59 / 0.85) !important;
+  box-shadow: none !important;
+}
+
+/* Inline style borders that still use white / light tints */
+.dark .linqi-main-scroll [style*="border"][style*="255,255,255"],
+.dark .linqi-page [style*="border"][style*="255,255,255"],
+.dark .linqi-main-scroll [style*="border"][style*="#e2e8f0"],
+.dark .linqi-main-scroll [style*="border"][style*="#cbd5e1"],
+.dark .linqi-main-scroll [style*="border"][style*="226, 232, 240"],
+.dark .linqi-main-scroll [style*="border"][style*="203, 213, 225"] {
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+/* Inputs / search / selects in dark shell */
+.dark .linqi-shell-input,
+.dark .linqi-settings-input,
+.dark .linqi-shell-select,
+.dark .linqi-main-scroll input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.dark .linqi-main-scroll textarea,
+.dark .linqi-main-scroll select,
+.dark .linqi-page input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.dark .linqi-page textarea,
+.dark .linqi-page select {
+  background-color: #020617 !important;
+  border-color: rgb(30 41 59 / 0.9) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .linqi-page-card,
+.dark .linqi-settings-card {
+  background: #0f172a !important;
+  border-color: rgb(30 41 59 / 0.85) !important;
+}
+
+/* Table dividers */
+.dark .linqi-main-scroll table,
+.dark .linqi-page table,
+.dark .linqi-main-scroll tr,
+.dark .linqi-page tr,
+.dark .linqi-main-scroll th,
+.dark .linqi-main-scroll td {
+  border-color: rgb(30 41 59 / 0.7) !important;
+}
+
+.dark tbody > tr {
+  border-bottom-color: rgb(30 41 59 / 0.7) !important;
+}
+
+/* Soft bordered chips that used light gray borders */
+.dark .linqi-page-chip-inactive,
+.dark .linqi-tab-inactive {
+  border-color: rgb(51 65 85) !important;
+  background: rgb(30 41 59 / 0.9) !important;
+  color: rgb(241 245 249) !important;
+}
+

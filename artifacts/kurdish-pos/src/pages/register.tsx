@@ -9,7 +9,7 @@ import {
   HeartPulse, ShoppingCart, Factory, Layers, MapPin,
   Mail, FileText, Lock, Eye, EyeOff, Upload, Clock,
   Briefcase, ShoppingBag, Phone, User, Globe,
-  AlertCircle, CheckCircle2, Pill,
+  AlertCircle, CheckCircle2, Pill, ShieldCheck,
   Search, X,
   Wheat, Coffee, Warehouse, Home, Car, Monitor, Cpu,
   Route, Shirt, HardHat, GraduationCap, Activity,
@@ -28,6 +28,7 @@ import {
   VERIFICATIONS_UPDATED_EVENT,
   type VerificationStatus,
 } from "@/lib/verification-storage";
+import { isValidBusinessName, isValidMobile } from "@/lib/business-profile";
 import {
   ONBOARDING_RESET_KEY,
   clearLogoutEntryFlag,
@@ -37,6 +38,8 @@ import {
   hardNavigate,
 } from "@/lib/auth-session";
 import { getAllowedCategoriesForSector, ALL_CAT_KEYS, type CatKey } from "@/lib/industries";
+import { cn } from "@/lib/utils";
+import { OnboardingAmbient } from "@/components/onboarding/OnboardingAmbient";
 
 /* ─── Language switcher data ───────────────────────────────────────── */
 const LANGUAGES = [
@@ -142,101 +145,6 @@ function hexToRgb(hex: string) {
   return `${r},${g},${b}`;
 }
 
-/* ─── Animated canvas background ──────────────────────────────────── */
-type IconType = "truck"|"cart"|"box"|"store";
-function drawIcon(ctx: CanvasRenderingContext2D, type: IconType, cx: number, cy: number, size: number, alpha: number) {
-  const s = size / 24;
-  ctx.save(); ctx.translate(cx - size/2, cy - size/2);
-  ctx.strokeStyle = `rgba(186,220,255,${alpha})`; ctx.lineWidth = 2/s; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.scale(s,s);
-  if (type === "truck") {
-    ctx.beginPath(); ctx.rect(1,6,13,10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(14,8); ctx.lineTo(21,8); ctx.lineTo(23,11); ctx.lineTo(23,16); ctx.lineTo(14,16); ctx.closePath(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(5,18,2,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(19,18,2,0,Math.PI*2); ctx.stroke();
-  } else if (type === "cart") {
-    ctx.beginPath(); ctx.moveTo(1,1); ctx.lineTo(5,1); ctx.lineTo(8.5,14); ctx.lineTo(20.5,14); ctx.lineTo(22,5); ctx.lineTo(6,5); ctx.stroke();
-    ctx.beginPath(); ctx.arc(9,20,1.5,0,Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.arc(20,20,1.5,0,Math.PI*2); ctx.stroke();
-  } else if (type === "box") {
-    ctx.beginPath(); ctx.rect(2,8,20,13); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(2,8); ctx.lineTo(12,3); ctx.lineTo(22,8); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(12,8); ctx.lineTo(12,21); ctx.stroke();
-  } else {
-    ctx.beginPath(); ctx.rect(2,10,20,11); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(1,10); ctx.lineTo(12,3); ctx.lineTo(23,10); ctx.stroke();
-    ctx.beginPath(); ctx.rect(9,15,6,6); ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function AnimatedBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d"); if (!ctx) return;
-    let raf: number;
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-    resize(); window.addEventListener("resize", resize);
-    const TYPES: IconType[] = ["truck","cart","box","store"];
-    const icons = Array.from({ length: 20 }, (_,i) => ({
-      x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight,
-      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
-      size: 16+Math.random()*14, type: TYPES[i%4],
-      pulse: Math.random()*Math.PI*2, pulseSpeed: .015+Math.random()*.02, baseAlpha: .4+Math.random()*.28,
-    }));
-    const orbs = [
-      { x:window.innerWidth*.18, y:window.innerHeight*.28, vx:.14, vy:.09, r:300 },
-      { x:window.innerWidth*.82, y:window.innerHeight*.72, vx:-.11, vy:-.08, r:240 },
-      { x:window.innerWidth*.55, y:window.innerHeight*.05, vx:.07, vy:.16, r:200 },
-    ];
-    let tick = 0;
-    const draw = () => {
-      const W = canvas.width, H = canvas.height;
-      ctx.fillStyle = "#020C1C"; ctx.fillRect(0,0,W,H);
-      const z1 = ctx.createRadialGradient(W*.22,H*.5,0,W*.22,H*.5,W*.48);
-      z1.addColorStop(0,"rgba(29,78,216,.38)"); z1.addColorStop(.4,"rgba(37,99,235,.18)"); z1.addColorStop(1,"rgba(10,30,80,0)");
-      ctx.fillStyle=z1; ctx.fillRect(0,0,W,H);
-      const z2 = ctx.createRadialGradient(W*.92,H*.08,0,W*.92,H*.08,W*.38);
-      z2.addColorStop(0,"rgba(6,182,212,.22)"); z2.addColorStop(.5,"rgba(14,116,144,.10)"); z2.addColorStop(1,"rgba(0,0,0,0)");
-      ctx.fillStyle=z2; ctx.fillRect(0,0,W,H);
-      const p4 = .09+.04*Math.sin(tick*.009+1.2);
-      const z4 = ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.55);
-      z4.addColorStop(0,`rgba(59,130,246,${p4})`); z4.addColorStop(.6,`rgba(37,99,235,${p4*.3})`); z4.addColorStop(1,"rgba(0,0,0,0)");
-      ctx.fillStyle=z4; ctx.fillRect(0,0,W,H);
-      for(const orb of orbs){
-        orb.x+=orb.vx; orb.y+=orb.vy;
-        if(orb.x<-orb.r||orb.x>W+orb.r) orb.vx*=-1;
-        if(orb.y<-orb.r||orb.y>H+orb.r) orb.vy*=-1;
-        const g=ctx.createRadialGradient(orb.x,orb.y,0,orb.x,orb.y,orb.r);
-        g.addColorStop(0,"rgba(99,179,255,.22)"); g.addColorStop(.45,"rgba(59,130,246,.10)"); g.addColorStop(1,"rgba(29,78,216,0)");
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(orb.x,orb.y,orb.r,0,Math.PI*2); ctx.fill();
-      }
-      ctx.textAlign="center"; ctx.textBaseline="middle";
-      [{x:.18,y:.22,s:80,ph:0},{x:.78,y:.72,s:56,ph:1.8},{x:.5,y:.92,s:44,ph:3.4}].forEach(wm=>{
-        const a=.18+.06*Math.sin(tick*.007+wm.ph);
-        ctx.font=`bold ${wm.s}px system-ui`; ctx.fillStyle=`rgba(147,197,253,${a})`;
-        ctx.fillText("LinQi",W*wm.x,H*wm.y);
-      });
-      for(const ic of icons){
-        ic.x+=ic.vx; ic.y+=ic.vy; ic.pulse+=ic.pulseSpeed;
-        if(ic.x<-ic.size) ic.x=W+ic.size; if(ic.x>W+ic.size) ic.x=-ic.size;
-        if(ic.y<-ic.size) ic.y=H+ic.size; if(ic.y>H+ic.size) ic.y=-ic.size;
-      }
-      const MAX=160;
-      for(let i=0;i<icons.length;i++) for(let j=i+1;j<icons.length;j++){
-        const dx=icons[i].x-icons[j].x,dy=icons[i].y-icons[j].y,d2=dx*dx+dy*dy;
-        if(d2<MAX*MAX){const d=Math.sqrt(d2);
-          ctx.strokeStyle=`rgba(96,165,250,${(1-d/MAX)*.45})`; ctx.lineWidth=.9;
-          ctx.beginPath(); ctx.moveTo(icons[i].x,icons[i].y); ctx.lineTo(icons[j].x,icons[j].y); ctx.stroke();}
-      }
-      for(const ic of icons) drawIcon(ctx,ic.type,ic.x,ic.y,ic.size,ic.baseAlpha+.08*Math.sin(ic.pulse));
-      tick++; raf=requestAnimationFrame(draw);
-    };
-    draw();
-    return ()=>{ cancelAnimationFrame(raf); window.removeEventListener("resize",resize); };
-  },[]);
-  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" style={{zIndex:0}} />;
-}
-
 /* ─── Progress Tracker ─────────────────────────────────────────────── */
 function ProgressBar({ step, total }: { step: number; total: number }) {
   const { t } = useTranslation();
@@ -300,7 +208,7 @@ function GSelect({ label, error, children, ...props }: any) {
     <div>
       {label && <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color:"#E2E8F0", letterSpacing:"0.06em" }}>{label}</label>}
       <div className="relative">
-        <select {...props} className="w-full appearance-none ps-3.5 pe-9 py-2.5 rounded-xl outline-none transition-all text-sm cursor-pointer text-white"
+        <select {...props} className="w-full appearance-none ps-3.5 pe-9 py-2.5 rounded-xl outline-none transition-all text-sm cursor-pointer linqi-shell-select text-slate-900 dark:text-white"
           style={{ ...glass.input, borderRadius:"0.75rem" }}
           onFocus={e=>{ e.currentTarget.style.border=glass.inputFocusBorder; e.currentTarget.style.boxShadow=glass.inputFocusShadow; }}
           onBlur={e=>{ e.currentTarget.style.border="1px solid rgba(255,255,255,0.12)"; e.currentTarget.style.boxShadow="none"; }}>
@@ -313,7 +221,6 @@ function GSelect({ label, error, children, ...props }: any) {
   );
 }
 
-const optionStyle = { background:"#0D1A2D", color:"#FFFFFF" };
 
 function PrimaryBtn({ children, disabled, ...props }: any) {
   return (
@@ -376,24 +283,63 @@ function PhoneInput({ label, value, onChange, error }: { label: string; value: s
 }
 
 /* ─── Upload Box ───────────────────────────────────────────────────── */
-function UploadBox({ label, hint, required, icon: Icon = Upload }: { label: string; hint: string; required?: boolean; icon?: any }) {
-  const [file, setFile] = useState<File | null>(null);
+function UploadBox({
+  label,
+  hint,
+  required,
+  icon: Icon = Upload,
+  file,
+  onFileChange,
+  showError,
+}: {
+  label: string;
+  hint: string;
+  required?: boolean;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  file: File | null;
+  onFileChange: (file: File | null) => void;
+  showError?: boolean;
+}) {
+  const { t } = useTranslation();
+  const missing = required && !file && showError;
+
   return (
-    <label className="flex flex-col items-center gap-2 p-4 rounded-xl text-center cursor-pointer transition-all"
-      style={{ background:"rgba(255,255,255,0.04)", border:`2px dashed ${file?"rgba(99,179,255,0.6)":"rgba(255,255,255,0.14)"}` }}
-      onMouseEnter={e=>(e.currentTarget.style.borderColor="rgba(99,179,255,0.5)")}
-      onMouseLeave={e=>(e.currentTarget.style.borderColor=file?"rgba(99,179,255,0.6)":"rgba(255,255,255,0.14)")}>
-      <input type="file" className="hidden" onChange={e=>setFile(e.target.files?.[0]??null)} />
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background:file?"rgba(59,130,246,0.25)":"rgba(255,255,255,0.07)" }}>
-        {file ? <Check className="w-5 h-5 text-blue-400" /> : <Icon className="w-5 h-5" style={{ color:"rgba(255,255,255,0.35)" }} />}
+    <label
+      className={cn(
+        "flex flex-col items-center gap-2 p-4 rounded-xl text-center cursor-pointer transition-all",
+        "bg-white/[0.04] border-2 border-dashed",
+        file ? "border-blue-400/60" : missing ? "border-red-400/50" : "border-white/15",
+        "hover:border-blue-400/50",
+      )}
+    >
+      <input
+        type="file"
+        className="hidden"
+        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+        onChange={e => onFileChange(e.target.files?.[0] ?? null)}
+      />
+      <div
+        className={cn(
+          "w-9 h-9 rounded-xl flex items-center justify-center",
+          file ? "bg-blue-500/25" : "bg-white/[0.07]",
+        )}
+      >
+        {file ? <Check className="w-5 h-5 text-blue-400" /> : <Icon className="w-5 h-5 text-white/35" />}
       </div>
-      <p className="text-[11px] font-semibold leading-tight" style={{ color:file?"#60A5FA":"rgba(255,255,255,0.6)" }}>
+      <p className={cn("text-[11px] font-semibold leading-tight", file ? "text-blue-400" : "text-white/60")}>
         {file ? file.name : label}
       </p>
-      <p className="text-[10px]" style={{ color:"rgba(255,255,255,0.3)" }}>{hint}</p>
+      <p className="text-[10px] text-white/30">{hint}</p>
       {required && !file && (
-        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background:"rgba(239,68,68,0.2)", color:"#FCA5A5", border:"1px solid rgba(239,68,68,0.3)" }}>
-          ✱ پێویست
+        <span
+          className={cn(
+            "text-[9px] px-1.5 py-0.5 rounded-full font-bold border",
+            missing
+              ? "bg-red-500/20 text-red-300 border-red-400/30"
+              : "bg-amber-500/15 text-amber-200 border-amber-400/25",
+          )}
+        >
+          ✱ {t("onboard.required")}
         </span>
       )}
     </label>
@@ -525,25 +471,40 @@ function StepSector({ selected, onSelect }: { selected: string; onSelect: (k: st
 
 /* ─── Category definitions: unique contextual icon + soft accent ────── */
 const CATEGORY_DEFS: Record<CatKey, { Icon: React.ComponentType<{className?:string;style?:React.CSSProperties}>; color: string }> = {
-  electronic:    { Icon: Monitor,         color: "#60A5FA" },
-  stationery:    { Icon: PenLine,         color: "#A78BFA" },
-  babyCare:      { Icon: Heart,           color: "#F9A8D4" },
-  cosmetics:     { Icon: Sparkles,        color: "#F472B6" },
-  homeLiving:    { Icon: Home,            color: "#34D399" },
-  gaming:        { Icon: Gamepad2,        color: "#818CF8" },
-  food:          { Icon: UtensilsCrossed, color: "#FB923C" },
-  medicine:      { Icon: Pill,            color: "#4ADE80" },
-  clothing:      { Icon: Shirt,           color: "#E879F9" },
-  automotive:    { Icon: Car,             color: "#F87171" },
-  agriculture:   { Icon: Wheat,           color: "#A3E635" },
-  construction:  { Icon: HardHat,         color: "#FCD34D" },
-  sports:        { Icon: Dumbbell,        color: "#FDBA74" },
-  beauty:        { Icon: Scissors,        color: "#FDA4AF" },
-  cleaning:      { Icon: Wind,            color: "#67E8F9" },
-  office:        { Icon: Briefcase,       color: "#93C5FD" },
-  technology:    { Icon: Cpu,             color: "#38BDF8" },
-  printing:      { Icon: Printer,         color: "#94A3B8" },
-  books:         { Icon: GraduationCap,   color: "#C4B5FD" },
+  electronic:       { Icon: Monitor,         color: "#60A5FA" },
+  stationery:       { Icon: PenLine,         color: "#A78BFA" },
+  babyCare:         { Icon: Heart,           color: "#F9A8D4" },
+  cosmetics:        { Icon: Sparkles,        color: "#F472B6" },
+  homeLiving:       { Icon: Home,            color: "#34D399" },
+  gaming:           { Icon: Gamepad2,        color: "#818CF8" },
+  food:             { Icon: UtensilsCrossed, color: "#FB923C" },
+  medicine:         { Icon: Pill,            color: "#4ADE80" },
+  clothing:         { Icon: Shirt,           color: "#E879F9" },
+  automotive:       { Icon: Car,             color: "#F87171" },
+  agriculture:      { Icon: Wheat,           color: "#A3E635" },
+  construction:     { Icon: HardHat,         color: "#FCD34D" },
+  sports:           { Icon: Dumbbell,        color: "#FDBA74" },
+  beauty:           { Icon: Scissors,        color: "#FDA4AF" },
+  cleaning:         { Icon: Wind,            color: "#67E8F9" },
+  office:           { Icon: Briefcase,       color: "#93C5FD" },
+  technology:       { Icon: Cpu,             color: "#38BDF8" },
+  printing:         { Icon: Printer,         color: "#94A3B8" },
+  books:            { Icon: GraduationCap,   color: "#C4B5FD" },
+  medicalSupplies:  { Icon: Stethoscope,     color: "#34D399" },
+  mobile:           { Icon: Phone,           color: "#60A5FA" },
+  accessories:      { Icon: Sparkles,        color: "#A78BFA" },
+  software:         { Icon: Cpu,             color: "#22D3EE" },
+  computer:         { Icon: Monitor,         color: "#60A5FA" },
+  pcParts:          { Icon: Cpu,             color: "#38BDF8" },
+  ticketsFlights:   { Icon: Plane,           color: "#38BDF8" },
+  hotelsBooking:    { Icon: Building2,       color: "#818CF8" },
+  visasTours:       { Icon: Globe,           color: "#34D399" },
+  travelInsurance:  { Icon: ShieldCheck,     color: "#FBBF24" },
+  pensionTransport: { Icon: Route,           color: "#F97316" },
+  officeSupplies:   { Icon: Briefcase,       color: "#93C5FD" },
+  officeFurniture:  { Icon: Home,            color: "#C4B5FD" },
+  officeServices:   { Icon: FileText,        color: "#67E8F9" },
+  computerPrinting: { Icon: Printer,         color: "#94A3B8" },
 };
 
 /* ─── Product Category Tag Input ──────────────────────────────────── */
@@ -590,13 +551,14 @@ function ProductTagInput({
     return m;
   }, [allPresets]);
 
-  /* Active keys: sector-filtered when available, else full list */
+  /* Active keys: sector-filtered only — NEVER fall back to ALL_CAT_KEYS */
   const activePresets = useMemo(() => {
-    const keys = getAllowedCategoriesForSector(sectorKey) ?? ALL_CAT_KEYS;
+    const keys = getAllowedCategoriesForSector(sectorKey);
+    if (!keys?.length) return [];
     return keys.map(k => allPresets.find(p => p.key === k)!).filter(Boolean);
   }, [sectorKey, allPresets]);
 
-  const isSectorFiltered = !!getAllowedCategoriesForSector(sectorKey);
+  const isSectorFiltered = (getAllowedCategoriesForSector(sectorKey)?.length ?? 0) > 0;
 
   const filtered = activePresets.filter(
     o => !value.includes(o.label) && o.label.toLowerCase().includes(inputVal.toLowerCase())
@@ -604,6 +566,7 @@ function ProductTagInput({
 
   const trimmed = inputVal.trim();
   const isCustom =
+    !isSectorFiltered &&
     trimmed !== "" &&
     !allPresets.some(o => o.label.toLowerCase() === trimmed.toLowerCase()) &&
     !value.includes(trimmed);
@@ -621,7 +584,12 @@ function ProductTagInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (inputVal.trim()) addTag(inputVal);
+      if (isSectorFiltered) {
+        const match = filtered[0];
+        if (match) addTag(match.label);
+      } else if (inputVal.trim()) {
+        addTag(inputVal);
+      }
     } else if (e.key === "Backspace" && inputVal === "" && value.length > 0) {
       removeTag(value[value.length - 1]);
     } else if (e.key === "Escape") {
@@ -629,7 +597,7 @@ function ProductTagInput({
     }
   };
 
-  const showDrop = open && (filtered.length > 0 || isCustom);
+  const showDrop = open && (filtered.length > 0 || (isCustom && !isSectorFiltered));
 
   return (
     <div ref={containerRef}>
@@ -816,8 +784,8 @@ function StepDetails({ group, sectorKey, data, setData, errors, onNext }: { grou
         <PhoneInput label={t("onboard.whatsapp")} value={data.whatsapp||""} onChange={setV("whatsapp")} />
         <div className="grid grid-cols-2 gap-3">
           <GSelect label={t("onboard.governorate")} value={data.governorate||""} onChange={set("governorate")} error={errors.governorate}>
-            <option value="" disabled style={optionStyle}>{t("onboard.select")}</option>
-            {GOVERNORATES.map(k=><option key={k} value={k} style={optionStyle}>{t(`register.provinces.${k}`)}</option>)}
+            <option value="" disabled>{t("onboard.select")}</option>
+            {GOVERNORATES.map(k=><option key={k} value={k}>{t(`register.provinces.${k}`)}</option>)}
           </GSelect>
           <Input label={t("onboard.city")} icon={MapPin} value={data.city||""} onChange={set("city")} error={errors.city} placeholder={t("onboard.cityPh")} />
         </div>
@@ -828,7 +796,6 @@ function StepDetails({ group, sectorKey, data, setData, errors, onNext }: { grou
           onChange={v => setData((d: any) => ({ ...d, productCategories: v }))}
           sectorKey={sectorKey}
         />
-        <Input label={t("onboard.brands")} icon={Package} value={data.brands||""} onChange={set("brands")} placeholder={t("onboard.brandsPh")} />
         <div>
           <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color:"#E2E8F0", letterSpacing:"0.06em" }}>
             {t("onboard.deliveryArea")}
@@ -916,21 +883,41 @@ function StepDetails({ group, sectorKey, data, setData, errors, onNext }: { grou
 /* STEP 3: Dynamic Uploads                                             */
 /* ═══════════════════════════════════════════════════════════════════ */
 function StepUploads({
-  group,
   onSubmit,
-  onSkip,
   onBack,
   isLoading,
   submitError,
 }: {
-  group: SectorGroup;
   onSubmit: () => void;
-  onSkip: () => void;
   onBack: () => void;
   isLoading: boolean;
   submitError?: string;
 }) {
   const { t } = useTranslation();
+  const formatHint = t("onboard.uploadDocFormats");
+
+  const uploadDocs = [
+    { key: "nationalId", label: t("onboard.uploadDocNationalId"), icon: User },
+    { key: "passport", label: t("onboard.uploadDocPassport"), icon: FileText },
+    { key: "businessLicense", label: t("onboard.uploadDocBusinessLicense"), icon: FileText },
+  ] as const;
+
+  const [files, setFiles] = useState<Record<(typeof uploadDocs)[number]["key"], File | null>>({
+    nationalId: null,
+    passport: null,
+    businessLicense: null,
+  });
+  const [showUploadError, setShowUploadError] = useState(false);
+
+  const handleContinue = () => {
+    const hasAny = uploadDocs.some(doc => files[doc.key]);
+    if (!hasAny) {
+      setShowUploadError(true);
+      return;
+    }
+    setShowUploadError(false);
+    onSubmit();
+  };
 
   return (
     <div className="px-6 pb-6 space-y-4">
@@ -939,68 +926,46 @@ function StepUploads({
         <p className="text-sm mt-0.5" style={{ color:"#94A3B8" }}>{t("onboard.uploadsSub")}</p>
       </div>
 
-      {/* Skip notice — all uploads are optional */}
-      <div className="rounded-2xl p-3 flex items-start gap-2.5" style={{ background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.25)" }}>
-        <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color:"#34D399" }} />
-        <p className="text-xs leading-relaxed" style={{ color:"#6EE7B7" }}>
-          بەڵگەنامەکان داواکارییەکی پێویست نییە — دواتر دەتوانیت لە پرۆفایلەکەت زیادیان بکەیت.
-          <br />
-          <span style={{ color:"rgba(110,231,183,0.6)" }}>Documents are optional — you can add them later from your profile settings.</span>
-        </p>
+      <div className="rounded-2xl p-4 flex items-start gap-3 border bg-emerald-800 border-emerald-600/50 text-emerald-100 dark:!bg-emerald-950/50 dark:!border-emerald-500/30">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-emerald-500/40 bg-emerald-900/40 text-emerald-300">
+          <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <p className="text-sm font-bold leading-snug text-emerald-100">
+            {t("onboard.uploadsRequiredBody")}
+          </p>
+          <p className="text-xs mt-1 font-medium leading-relaxed text-emerald-200">
+            {t("onboard.uploadsRequiredSubtitle")}
+          </p>
+        </div>
       </div>
 
-      {/* Optional badge only */}
-      <div className="flex gap-3 text-[11px]">
-        <span className="flex items-center gap-1.5" style={{ color:"#94A3B8" }}>
-          <span className="w-2 h-2 rounded-full bg-slate-500 inline-block" />هەمووی ئارەزوومەندانە (Optional)
-        </span>
+      {showUploadError && (
+        <div
+          className="rounded-xl p-3 flex items-start gap-2.5"
+          style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.35)" }}
+        >
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#F87171" }} />
+          <p className="text-xs leading-relaxed" style={{ color: "#FCA5A5" }}>{t("onboard.uploadsMissingDocs")}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {uploadDocs.map(doc => (
+          <UploadBox
+            key={doc.key}
+            label={doc.label}
+            hint={formatHint}
+            icon={doc.icon}
+            file={files[doc.key]}
+            onFileChange={file => {
+              setFiles(prev => ({ ...prev, [doc.key]: file }));
+              if (file) setShowUploadError(false);
+            }}
+            showError={showUploadError && !files[doc.key]}
+          />
+        ))}
       </div>
-
-      {group === "enterprise" && (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            <UploadBox label={t("onboard.uploadCommercialReg")} hint="PDF / JPG / PNG" icon={FileText} />
-            <UploadBox label={t("onboard.uploadManufacturingLicense")} hint="PDF / JPG / PNG" icon={Lock} />
-            <UploadBox label={t("onboard.uploadOwnerID")} hint="JPG / PNG" icon={User} />
-            <UploadBox label={t("onboard.uploadISO")} hint="PDF" icon={CheckCircle2} />
-            <UploadBox label={t("onboard.uploadCatalog")} hint="PDF" icon={Layers} />
-          </div>
-        </>
-      )}
-
-      {group === "retail" && (
-        <div className="flex justify-center">
-          <div className="w-1/2">
-            <UploadBox label={t("onboard.uploadOwnerID")} hint="JPG / PNG" icon={User} />
-          </div>
-        </div>
-      )}
-
-      {group === "delivery" && (
-        <div className="grid grid-cols-2 gap-3">
-          <UploadBox label={t("onboard.uploadOwnerID")} hint="JPG / PNG" icon={User} />
-          <UploadBox label={t("onboard.uploadCommercialReg")} hint="PDF / JPG" icon={FileText} />
-        </div>
-      )}
-
-      {group === "standard" && (
-        <div className="flex justify-center">
-          <div className="w-1/2">
-            <UploadBox label={t("onboard.uploadOwnerID")} hint="JPG / PNG" icon={User} />
-          </div>
-        </div>
-      )}
-
-      {/* Skip shortcut */}
-      <button
-        type="button"
-        onClick={onSkip}
-        disabled={isLoading}
-        className="w-full py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
-        style={{ color:"#60A5FA", background:"rgba(59,130,246,0.08)", border:"1px dashed rgba(59,130,246,0.3)" }}
-      >
-        بگوزەرێ ئێستا — بچۆ داشبۆردەکە ←&nbsp;&nbsp;<span style={{ opacity:0.6, fontSize:"0.75rem" }}>Skip for now → Go to Dashboard</span>
-      </button>
 
       {submitError && (
         <div
@@ -1018,14 +983,14 @@ function StepUploads({
         </SecondaryBtn>
         <PrimaryBtn
           type="button"
-          onClick={() => onSubmit()}
+          onClick={handleContinue}
           disabled={isLoading}
           style={{ flex: 2 }}
         >
           {isLoading ? (
             <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t("onboard.submitting")}</>
           ) : (
-            <>{t("onboard.complete", { defaultValue: t("onboard.submit") })} <Check className="w-4 h-4" /></>
+            <>{t("onboard.uploadsNextStep")} <ChevronRight className="w-4 h-4" /></>
           )}
         </PrimaryBtn>
       </div>
@@ -1289,28 +1254,42 @@ export default function Register() {
   const validateDetails = (): Record<string,string> => {
     const e: Record<string,string> = {};
     const req = t("onboard.errRequired");
+    const checkName = (field: "companyName" | "businessName", value?: string) => {
+      if (!value?.trim()) {
+        e[field] = req;
+        return;
+      }
+      if (!isValidBusinessName(value)) e[field] = t("onboard.errBusinessName");
+    };
+    const checkPhone = (value?: string) => {
+      if (!value?.trim()) {
+        e.mobile = req;
+        return;
+      }
+      if (!isValidMobile(value)) e.mobile = t("onboard.errPhone");
+    };
     if (group==="enterprise") {
-      if (!details.companyName?.trim()) e.companyName = req;
+      checkName("companyName", details.companyName);
       if (!details.licenseNumber?.trim()) e.licenseNumber = req;
       if (!details.managerName?.trim()) e.managerName = req;
       if (!details.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email)) e.email = t("onboard.errEmail");
-      if (!details.mobile?.trim() || details.mobile.replace(/\D/g,"").length < 7) e.mobile = t("onboard.errPhone");
+      checkPhone(details.mobile);
     }
     if (group==="retail") {
-      if (!details.businessName?.trim()) e.businessName = req;
+      checkName("businessName", details.businessName);
       if (!details.managerName?.trim()) e.managerName = req;
-      if (!details.mobile?.trim() || details.mobile.replace(/\D/g,"").length < 7) e.mobile = t("onboard.errPhone");
+      checkPhone(details.mobile);
     }
     if (group==="delivery") {
-      if (!details.companyName?.trim()) e.companyName = req;
+      checkName("companyName", details.companyName);
       if (!details.companyReg?.trim()) e.companyReg = req;
-      if (!details.mobile?.trim() || details.mobile.replace(/\D/g,"").length < 7) e.mobile = t("onboard.errPhone");
+      checkPhone(details.mobile);
       if (!details.nationalId?.trim()) e.nationalId = req;
     }
     if (group==="standard") {
-      if (!details.businessName?.trim()) e.businessName = req;
+      checkName("businessName", details.businessName);
       if (!details.managerName?.trim()) e.managerName = req;
-      if (!details.mobile?.trim() || details.mobile.replace(/\D/g,"").length < 7) e.mobile = t("onboard.errPhone");
+      checkPhone(details.mobile);
     }
     if (!details.password || details.password.length < 6) e.password = t("onboard.errPassword");
     if (details.password !== details.confirmPassword) e.confirmPassword = t("onboard.errMatch");
@@ -1382,10 +1361,7 @@ export default function Register() {
     }
   };
 
-  /* ── Skip uploads: same completion path as Finish (documents optional) ── */
-  const handleSkip = () => {
-    void handleSubmit();
-  };
+  /* ── Submit registration (documents required on step 3) ── */
 
   const handleSubmit = async () => {
     const detailErrors = validateDetails();
@@ -1422,7 +1398,7 @@ export default function Register() {
       ? formatStoreAddress(storeLat!, storeLng!, addressText)
       : addressText;
 
-    const extraData = (({ password: _p, confirmPassword: _c, ...rest }) => rest)(details);
+    const extraData = (({ password: _p, confirmPassword: _c, brands: _b, ...rest }) => rest)(details);
 
     const verificationPayload = {
       sectorKey,
@@ -1561,7 +1537,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
-      <AnimatedBackground />
+      <OnboardingAmbient step={step} />
 
       <div className="relative z-10 w-full max-w-lg">
         <AnimatePresence mode="wait">
@@ -1601,9 +1577,7 @@ export default function Register() {
                 {step === 3 && (
                   <motion.div key="s3" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration:0.22 }}>
                     <StepUploads
-                      group={group}
                       onSubmit={handleSubmit}
-                      onSkip={handleSkip}
                       onBack={() => { setDir(-1); setStep(2); }}
                       isLoading={isLoading}
                       submitError={errors.submit}

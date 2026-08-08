@@ -84,25 +84,23 @@ export function useAdminOverview() {
   return useQuery({
     queryKey: ["admin-overview"],
     queryFn: async () => {
-      try {
-        const res = await authedFetch("/api/admin/overview");
-        if (!res.ok) return EMPTY_ADMIN_OVERVIEW;
-        const json = (await res.json()) as Partial<AdminOverviewData>;
-        return {
-          ...EMPTY_ADMIN_OVERVIEW,
-          ...json,
-          totals: { ...EMPTY_ADMIN_OVERVIEW.totals, ...(json.totals ?? {}) },
-          byMethod: { ...EMPTY_ADMIN_OVERVIEW.byMethod, ...(json.byMethod ?? {}) },
-          liveDrivers: (json.liveDrivers as TrackedDriver[] | undefined) ?? [],
-          rfqs: json.rfqs ?? [],
-        };
-      } catch {
-        return EMPTY_ADMIN_OVERVIEW;
+      const res = await authedFetch("/api/admin/overview");
+      if (!res.ok) {
+        throw new Error(`Admin overview failed (${res.status})`);
       }
+      const json = (await res.json()) as Partial<AdminOverviewData>;
+      return {
+        ...EMPTY_ADMIN_OVERVIEW,
+        ...json,
+        totals: { ...EMPTY_ADMIN_OVERVIEW.totals, ...(json.totals ?? {}) },
+        byMethod: { ...EMPTY_ADMIN_OVERVIEW.byMethod, ...(json.byMethod ?? {}) },
+        liveDrivers: (json.liveDrivers as TrackedDriver[] | undefined) ?? [],
+        rfqs: json.rfqs ?? [],
+      };
     },
-    placeholderData: EMPTY_ADMIN_OVERVIEW,
     staleTime: 30_000,
     refetchInterval: 60_000,
+    retry: 1,
   });
 }
 

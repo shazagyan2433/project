@@ -3,6 +3,7 @@ import { db, businessRegistrationsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 import { requireAdmin } from "../middlewares/auth";
+import { assertValidRegistration, initialRegistrationStatus } from "../lib/registration-policy";
 
 const router: IRouter = Router();
 
@@ -21,6 +22,15 @@ router.post("/registrations", async (req, res): Promise<void> => {
       extraData:    z.record(z.unknown()).optional(),
     });
     const body = schema.parse(req.body);
+
+    assertValidRegistration({
+      businessName: body.businessName,
+      mobile: body.mobile,
+      sectorKey: body.sectorKey,
+      sectorGroup: body.sectorGroup,
+    });
+
+    const regStatus = initialRegistrationStatus(body.sectorGroup, body.sectorKey);
     const [reg] = await db
       .insert(businessRegistrationsTable)
       .values({
@@ -33,15 +43,16 @@ router.post("/registrations", async (req, res): Promise<void> => {
         city:         body.city,
         address:      body.address,
         extraData:    body.extraData ?? {},
-        status:       "approved",
-        reviewedAt:   new Date(),
-        reviewedBy:   "auto",
+        status:       regStatus,
+        reviewedAt:   regStatus === "approved" ? new Date() : null,
+        reviewedBy:   regStatus === "approved" ? "auto" : null,
       })
       .returning();
     res.status(201).json(reg);
   } catch (err) {
     req.log.error({ err }, "Failed to submit registration");
-    res.status(400).json({ message: "داتاکان هەڵەن" });
+    const message = err instanceof Error ? err.message : "داتاکان هەڵەن";
+    res.status(400).json({ message });
   }
 });
 

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Palette, X, RotateCcw, Check } from "lucide-react";
 import { useCustomTheme, PRESETS } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 /* ══════════════════════════════════════════════════════════════════
    THEME CUSTOMIZER — glassmorphic palette drawer
@@ -23,28 +24,25 @@ function ColorRow({ label, sublabel, value, onChange }: ColorRowProps) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-extrabold leading-none mb-0.5" style={{ color: "#f1f5f9", fontFamily: "Vazirmatn,sans-serif" }}>
+        <p className="text-[11px] font-extrabold leading-none mb-0.5 linqi-shell-heading" style={{ fontFamily: "Vazirmatn,sans-serif" }}>
           {label}
         </p>
-        <p className="text-[9px]" style={{ color: "#64748b", fontFamily: "Vazirmatn,sans-serif" }}>{sublabel}</p>
+        <p className="text-[9px] linqi-shell-muted" style={{ fontFamily: "Vazirmatn,sans-serif" }}>{sublabel}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-[9px] font-mono font-bold uppercase tabular-nums"
-          style={{ color: "#64748b" }}>
+        <span className="text-[9px] font-mono font-bold uppercase tabular-nums linqi-shell-muted">
           {value.toUpperCase()}
         </span>
         {/* Color swatch — clicks through to hidden native picker */}
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="relative w-8 h-8 rounded-xl border-2 transition-all duration-200 overflow-hidden shrink-0"
+          className="relative w-8 h-8 rounded-xl border-2 transition-all duration-200 overflow-hidden shrink-0 hover:scale-110"
           style={{
             background: value,
-            borderColor: "rgba(255,255,255,0.15)",
+            borderColor: "var(--shell-border)",
             boxShadow: `0 0 14px ${value}55, inset 0 1px 0 rgba(255,255,255,0.18)`,
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.12)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
           title="کلیک بکە بۆ گۆڕین"
         >
           <input
@@ -90,33 +88,26 @@ export function ThemeCustomizer() {
   }
 
   return (
-    <div ref={drawerRef} className="relative w-full">
+    <div ref={drawerRef} className="relative w-full px-2.5 pb-1">
 
       {/* ── Trigger button ─────────────────────────────────────── */}
       <button
+        data-open={open ? "true" : "false"}
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group"
-        style={{
-          background:  open ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
-          border:      open ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(255,255,255,0.06)",
-          boxShadow:   open ? `0 0 14px var(--terminal-accent)22` : "none",
-        }}
-        onMouseEnter={e => {
-          if (!open) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.055)";
-        }}
-        onMouseLeave={e => {
-          if (!open) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-        }}
+        className="linqi-theme-customizer-trigger w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group"
       >
         <div className="w-[18px] h-[18px] shrink-0 flex items-center justify-center">
           <Palette
             className="w-[18px] h-[18px] transition-colors"
-            style={{ color: open ? "var(--terminal-accent)" : "rgba(77,158,255,0.7)", filter: open ? `drop-shadow(0 0 4px var(--terminal-accent))` : undefined }}
+            style={{
+              color: open ? "var(--terminal-accent)" : "color-mix(in srgb, var(--terminal-accent) 70%, transparent)",
+              filter: open ? `drop-shadow(0 0 4px var(--terminal-accent))` : undefined,
+            }}
           />
         </div>
         <span
-          className="truncate transition-colors text-[13px] font-bold"
-          style={{ fontFamily: "Vazirmatn,sans-serif", color: open ? "#f1f5f9" : "rgba(255,255,255,0.80)" }}
+          className="truncate transition-colors text-[13px] font-bold linqi-shell-body text-slate-900 dark:text-inherit"
+          style={{ fontFamily: "Vazirmatn,sans-serif" }}
         >
           ڕێکخستنی ڕەنگەکان
         </span>
@@ -131,31 +122,20 @@ export function ThemeCustomizer() {
             exit={{   opacity: 0, y: 8,   scale: 0.98 }}
             transition={{ duration: 0.18, type: "spring", stiffness: 360, damping: 28 }}
             dir="rtl"
-            className="absolute bottom-[calc(100%+8px)] start-0 end-0 rounded-2xl overflow-hidden"
-            style={{
-              background:           "rgba(10,13,20,0.97)",
-              backdropFilter:       "blur(32px)",
-              WebkitBackdropFilter: "blur(32px)",
-              border:               "1px solid rgba(255,255,255,0.09)",
-              boxShadow:            `0 -8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04), 0 0 24px var(--terminal-accent)18`,
-              zIndex: 50,
-            }}
+            className="linqi-theme-customizer-panel absolute bottom-[calc(100%+8px)] start-0 end-0 rounded-2xl overflow-hidden"
+            style={{ zIndex: 50 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center justify-between px-4 py-3 linqi-dropdown-header">
               <div className="flex items-center gap-2">
                 <Palette className="w-3.5 h-3.5" style={{ color: "var(--terminal-accent)" }} />
-                <span className="text-[12px] font-extrabold text-white"
+                <span className="text-[12px] font-extrabold linqi-shell-heading"
                   style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                   ڕێکخستنی ڕەنگەکانی پانێڵ
                 </span>
               </div>
               <button onClick={() => setOpen(false)}
-                className="w-6 h-6 flex items-center justify-center rounded-lg transition-all"
-                style={{ color: "#64748b" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                className="w-6 h-6 flex items-center justify-center rounded-lg transition-all linqi-shell-muted hover:text-[var(--shell-text-primary)]"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -165,8 +145,8 @@ export function ThemeCustomizer() {
 
               {/* Presets */}
               <div>
-                <p className="text-[9px] uppercase tracking-[0.18em] font-extrabold mb-3"
-                  style={{ color: "#475569", fontFamily: "Vazirmatn,sans-serif" }}>
+                <p className="text-[9px] uppercase tracking-[0.18em] font-extrabold mb-3 linqi-shell-muted"
+                  style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                   تیمەکانی ئامادە
                 </p>
                 <div className="grid grid-cols-5 gap-2">
@@ -181,15 +161,17 @@ export function ThemeCustomizer() {
                         className="flex flex-col items-center gap-1.5 group"
                       >
                         {/* Color stack preview */}
-                        <div className="relative w-9 h-9 rounded-xl overflow-hidden transition-all duration-200"
+                        <div
+                          className={cn(
+                            "relative w-9 h-9 rounded-xl overflow-hidden transition-all duration-200 border-2",
+                            !isActive && "border-[var(--shell-border)] hover:scale-105",
+                          )}
                           style={{
                             background:  preset.colors.bg,
-                            border:      isActive ? `2px solid ${preset.colors.accent}` : "2px solid rgba(255,255,255,0.08)",
+                            borderColor: isActive ? preset.colors.accent : undefined,
                             boxShadow:   isActive ? `0 0 14px ${preset.colors.accent}55` : "none",
                             transform:   isActive ? "scale(1.08)" : "scale(1)",
                           }}
-                          onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.transform = "scale(1.06)"; }}
-                          onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                         >
                           {/* Accent stripe at bottom */}
                           <div className="absolute bottom-0 inset-x-0 h-2"
@@ -204,8 +186,12 @@ export function ThemeCustomizer() {
                             </div>
                           )}
                         </div>
-                        <span className="text-[8px] font-bold text-center leading-snug"
-                          style={{ color: isActive ? "var(--terminal-accent)" : "#475569", fontFamily: "Vazirmatn,sans-serif", maxWidth: "38px" }}>
+                        <span className="text-[8px] font-bold text-center leading-snug linqi-shell-muted"
+                          style={{
+                            color: isActive ? "var(--terminal-accent)" : undefined,
+                            fontFamily: "Vazirmatn,sans-serif",
+                            maxWidth: "38px",
+                          }}>
                           {preset.label.split("ی")[0]}
                         </span>
                       </button>
@@ -215,12 +201,12 @@ export function ThemeCustomizer() {
               </div>
 
               {/* Divider */}
-              <div style={{ height: "1px", background: "rgba(255,255,255,0.05)" }} />
+              <div className="h-px linqi-shell-divider" />
 
               {/* Custom color pickers */}
               <div>
-                <p className="text-[9px] uppercase tracking-[0.18em] font-extrabold mb-3.5"
-                  style={{ color: "#475569", fontFamily: "Vazirmatn,sans-serif" }}>
+                <p className="text-[9px] uppercase tracking-[0.18em] font-extrabold mb-3.5 linqi-shell-muted"
+                  style={{ fontFamily: "Vazirmatn,sans-serif" }}>
                   ڕەنگی تایبەت
                 </p>
                 <div className="space-y-3.5">
@@ -246,11 +232,11 @@ export function ThemeCustomizer() {
               </div>
 
               {/* Divider */}
-              <div style={{ height: "1px", background: "rgba(255,255,255,0.05)" }} />
+              <div className="h-px linqi-shell-divider" />
 
               {/* Live preview strip */}
-              <div className="rounded-xl overflow-hidden"
-                style={{ border: "1px solid rgba(255,255,255,0.06)", height: "36px", background: colors.bg }}>
+              <div className="rounded-xl overflow-hidden border border-[var(--shell-border)] h-9"
+                style={{ background: colors.bg }}>
                 <div className="h-full flex items-center px-3 gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ background: colors.accent, boxShadow: `0 0 6px ${colors.accent}` }} />
                   <span className="text-[10px] font-extrabold" style={{ color: colors.text, fontFamily: "Vazirmatn,sans-serif" }}>
@@ -268,15 +254,8 @@ export function ThemeCustomizer() {
               <div className="flex gap-2">
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-extrabold transition-all flex-1"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border:     "1px solid rgba(255,255,255,0.07)",
-                    color:      "#64748b",
-                    fontFamily: "Vazirmatn,sans-serif",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-extrabold transition-all flex-1 linqi-shell-muted hover:text-[var(--shell-text-primary)] bg-[var(--shell-hover)] border border-[var(--shell-border)]"
+                  style={{ fontFamily: "Vazirmatn,sans-serif" }}
                 >
                   <RotateCcw className="w-3 h-3" />
                   گەڕانەوە

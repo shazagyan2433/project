@@ -26,9 +26,24 @@
     "aiAssistant": "یارمەتیدەری LinQi — {{sector}}",
     "aiAssistantSubtitle": "کۆپایلۆتی کارەبایی تایبەت بە {{sector}}"
   },
+  "pageDescriptions": {
+    "dashboard": "پێشاندانی گشتی کارەکانی بزنسەکەت",
+    "marketplace": "پلاتفۆرمی بازرگانی B2B",
+    "inventory": "بەڕێوەبردنی ئەنبار و کاڵاکان",
+    "procurement": "داواکاری نرخ و کڕین",
+    "suppliers": "تۆماری فرۆشیارانی دەستنیشانکراو",
+    "marketIntel": "شیکاری نرخ و داواکاری",
+    "logistics": "شوێنکەوتن و گواستنەوە",
+    "financial": "داشبۆردی دارایی",
+    "negotiation": "گفتوگۆی بازرگانی B2B",
+    "aiAssistant": "کۆپایلۆتی کارەبایی بۆ بزنسەکەت",
+    "settings": "بەڕێوەبردنی پرۆفایل، دووکان، پەسەندکراوەکان، و ئاسایش"
+  },
   "emptyStates": {
-    "noSuppliers": "هیچ فرۆشیارێک بوونی نییە",
-    "noSuppliersSubtitle": "هێشتا هیچ فرۆشیاری تۆمارکراو نییە بۆ ئەم بەشە",
+    "noSuppliers": "هیچ فرۆشیارێک لە سیستەمەکەدا تۆمار نەکراوە",
+    "noSuppliersSubtitle": "کاتێک فرۆشیارێکی نوێ تۆمار دەکات، لێرە دەردەکەوێت",
+    "noSuppliersFilter": "هیچ فرۆشیارێک نەدۆزرایەوە",
+    "noSuppliersFilterSubtitle": "گەڕان یان فلتەرەکان بگۆڕە",
     "noRfqs": "هیچ داواکارییەک نییە",
     "noRfqsSubtitle": "داواکاری نرخی نوێ (RFQ) دروست بکە یان چاوەڕێی وەڵام بکە",
     "noAnalytics": "هیچ ئامارێک بەردەست نییە",
@@ -45,11 +60,23 @@
     "noNotifications": "هیچ ئاگادارکردنەوەیەک نییە",
     "loadError": "نەتوانرا داتا بارکرێت",
     "searchSuppliers": "گەڕان بەناو یان بەرهەم...",
+    "filterAllCategories": "هەموو پۆلەکان",
+    "filterAllCities": "هەموو شارەکان",
+    "dealsCount": "{{count}} مامەڵە",
+    "contactSupplier": "پەیوەندی",
     "verifiedCount": "تەسدیقکراو",
     "totalSuppliers": "فرۆشیار کۆی گشتی",
     "noSuppliersForRfq": "هیچ فرۆشیارێک بۆ هەڵبژاردن نییە",
     "noCustomer": "کڕیاری گشتی",
     "customerRole": "کڕیار"
+  },
+  "supplierProfile": {
+    "viewInfo": "زانیاری",
+    "backToDirectory": "گەڕانەوە بۆ تۆماری فرۆشیاران",
+    "notFound": "فرۆشیار نەدۆزرایەوە",
+    "products": "بەرهەمەکان",
+    "call": "پەیوەندی تەلەفۆن",
+    "viewCatalog": "بینینی بازاڕ"
   },
   "language": {
     "select": "زمان",
@@ -90,7 +117,8 @@
     "rewardsCenter": "خەڵاتەکان",
     "b2bTerminal": "پلاتفۆرمی B2B",
     "posSystem": "سیستەمی فرۆشتن",
-    "tools": "ئامرازەکان"
+    "tools": "ئامرازەکان",
+    "settings": "ڕێکخستنەکان"
   },
   "top": {
     "search": "گەڕان لە پانێلدا...",
@@ -174,7 +202,26 @@
       "request": "داواکاری",
       "listPrice": "نرخی تۆمار",
       "lowStock": "ستۆکی کەم",
-      "allCategories": "هەموو"
+      "allCategories": "هەموو",
+      "categoriesLabel": "کەتەگۆرییەکان",
+      "sectorOnlyHint": "تەنها بەرهەمەکانی بواری بزنسەکەت"
+    },
+    "requestModal": {
+      "title": "داواکاری نرخ (RFQ)",
+      "subtitle": "وردەکارییەکان پشکنین بکە و ناردن دابگرە",
+      "subtitleSupplier": "داواکاری بۆ {{supplier}}",
+      "product": "ناوی کاڵا",
+      "productPlaceholder": "ناوی بەرهەم",
+      "quantity": "بڕ",
+      "unit": "یەکە",
+      "unitPlaceholder": "کارتۆن، کیسە…",
+      "deadline": "کاتی دوایی",
+      "listPriceHint": "نرخی تۆمار لە بازاڕ:",
+      "suppliers": "فرۆشیارەکان",
+      "submit": "ناردنی داواکاری",
+      "successTitle": "داواکاری نێردرا ✓",
+      "successBody": "داواکارییەکەت بۆ فرۆشیارەکان نێردرا. لە بەشی داواکاری نرخ شوێنی بکە.",
+      "errorTitle": "ناردن سەرکەوتوو نەبوو"
     },
     "sellers": {
       "contact": "پێوەندیگرتن",
@@ -187,7 +234,8 @@
       "specialties": "پسپۆڕییەکان",
       "orders": "داواکاری",
       "rating": "هەڵسەنگاندن",
-      "verifiedBadge": "پشتیوانیکراو"
+      "verifiedBadge": "پشتیوانیکراو",
+      "viewProcurement": "بەشی داواکاری نرخ"
     },
     "analytics": {
       "title": "ئامارەکانی فرۆشتن و داواکارییەکان",
@@ -225,25 +273,138 @@
     },
     "cats": {
       "all": "هەموو",
-      "electronic": "ئەلێکترۆنیک",
-      "stationery": "پەرتووکخانە",
-      "babyCare": "ئامرازی منداڵ",
-      "cosmetics": "خۆشکردنەوە",
+      "medicine": "دەرمان",
+      "medicalSupplies": "پێداویستی پزیشکی",
+      "babyCare": "شیر و منداڵ",
+      "cosmetics": "جوانکاری",
       "homeLiving": "ماڵ و ژیان",
       "gaming": "یاری",
       "food": "خواردن و خواردنەوە",
-      "medicine": "دەرمان",
       "clothing": "جلوبەرگ",
       "automotive": "ئۆتۆمۆبیل",
       "agriculture": "کشتوکاڵ",
       "construction": "بیناسازی",
       "sports": "وەرزش",
       "beauty": "ئارایش",
-      "cleaning": "پاکیزەکردن و ماڵ",
+      "cleaning": "پاککەرەوە",
       "office": "نووسینگە",
       "technology": "تەکنەلۆجیا",
       "printing": "چاپخانە",
-      "books": "کتێب"
+      "books": "کتێب",
+      "mobile": "مۆبایل",
+      "accessories": "ئێکسسوارات",
+      "software": "سۆفتوێر",
+      "electronic": "ئەلێکترۆنیک",
+      "stationery": "پەرتووکخانە",
+      "computer": "کۆمپیوتەر",
+      "pcParts": "پارچەکانی PC",
+      "ticketsFlights": "تکت و فڕۆکەوانی",
+      "hotelsBooking": "هۆتێل و حجز",
+      "visasTours": "ڤیزە و گەشتەکان",
+      "travelInsurance": "تەئمین",
+      "pensionTransport": "پێنسیۆن و ترانسپۆرت",
+      "officeSupplies": "کەلوپەلی ئۆفیس",
+      "officeFurniture": "سافڵایز",
+      "officeServices": "خزمەتگوزاری نووسینگە",
+      "computerPrinting": "کۆمپیوتەر و چاپ"
+    }
+  },
+  "financial": {
+    "currencySuffix": " د.ع",
+    "kpi": {
+      "totalRevenue": "کۆی داهات",
+      "debt": "قەرزی کراوە",
+      "netProfit": "قازانجی خالص",
+      "transactions": "مامەڵەکان",
+      "transactionCount": "{{count}} مامەڵە",
+      "debtorCount": "{{count}} کڕیار",
+      "total": "کۆی گشتی"
+    },
+    "chart": {
+      "performance": "کارکردی دارایی",
+      "invoices": "ئینڤۆیسەکان",
+      "cashflow": "پارەهاتن / پارەدەرچوون (هەفتەیی)",
+      "revenue": "داهات",
+      "net": "خالص",
+      "in": "هاتوو",
+      "out": "دەرچوو"
+    },
+    "status": {
+      "paid": "پارەدراو",
+      "pending": "چاوەڕوان",
+      "overdue": "دواکەوتوو"
+    },
+    "week": "ه{{n}}"
+  },
+  "logistics": {
+    "steps": {
+      "received": "وەرگیرا",
+      "prepared": "ئامادەکرا",
+      "shipped": "نێردرا",
+      "delivered": "گەیشت"
+    },
+    "stats": {
+      "activeShipments": "بارگیریی چالاک",
+      "totalDeliveries": "کۆی گەیاندن",
+      "pending": "چاوەڕوان",
+      "completed": "گەیشتوو",
+      "onRoute": "لەسەر ڕێگا",
+      "registered": "تۆمارکراو",
+      "active": "چالاک",
+      "done": "تەواو"
+    },
+    "shipmentTracker": "پاساوی بارگیری",
+    "deliveries": "گەیاندنەکان",
+    "urgent": "فووریە",
+    "onRoute": "لەسەر ڕێگا",
+    "arrived": "گەیشت",
+    "live": "زیندوو",
+    "liveGps": "Live GPS",
+    "product": "بەرهەم",
+    "driver": "شۆفێر",
+    "map": {
+      "title": "ردەکردنی زیندوو — {{id}}",
+      "loading": "بارکردنی نەخشە...",
+      "pickup": "شوێنی وەرگرتن (Pickup)",
+      "dropoff": "شوێنی گەیاندن (Dropoff)",
+      "driverLive": "شۆفێر — زیندوو"
+    },
+    "driverStatus": {
+      "delivering": "لەسەر ڕێگا",
+      "idle": "ئامادەیە",
+      "returning": "گەڕانەوە"
+    }
+  },
+  "marketIntel": {
+    "demandScore": "نمرەی داواکاری",
+    "tabs": {
+      "price": "نرخ",
+      "region": "ناوچە"
+    },
+    "chart": {
+      "sales": "فرۆش"
+    },
+    "prediction": {
+      "title": "پێشبینی فرۆشی دوایی"
+    }
+  },
+  "aiChat": {
+    "online": "ئۆنلاینە",
+    "quickActionsTitle": "دوگمەکانی خێرا — کلیک بکە بۆ دەستپێکردن",
+    "consoleTitle": "کۆنسۆڵی LinQi AI",
+    "typing": "دەنووسێت…",
+    "refresh": "نوێکردنەوە",
+    "currentLanguage": "زمانی ئێستا:",
+    "placeholder": "لێرە پرسیارەکەت بنووسە…",
+    "inputHint": "Enter · ناردن | Shift+Enter · هێڵی نوێ",
+    "welcome": "سڵاو! من یارمەتیدەری زیرەکی LinQiـم. چۆن دەتوانم ئەمڕۆ لە بەڕێوەبردنی کارەکەتدا یارمەتیت بدەم؟",
+    "quickActions": {
+      "sales": { "label": "چاتی کارەبایی", "sub": "شیکاری فرۆشی ئەمسەر", "prompt": "دەمەوێت شیکارییەک بۆ فرۆشی ئەمسەر بکەم" },
+      "strategy": { "label": "پێشنیازی ستراتیژی", "sub": "بۆ گەشەکردنی کارەکانت", "prompt": "پێشنیازی ستراتیژیی بدەم بۆ بەهێزکردنی کارەکانم" },
+      "report": { "label": "دروستکردنی ڕاپۆرت", "sub": "ڕاپۆرتی پڕۆفیشناڵ", "prompt": "ڕاپۆرتی کاری مانگانەم بۆ حوزەیران دروست بکە" },
+      "inventory": { "label": "شیکاری ئەنبار", "sub": "ستۆک و کەمبوونەکان", "prompt": "ئاستی ئەنبارم شیبکەرەوە و پێشنیارم بدە" },
+      "market": { "label": "پیشبینیی بازاڕ", "sub": "تووێژ و فرصەتەکان", "prompt": "شیکاری بازاڕی B2B و فرصەتەکانم پیشانم بدە" },
+      "personal": { "label": "فێربوونی تایبەتی", "sub": "پیشنیاز لەسەر کارەکانت", "prompt": "لەسەر بنیادی مێژووی کارەکانم چی پێشنیاز دەکەی؟" }
     }
   }
 }

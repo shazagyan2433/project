@@ -11,6 +11,7 @@ import { formatDate, cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useLocaleDir } from "@/lib/use-locale-dir";
 import { adminSectionTitle, adminSubheader } from "@/lib/admin-nav-styles";
+import { PAGE_BADGE_SUCCESS, PAGE_MODAL, PAGE_MODAL_FOOTER, PAGE_BTN_GHOST, PAGE_BTN_SUCCESS } from "@/lib/page-theme";
 import {
   fetchWithSafeJson,
   getCachedUsers,
@@ -50,12 +51,12 @@ const ROLE_BADGE: Record<
     icon: User,
   },
   supplier: {
-    badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+    badge: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30",
     avatar: "bg-gradient-to-br from-emerald-500 to-emerald-700",
     icon: User,
   },
   merchant: {
-    badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+    badge: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30",
     avatar: "bg-gradient-to-br from-emerald-500 to-emerald-700",
     icon: User,
   },
@@ -276,9 +277,9 @@ function PermissionsModal({ user, onClose }: { user: AppUser; onClose: () => voi
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.93, y: 12 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
+        className={cn("w-full max-w-lg overflow-hidden", PAGE_MODAL)}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow ${user.role === "admin" ? "bg-gradient-to-br from-primary to-blue-700" : "bg-gradient-to-br from-slate-400 to-slate-600"}`}>
               {user.name.charAt(0)}
@@ -339,15 +340,15 @@ function PermissionsModal({ user, onClose }: { user: AppUser; onClose: () => voi
         </div>
 
         {!isAdminUser && (
-          <div className="px-6 pb-6 flex gap-3">
-            <button type="button" onClick={onClose} className="flex-1 py-3 border border-slate-200 rounded-2xl text-slate-600 font-semibold hover:bg-slate-50 transition-colors">
+          <div className={cn(PAGE_MODAL_FOOTER, "justify-end")}>
+            <button type="button" onClick={onClose} className={PAGE_BTN_GHOST}>
               {t("common.cancel")}
             </button>
             <button
               type="button"
               onClick={() => permMutation.mutate(perms)}
               disabled={permMutation.isPending}
-              className="flex-1 py-3 bg-primary text-white rounded-2xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              className={cn(PAGE_BTN_SUCCESS, "px-6 py-2.5 disabled:opacity-60")}
             >
               {permMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {t("users.save")}
@@ -395,10 +396,10 @@ function UserFormModal({ editingId, form, setForm, formError, isPending, onSubmi
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="bg-white w-full max-w-md overflow-hidden rounded-3xl shadow-2xl border border-primary/30"
+        className={cn("w-full max-w-md overflow-hidden", PAGE_MODAL)}
         style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(26,106,255,0.08)" }}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary to-blue-700">
               <UserPlus className="w-5 h-5 text-white" />
@@ -412,7 +413,8 @@ function UserFormModal({ editingId, form, setForm, formError, isPending, onSubmi
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="p-6 space-y-5">
+        <form onSubmit={onSubmit} className="flex flex-col max-h-[min(80vh,640px)]">
+          <div className="p-6 space-y-5 overflow-y-auto flex-1 min-h-0">
           <div>
             <label className={labelClass}>{t("users.fullName")}</label>
             <input ref={nameRef} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required className={inputClass} placeholder={t("users.fullNamePlaceholder")} />
@@ -454,19 +456,16 @@ function UserFormModal({ editingId, form, setForm, formError, isPending, onSubmi
           {formError && (
             <div className="bg-rose-50 border-2 border-rose-200 text-rose-600 text-sm px-4 py-3 rounded-xl font-semibold">{formError}</div>
           )}
+          </div>
 
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 rounded-xl font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
-            >
+          <div className={cn(PAGE_MODAL_FOOTER, "justify-end")}>
+            <button type="button" onClick={onClose} className={PAGE_BTN_GHOST}>
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 py-3 rounded-xl font-extrabold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60 bg-gradient-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 hover:shadow-primary/50"
+              className={cn(PAGE_BTN_SUCCESS, "px-6 py-2.5 disabled:opacity-60")}
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               {editingId ? t("users.save") : t("users.add")}
@@ -663,7 +662,7 @@ export default function UsersPage() {
           <select
             value={roleFilter}
             onChange={e => setRoleFilter(e.target.value as "all" | "admin" | "staff")}
-            className="appearance-none w-full sm:w-44 ps-4 pe-9 py-2.5 rounded-xl bg-slate-900/60 backdrop-blur border border-slate-800 text-white text-sm font-semibold outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 cursor-pointer transition-all"
+            className="appearance-none w-full sm:w-44 ps-4 pe-9 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer transition-all linqi-shell-select text-slate-900 dark:text-white bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
           >
             <option value="all">{t("users.filterAllRoles")}</option>
             <option value="admin">{t("role.admin")}</option>
@@ -753,8 +752,8 @@ export default function UsersPage() {
                         <PermissionDots user={u} />
                       </td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <span className={PAGE_BADGE_SUCCESS}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
                           {t("users.statusActive")}
                         </span>
                       </td>

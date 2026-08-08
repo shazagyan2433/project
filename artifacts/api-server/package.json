@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "predev": "cross-env USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite pnpm --filter @workspace/db run sync-local",
-    "dev": "cross-env NODE_ENV=development USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite node ./build.mjs && cross-env NODE_ENV=development USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite node --watch --enable-source-maps ./dist/index.mjs",
+    "prestart": "cross-env USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite pnpm --filter @workspace/db run sync-local",
+    "dev": "cross-env NODE_ENV=development PORT=5001 API_PORT=5001 USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite node ./build.mjs && cross-env NODE_ENV=development PORT=5001 API_PORT=5001 USE_LOCAL_DB=true PGLITE_DATA_DIR=../../.data/linqi-pglite node --watch --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -23,6 +24,8 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "pdf-parse": "^1.1.1",
     "pino": "^9",
     "pino-http": "^10",
     "socket.io": "^4.8.3",
@@ -34,6 +37,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "catalog:",
     "cross-env": "^10.1.0",
     "esbuild": "^0.27.3",
