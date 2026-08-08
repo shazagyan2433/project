@@ -150,8 +150,9 @@ export function mountPublicStatic(app: Express): void {
     }),
   );
 
-  // SPA fallback — non-API routes without a file extension get index.html
-  app.get("*", (req, res, next) => {
+  // SPA fallback — Express 5 / path-to-regexp rejects bare "*" routes.
+  // Use pathless middleware instead of app.get("*") or app.get("/*").
+  app.use((req, res, next) => {
     if (req.method !== "GET" && req.method !== "HEAD") return next();
     if (req.path.startsWith("/api")) return next();
     if (req.path.startsWith("/socket.io")) return next();
