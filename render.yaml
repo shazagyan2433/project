@@ -15,11 +15,14 @@ services:
         value: "true"
       - key: SESSION_SECRET
         generateValue: true
+      - key: SEED_DEFAULT_ADMIN
+        value: "true"
       - key: DATABASE_URL
-        sync: false
-    # Link your Postgres manually in the dashboard, or add a databases block:
-    # databases:
-    #   - name: linqi-db
-    #     databaseName: linqi_db
-    #     user: linqi_db_user
-    #     plan: free
+        fromDatabase:
+          name: linqi-db
+          property: connectionString
+databases:
+  - name: linqi-db
+    databaseName: linqi_db
+    user: linqi_db_user
+    plan: free

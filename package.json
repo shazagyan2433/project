@@ -12,7 +12,7 @@
     "start": "pnpm --filter @workspace/api-server run start",
     "start:api": "pnpm --filter @workspace/api-server run start",
     "render:build": "pnpm install --frozen-lockfile && pnpm --filter @workspace/kurdish-pos run build && pnpm --filter @workspace/api-server run build",
-    "render:start": "pnpm run start:api",
+    "render:start": "node scripts/render-start.mjs",
     "postinstall": "node -e \"if(process.platform!=='win32'){require('child_process').execSync('find node_modules/.pnpm -name esbuild -path */bin/esbuild -exec chmod +x {} +',{stdio:'inherit'})}\""
   },
   "private": true,

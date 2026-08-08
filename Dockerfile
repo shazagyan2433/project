@@ -33,7 +33,8 @@ FROM node:22-bookworm-slim AS runner
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_ENV=production
-ENV PORT=8080
+# Render / cloud inject PORT at runtime — default matches common platform default
+ENV PORT=10000
 
 RUN corepack enable && corepack prepare pnpm@10.33.4 --activate \
   && apt-get update \
@@ -53,6 +54,9 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 8080
+# Document the default listen port; runtime always uses process.env.PORT
+EXPOSE 10000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
+# Explicit CMD so platforms that override ENTRYPOINT still know how to start
+CMD []

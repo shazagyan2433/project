@@ -7,25 +7,39 @@ import { bootstrapDatabase } from "./lib/ensure-loyalty-schema";
 import { seedRewards } from "./lib/seed-rewards";
 import { cleanupTestRegistrations } from "./lib/cleanup-test-registrations";
 
-const port = Number(process.env.PORT ?? process.env.API_PORT ?? 5001);
+/**
+ * Bind order for cloud hosts (Render, DO, etc.):
+ * 1. Read process.env.PORT first (platform-injected)
+ * 2. Listen on 0.0.0.0 immediately so port scanners succeed
+ * 3. Run DB bootstrap AFTER listen (non-blocking)
+ */
+const rawPort = process.env.PORT ?? process.env.API_PORT ?? "3000";
+const port = Number(rawPort);
+const host = "0.0.0.0";
 
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${process.env.PORT}"`);
+if (!Number.isFinite(port) || port <= 0) {
+  throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-// Create a plain HTTP server so Socket.io can share it with Express
 const httpServer = createServer(app);
 initSocketIO(httpServer);
 
-httpServer.listen(port, "0.0.0.0", (err?: Error) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-  logger.info({ port }, "Server listening (HTTP + Socket.io)");
+httpServer.listen(port, host, () => {
+  logger.info(
+    { host, port, nodeEnv: process.env.NODE_ENV, render: Boolean(process.env.RENDER) },
+    "Server listening (HTTP + Socket.io)",
+  );
+  console.log(`[listen] http://${host}:${port} (PORT=${process.env.PORT ?? "(unset)"})`);
+
+  // DB work must never delay the bind above
   void bootstrapDatabase()
     .then(() => seedRewards())
     .then(() => seedDefaultAdmin())
     .then(() => cleanupTestRegistrations())
     .catch((err) => logger.error({ err }, "Startup bootstrap failed"));
+});
+
+httpServer.on("error", (err) => {
+  logger.error({ err, host, port }, "Error listening on port");
+  process.exit(1);
 });

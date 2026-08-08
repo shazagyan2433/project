@@ -37,6 +37,8 @@ services:
       PUBLIC_STATIC_DIR: /app/artifacts/kurdish-pos/dist/public
       # Optional: set to your droplet URL if you access from another origin
       # ALLOWED_ORIGINS: http://YOUR_DROPLET_IP
+      # Skip infinite waits if Postgres is slow to accept (entrypoint still retries with timeout)
+      PG_WAIT_MAX_ATTEMPTS: "30"
     depends_on:
       postgres:
         condition: service_healthy

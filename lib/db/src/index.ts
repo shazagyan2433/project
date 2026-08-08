@@ -34,11 +34,19 @@ if (useLocalPglite && !process.env.DATABASE_URL?.startsWith("postgres")) {
     "DATABASE_URL must be set. For local dev without Postgres, run the API with USE_LOCAL_DB=true (PGlite fallback).",
   );
 } else {
-  const sslEnabled = process.env.DATABASE_SSL === "true";
+  const url = process.env.DATABASE_URL;
+  const sslEnabled =
+    process.env.DATABASE_SSL === "true" ||
+    process.env.DATABASE_SSL === "1" ||
+    /[?&]sslmode=(require|verify-full|verify-ca)/i.test(url) ||
+    /\.render\.com|\.railway\.app|\.supabase\.co/i.test(url);
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: url,
     ssl: sslEnabled ? { rejectUnauthorized: false } : undefined,
+    // Fail fast on connect so HTTP bootstrap isn't blocked by hung sockets
+    connectionTimeoutMillis: Number(process.env.PG_CONNECT_TIMEOUT_MS ?? 10_000),
   });
+  console.info(`[db] Using PostgreSQL (ssl=${sslEnabled})`);
 }
 
 export const db = pgliteClient

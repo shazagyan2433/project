@@ -28,19 +28,28 @@ declare global {
 
 const JWT_SECRET = process.env.SESSION_SECRET;
 
-if (!JWT_SECRET) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("SESSION_SECRET must be set in production");
-  }
+if (!JWT_SECRET && process.env.NODE_ENV === "production") {
+  // Do not throw at import time — that prevents Render from detecting an open port.
+  // Auth routes still reject until SESSION_SECRET is configured.
+  console.error(
+    "[auth] SESSION_SECRET is not set — API will listen for health checks, but JWT auth will fail until it is configured.",
+  );
 }
 
 const EFFECTIVE_JWT_SECRET = JWT_SECRET ?? "dev-only-secret-change-me";
 
 export function signToken(payload: AuthPayload): string {
+  if (!JWT_SECRET && process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET must be set in production");
+  }
   return jwt.sign(payload, EFFECTIVE_JWT_SECRET, { expiresIn: "7d" });
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
+  if (!JWT_SECRET && process.env.NODE_ENV === "production") {
+    res.status(503).json({ message: "Server misconfigured: SESSION_SECRET missing" });
+    return;
+  }
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ message: "پێویستت بە چوونەژوورەوەیە" });

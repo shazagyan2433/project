@@ -125,11 +125,24 @@ This repo includes `render.yaml` for one-click Blueprint deploy. You can use **N
 
 | Issue | Fix |
 |-------|-----|
+| **No open ports / Port scan timeout** | Ensure Start command is `pnpm run render:start` (binds `0.0.0.0:$PORT`). Check logs for `Server listening`. Set `SESSION_SECRET` and `DATABASE_URL` — missing secrets crash before bind. |
 | Build fails on `pnpm` | Ensure `pnpm-lock.yaml` is committed; Render uses `packageManager` field |
 | `DATABASE_URL must be set` | Add `DATABASE_URL` in Environment; redeploy |
 | SSL / connection errors | Set `DATABASE_SSL=true` or use URL with `?sslmode=require` |
 | CORS / Socket blocked | Set `ALLOWED_ORIGINS` to your exact frontend origin (no trailing slash) |
 | Service sleeps (free tier) | Upgrade to Starter or use a uptime ping; WebSockets drop when instance sleeps |
+
+### Port binding (Render)
+
+Render injects `PORT` automatically. The API listens on:
+
+```text
+0.0.0.0:${PORT}
+```
+
+Health check path: `/api/healthz`
+
+Do **not** hardcode port `5001` / `8080` in the Start command. Do **not** use the Docker entrypoint for Native Node deploys (`render:start` starts Node directly).
 
 ---
 
@@ -139,8 +152,9 @@ This repo includes `render.yaml` for one-click Blueprint deploy. You can use **N
 export DATABASE_URL="postgresql://..."
 export SESSION_SECRET="local-dev-secret"
 export NODE_ENV=production
+export PORT=3000
 pnpm run render:build
 pnpm run render:start
 ```
 
-Server listens on `http://0.0.0.0:3000` unless `PORT` is set.
+Server listens on `http://0.0.0.0:3000` unless `PORT` is set (Render sets this automatically).
