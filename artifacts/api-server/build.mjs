@@ -68,7 +68,10 @@ async function buildAll() {
     // - uses native modules and loads them dynamically (e.g. sharp)
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)
     external: [
+      // Local-dev only — must stay external + dynamically imported so Render/Postgres never requires it
       "@electric-sql/pglite",
+      "@electric-sql/pglite/*",
+      "drizzle-orm/pglite",
       "*.node",
       "sharp",
       "better-sqlite3",

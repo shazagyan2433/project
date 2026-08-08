@@ -14,7 +14,6 @@
     "node": ">=20.19.0"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.2.17",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "bcryptjs": "^3.0.3",
@@ -29,6 +28,9 @@
     "pino-http": "^10",
     "socket.io": "^4.8.3",
     "zod": "catalog:"
+  },
+  "optionalDependencies": {
+    "@electric-sql/pglite": "^0.2.17"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
